@@ -27,6 +27,28 @@ Sistem Janji Temu Digital untuk **RS Gunung Maria Tomohon** yang dirancang denga
 - Pengolahan data dokter dan departemen.
 - Statistik dan riwayat pembayaran.
 
+## 📦 Migrasi ke Laptop Lain (Backup & Restore)
+
+Jika Anda ingin memindah atau menjalankan proyek ini di laptop lain, ikuti langkah berikut:
+
+### 1. Migrasi Database (MySQL)
+Saya telah menyediakan file **`hospital_data.json`** yang berisi seluruh data (Dokter, Jadwal, Departemen).
+
+**Langkah Restore:**
+1. Buat database kosong bernama `rsgumato` di MySQL laptop baru.
+2. Jalankan migrasi tabel terlebih dahulu:
+   ```bash
+   python manage.py migrate
+   ```
+3. Impor data dari file backup:
+   ```bash
+   python manage.py loaddata hospital_data.json
+   ```
+
+### 2. Konfigurasi Lingkungan (.env)
+1. Salin file `.env.example` menjadi `.env`.
+2. Sesuaikan `DB_USER` dan `DB_PASSWORD` sesuai dengan pengaturan MySQL di laptop baru tersebut.
+
 ---
 
 ## 🚀 Instalasi & Persiapan
