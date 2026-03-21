@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Janji Temu · RS Gunung Maria Tomohon{% endblock %}
+
+{% block content %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="mb-3">
+        <h1 class="h3 fw-bold mb-1">Ajukan janji temu</h1>
+        <div class="text-muted">Isi formulir berikut. Tim kami akan menghubungi Anda untuk konfirmasi jadwal.</div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data" novalidate id="appointmentForm">
+            {% csrf_token %}
+            
+            <!-- OCR Auto Fill Section -->
+            <div class="row mb-4 bg-light p-3 rounded-3 border">
+              <div class="col-12 mb-2">
+                <label class="form-label fw-bold text-primary"><i class="bi bi-person-vcard me-2"></i>Isi Data Otomatis dengan KTP (OCR Scan)</label>
+                <div class="small text-muted mb-2">Unggah foto KTP Anda, dan sistem AI kami akan membaca NIK & Nama secara otomatis. (Opsional tapi disarankan)</div>
+              </div>
+              <div class="col-md-9 mb-2 mb-md-0">
+                {{ form.ktp_photo }}
+                {% for e in form.ktp_photo.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-3">
+                <button type="button" id="btnScanKtp" class="btn btn-outline-primary w-100 fw-bold">
+                  <i class="bi bi-upc-scan me-1"></i> Scan KTP
+                </button>
+              </div>
+              <div id="ocrStatus" class="col-12 small mt-2 d-none">
+                <!-- Status OCR akan muncul di sini -->
+              </div>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">NIK (No. KTP) <span class="text-danger">*</span></label>
+                {{ form.national_id }}
+                {% for e in form.national_id.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Nama lengkap <span class="text-danger">*</span></label>
+                {{ form.full_name }}
+                {% for e in form.full_name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">No. HP/Telepon <span class="text-danger">*</span></label>
+                {{ form.phone }}
+                {% for e in form.phone.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email (opsional)</label>
+                {{ form.email }}
+                {% for e in form.email.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Tanggal yang diinginkan <span class="text-danger">*</span></label>
+                {{ form.preferred_date }}
+                {% for e in form.preferred_date.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Poli/Departemen <span class="text-danger">*</span></label>
+                {{ form.department }}
+                {% for e in form.department.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Dokter pilihan (opsional)</label>
+                {{ form.doctor }}
+                {% for e in form.doctor.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-12">
+                <label class="form-label">Keluhan/Catatan (opsional)</label>
+                {{ form.message }}
+                {% for e in form.message.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+            </div>
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger mt-3 mb-0">
+                {% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}
+              </div>
+            {% endif %}
+
+            <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
+              <button class="btn btn-primary" type="submit">Kirim permintaan</button>
+              <a class="btn btn-outline-secondary" href="{% url 'home' %}">Kembali</a>
+            </div>
+            <div class="small text-muted mt-3">Kolom bertanda <span class="text-danger">*</span> wajib diisi.</div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="fw-semibold mb-2">Cara kerja janji temu</div>
+          <ol class="small text-muted mb-0 ps-3">
+            <li>Isi formulir dan kirim.</li>
+            <li>Tim kami menghubungi untuk konfirmasi (jadwal/dokter).</li>
+            <li>Datang sesuai jadwal dengan membawa identitas dan dokumen penjamin (jika ada).</li>
+          </ol>
+        </div>
+      </div>
+      <div class="card mt-3">
+        <div class="card-body">
+          <div class="fw-semibold mb-1">Butuh bantuan cepat?</div>
+          <div class="small text-muted">Hubungi (0431) 351008 atau kirim email ke rsgunungmaria@yahoo.co.id</div>
+        </div>
+      </div>
+      <div class="alert alert-info mt-3 mb-0">
+        Untuk kondisi gawat darurat, segera datang ke <strong>IGD</strong>.
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const btnScan = document.getElementById("btnScanKtp");
+      const statusDiv = document.getElementById("ocrStatus");
+      const fileInput = document.querySelector('input[name="ktp_photo"]');
+      
+      if(btnScan && fileInput) {
+        btnScan.addEventListener("click", function() {
+          if(!fileInput.files || fileInput.files.length === 0) {
+            statusDiv.className = "col-12 small mt-2 text-danger fw-semibold";
+            statusDiv.innerHTML = "<i class='bi bi-exclamation-circle me-1'></i>Silakan pilih foto KTP terlebih dahulu sebelum di-scan.";
+            statusDiv.classList.remove("d-none");
+            return;
+          }
+          
+          const formData = new FormData();
+          formData.append('ktp_image', fileInput.files[0]);
+          
+          // Show loading
+          statusDiv.className = "col-12 small mt-2 text-primary fw-semibold";
+          statusDiv.innerHTML = "<span class='spinner-border spinner-border-sm me-2' role='status' aria-hidden='true'></span>Memproses gambar dengan AI (OCR)... Mohon tunggu.";
+          statusDiv.classList.remove("d-none");
+          btnScan.disabled = true;
+          
+          fetch("{% url 'ocr_ktp' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+          })
+          .then(res => res.json())
+          .then(data => {
+            btnScan.disabled = false;
+            if(data.success && data.data && data.data.nik) {
+              const nikField = document.querySelector('input[name="national_id"]');
+              if(nikField) nikField.value = data.data.nik;
+              
+              // Note: Name field is now manual as per requested logic
+              
+              statusDiv.className = "col-12 small mt-2 text-success fw-bold";
+              statusDiv.innerHTML = "<i class='bi bi-check-circle-fill me-1'></i>Berhasil Mendeteksi NIK! Silakan isi Nama Lengkap secara manual.";
+            } else {
+              statusDiv.className = "col-12 small mt-2 text-warning fw-bold border p-2 rounded bg-white";
+              statusDiv.innerHTML = "<i class='bi bi-exclamation-triangle-fill me-1 text-danger'></i>Sistem AI gagal menemukan NIK pada gambar ini. Silakan isi NIK dan Nama secara manual.";
+            }
+          })
+          .catch(err => {
+            btnScan.disabled = false;
+            statusDiv.className = "col-12 small mt-2 text-danger fw-semibold";
+            statusDiv.innerHTML = "<i class='bi bi-bug-fill me-1'></i>Terjadi kesalahan saat menghubungi sistem OCR.";
+          });
+        });
+      }
+
+      // --- Dependent Logic: Lock Doctor field before Department selected ---
+      const deptField = document.getElementById("id_department");
+      const docField = document.getElementById("id_doctor");
+
+      if (deptField && docField) {
+        // Function to update status and fetch doctors
+        const updateDocState = () => {
+          const deptId = deptField.value;
+          if (!deptId) {
+            docField.disabled = true;
+            docField.innerHTML = '<option value="">---------</option>';
+            docField.title = "Silakan pilih Poli/Departemen terlebih dahulu";
+          } else {
+            docField.disabled = true; // Lock while fetching
+            docField.innerHTML = '<option value="">Loading...</option>';
+            
+            fetch(`/api/get-doctors-by-dept/?department_id=${deptId}`)
+              .then(res => res.json())
+              .then(data => {
+                docField.disabled = false;
+                docField.title = "";
+                let html = '<option value="">---------</option>';
+                if (data.success && data.doctors && data.doctors.length > 0) {
+                  data.doctors.forEach(doc => {
+                    html += `<option value="${doc.id}">${doc.full_name}</option>`;
+                  });
+                  docField.innerHTML = html;
+                  
+                  // --- NEW: Automatically pick a random doctor from the list ---
+                  const randomIndex = Math.floor(Math.random() * data.doctors.length);
+                  const randomDoc = data.doctors[randomIndex];
+                  docField.value = randomDoc.id;
+                } else {
+                  docField.innerHTML = html;
+                }
+              })
+              .catch(err => {
+                docField.disabled = false;
+                docField.innerHTML = '<option value="">Gagal memuat dokter</option>';
+              });
+          }
+        };
+        updateDocState();
+        deptField.addEventListener("change", updateDocState);
+      }
+    });
+  </script>
+{% endblock %}
+

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Layanan · RS Gunung Maria Tomohon{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+    <div>
+      <h1 class="h3 fw-bold mb-1">Layanan & fasilitas</h1>
+      <div class="text-muted">Ringkasan layanan klinis, penunjang, dan kapasitas perawatan.</div>
+    </div>
+    <a class="btn btn-primary" href="{% url 'appointment_create' %}">Ajukan janji temu</a>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 fw-semibold mb-2">Kapasitas unit perawatan & tindakan</h2>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Unit</th>
+              <th class="text-end">Kapasitas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Instalasi Gawat Darurat (IGD)</td><td class="text-end">11 bed</td></tr>
+            <tr><td>Intensive Care Unit (ICU)</td><td class="text-end">6 bed</td></tr>
+            <tr><td>NICU / PICU</td><td class="text-end">10 bed</td></tr>
+            <tr><td>Kamar Operasi (Bedah)</td><td class="text-end">2 unit</td></tr>
+            <tr><td>Kamar Persalinan / Bayi</td><td class="text-end">1 unit</td></tr>
+            <tr><td>Rawat Inap</td><td class="text-end">±185 bed (operasional)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="small text-muted mt-2">Catatan: kapasitas rawat inap dapat berada pada rentang 138–185 TT sesuai kebutuhan dan renovasi.</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="fw-semibold">Klinik Spesialis</div>
+          <div class="text-muted small mt-1">Kebidanan & Kandungan, Anak, Penyakit Dalam, Jantung, Mata, Saraf, Rehabilitasi Medik, Bedah, dan lainnya.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="fw-semibold">Hemodialisa</div>
+          <div class="text-muted small mt-1">Layanan dialisis untuk pasien gagal ginjal kronis di Tomohon dan sekitarnya.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="fw-semibold">Penunjang Diagnostik</div>
+          <div class="text-muted small mt-1">Laboratorium dan layanan penunjang diagnostik untuk mendukung keputusan klinis.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="fw-semibold">Kesehatan Ibu & Anak</div>
+          <div class="text-muted small mt-1">Fokus strategis melalui NICU/PICU dan layanan persalinan.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="fw-semibold">Akreditasi & Keselamatan Pasien</div>
+          <div class="text-muted small mt-1">Standar mutu berkelanjutan: PPI, sasaran keselamatan pasien, tata kelola, dan kompetensi staf.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="fw-semibold">Transformasi Digital</div>
+          <div class="text-muted small mt-1">Arah penguatan SIRS/EMR dan integrasi SatuSehat untuk efisiensi layanan.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

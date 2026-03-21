@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Kontak · RS Gunung Maria Tomohon{% endblock %}
+
+{% block content %}
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <h1 class="h3 fw-bold mb-2">Kontak</h1>
+      <div class="text-muted mb-3">Punya pertanyaan? Kirim pesan, tim kami akan menindaklanjuti.</div>
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nama lengkap</label>
+                {{ form.full_name }}
+                {% for e in form.full_name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                {{ form.email }}
+                {% for e in form.email.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-12">
+                <label class="form-label">Subjek</label>
+                {{ form.subject }}
+                {% for e in form.subject.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-12">
+                <label class="form-label">Pesan</label>
+                {{ form.message }}
+                {% for e in form.message.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+              <button class="btn btn-primary" type="submit">Kirim pesan</button>
+              <a class="btn btn-outline-secondary" href="{% url 'home' %}">Kembali</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <h2 class="h5 fw-semibold">Lokasi & informasi</h2>
+      <div class="card">
+        <div class="card-body">
+          <div class="fw-semibold">Rumah Sakit Gunung Maria</div>
+          <div class="text-muted small">Jl. Sejahtera No. 282, Kel. Kolongan, Kota Tomohon</div>
+          <hr />
+          <div class="small text-muted">Telp: (0431) 351008</div>
+          <div class="small text-muted">Email: rsgunungmaria@yahoo.co.id</div>
+          <div class="small text-muted">Website: <a href="http://rsgunungmaria.com" target="_blank" rel="noreferrer">rsgunungmaria.com</a></div>
+        </div>
+      </div>
+      <div class="alert alert-info mt-3 mb-0">
+        Untuk kondisi gawat darurat, segera hubungi <strong>112</strong> atau datang ke IGD terdekat.
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

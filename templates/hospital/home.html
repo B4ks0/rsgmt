@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Beranda · RS Gunung Maria Tomohon{% endblock %}
+
+{% block hero %}
+  <section class="hero-banner">
+    <div id="heroCarousel" class="carousel slide carousel-fade w-100" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        <div class="carousel-item active" data-bs-interval="10000">
+          <img src="{% url 'slideshow_image' '1' %}" class="hero-banner-img" alt="RS Gunung Maria Slideshow 1">
+        </div>
+        <div class="carousel-item" data-bs-interval="10000">
+          <img src="{% url 'slideshow_image' '2' %}" class="hero-banner-img" alt="RS Gunung Maria Slideshow 2">
+        </div>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+  </section>
+
+  <div class="main-quick-actions">
+    <div class="container text-center">
+      <div class="d-flex flex-wrap justify-content-center gap-3">
+        <a href="#" class="btn-quick-action">
+          <div class="action-icon mcu-icon">
+            <i class="bi bi-heart-pulse"></i>
+          </div>
+          <div class="action-text">
+            <strong>Paket MCU</strong>
+            <small>Medical Check Up</small>
+          </div>
+        </a>
+        <a href="{% url 'appointment_create' %}" class="btn-quick-action">
+          <div class="action-icon app-icon">
+            <i class="bi bi-calendar-check"></i>
+          </div>
+          <div class="action-text">
+            <strong>Janji Temu</strong>
+            <small>Doctor Appointment</small>
+          </div>
+        </a>
+        <a href="https://wa.me/62811351008" target="_blank" class="btn-quick-action">
+          <div class="action-icon wa-icon">
+            <i class="bi bi-whatsapp"></i>
+          </div>
+          <div class="action-text">
+            <strong>Chat WA</strong>
+            <small>Customer Service</small>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <h2 class="h4 fw-semibold">Gambaran singkat institusi</h2>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="text-muted small">Sejarah</div>
+              <div class="fw-semibold">Berakar dari “Rumah Sakit Bundar” (1913)</div>
+              <div class="small text-muted mt-1">Warisan arsitektur kolonial menjadi identitas sekaligus atmosfer terapeutik.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="text-muted small">Tata kelola</div>
+              <div class="fw-semibold">PT Ratna Maria Tomohon</div>
+              <div class="small text-muted mt-1">Swasta (organisasi Katolik) dengan kepemimpinan profesional.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="text-muted small">Kunjungan rawat jalan</div>
+              <div class="h4 mb-0 fw-bold">±59.504/tahun</div>
+              <div class="small text-muted">≈160+ pasien/hari</div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-muted small">Kapasitas rawat inap</div>
+              <div class="h4 mb-0 fw-bold">138–185 TT</div>
+              <div class="small text-muted">menyesuaikan kebutuhan operasional</div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-muted small">Layanan intensif</div>
+              <div class="h4 mb-0 fw-bold">NICU/PICU 10</div>
+              <div class="small text-muted">ICU 6 · IGD 11 bed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4 border-0 highlight-card">
+        <div class="card-body p-4">
+          <div class="row g-3 align-items-center">
+            <div class="col-md-8">
+              <div class="h5 fw-semibold mb-1">Fitur vital: Janji Temu Online</div>
+              <div class="text-muted">Ajukan janji temu dalam 1 menit. Tim kami akan menghubungi untuk konfirmasi jadwal & dokter.</div>
+            </div>
+            <div class="col-md-4 text-md-end">
+              <a class="btn btn-primary btn-lg w-100 w-md-auto" href="{% url 'appointment_create' %}">Ajukan Janji Temu</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h4 fw-semibold">Dokter unggulan</h2>
+      <div class="row g-3">
+        {% for d in featured_doctors %}
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="avatar">
+                    {% if d.photo %}<img src="{{ d.photo.url }}" alt="{{ d.full_name }}" />{% endif %}
+                  </div>
+                  <div>
+                    <div class="fw-semibold">{{ d.full_name }}</div>
+                    <div class="text-muted small">{{ d.department.name }}{% if d.title %} · {{ d.title }}{% endif %}</div>
+                    {% if d.bio %}<div class="mt-2 small text-muted">{{ d.bio|truncatewords:22 }}</div>{% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="col-12">
+            <div class="alert alert-secondary mb-0">Tambahkan data dokter melalui admin untuk ditampilkan di sini.</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <h2 class="h4 fw-semibold">Info cepat</h2>
+      <div class="list-group shadow-sm">
+        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="{% url 'appointment_create' %}">
+          Ajukan janji temu <span class="badge text-bg-primary">Form</span>
+        </a>
+        <a class="list-group-item list-group-item-action" href="{% url 'services' %}">Layanan & fasilitas</a>
+        <a class="list-group-item list-group-item-action" href="{% url 'doctors' %}">Daftar dokter</a>
+        <a class="list-group-item list-group-item-action" href="{% url 'contact' %}">Kontak & lokasi</a>
+      </div>
+      <div class="card mt-3">
+        <div class="card-body">
+          <div class="fw-semibold mb-1">Alamat</div>
+          <div class="small text-muted">Jl. Sejahtera No. 282, Kel. Kolongan, Kota Tomohon</div>
+          <div class="small text-muted mt-2">Kode RS: <span class="fw-semibold">7173051</span> · Kelas: <span class="fw-semibold">C</span></div>
+        </div>
+      </div>
+      <div class="card mt-3">
+        <div class="card-body">
+          <div class="fw-semibold mb-1">Website resmi</div>
+          <a class="small" href="http://rsgunungmaria.com" target="_blank" rel="noreferrer">rsgunungmaria.com</a>
+        </div>
+      </div>
+
+      <div class="card mt-3">
+        <div class="card-body">
+          <div class="fw-semibold mb-2">Penjamin</div>
+          <div class="d-flex flex-wrap gap-2">
+            <span class="badge text-bg-light border">BPJS</span>
+            <span class="badge text-bg-light border">Asuransi swasta</span>
+            <span class="badge text-bg-light border">Perusahaan</span>
+            <span class="badge text-bg-light border">TPA</span>
+          </div>
+          <div class="small text-muted mt-2">Dukungan administrasi penjamin membantu proses layanan lebih lancar.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
