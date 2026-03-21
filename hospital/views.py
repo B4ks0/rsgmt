@@ -410,10 +410,13 @@ def ocr_ktp(request):
         image_file = request.FILES['ktp_image']
         try:
             import pytesseract
+            import platform
             from PIL import Image
             
-            # Explicitly point to the installed Tesseract executable on Windows
-            pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+            # Smart Tesseract Path detection
+            if platform.system() == "Windows":
+                pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+            # On Linux/Docker, tesseract is usually in the PATH automatically
             
             img = Image.open(image_file)
             

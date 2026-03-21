@@ -49,6 +49,18 @@ Saya telah menyediakan file **`hospital_data.json`** yang berisi seluruh data (D
 1. Salin file `.env.example` menjadi `.env`.
 2. Sesuaikan `DB_USER` dan `DB_PASSWORD` sesuai dengan pengaturan MySQL di laptop baru tersebut.
 
+### 3. Menjalankan dengan Docker 🐳
+Jika Anda memiliki Docker, Anda tidak perlu menginstall Python atau Tesseract secara manual. Cukup jalankan:
+```bash
+docker-compose up --build
+```
+Sistem akan otomatis:
+- Membuat kontainer MySQL.
+- Menginstall Tesseract OCR versi Linux.
+- Menjalankan migrasi database.
+- Mengimpor data dari `hospital_data.json`.
+- Aplikasi bisa diakses di `http://localhost:8000`.
+
 ---
 
 ## 🚀 Instalasi & Persiapan
