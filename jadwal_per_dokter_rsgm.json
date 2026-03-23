@@ -1,0 +1,296 @@
+{
+  "rumah_sakit": "RS Gunung Maria Tomohon",
+  "dokter": [
+    {
+      "nama": "dr. Cerelia Sugeng, Sp.PD-KGH",
+      "spesialisasi": "Penyakit Dalam",
+      "jadwal": [
+        { "hari": "Selasa", "jam": "15.00 - 18.00" }
+      ]
+    },
+    {
+      "nama": "dr. Denny Walandow, Sp.M",
+      "spesialisasi": "Mata",
+      "jadwal": [
+        { "hari": "Rabu",  "jam": "12.00 - 20.00" },
+        { "hari": "Sabtu", "jam": "12.00 - 16.00" }
+      ]
+    },
+    {
+      "nama": "dr. Enricco Mamuaja, Sp.KK",
+      "spesialisasi": "Kulit & Kelamin",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "15.00 - 17.00" },
+        { "hari": "Kamis",  "jam": "15.00 - 17.00" },
+        { "hari": "Sabtu",  "jam": "15.00 - 18.00" }
+      ]
+    },
+    {
+      "nama": "dr. Ester Mewengkang, Sp.PD",
+      "spesialisasi": "Penyakit Dalam",
+      "jadwal": [
+        { "hari": "Jumat", "jam": "09.00 - 13.00" }
+      ]
+    },
+    {
+      "nama": "dr. Frendy Wihono, Sp.U",
+      "spesialisasi": "Bedah Urologi",
+      "jadwal": [
+        { "hari": "Selasa", "jam": "14.00 - 17.00" },
+        { "hari": "Kamis",  "jam": "14.00 - 17.00" }
+      ]
+    },
+    {
+      "nama": "dr. Friando G. Boneka, Sp.A",
+      "spesialisasi": "Anak",
+      "jadwal": [
+        { "hari": "Kamis", "jam": "09.00 - 11.00 (Umum & Asuransi) / 10.00 - 14.00 (BPJS, Umum & Asuransi)" },
+        { "hari": "Sabtu", "jam": "10.00 - 14.00" }
+      ]
+    },
+    {
+      "nama": "dr. Irene Masengi, Sp.OG",
+      "spesialisasi": "Kebidanan & Kandungan",
+      "jadwal": [
+        { "hari": "Senin", "jam": "13.00 - 18.00" },
+        { "hari": "Kamis", "jam": "12.00 - 18.00" }
+      ]
+    },
+    {
+      "nama": "dr. J.F. Lisa Kepel, Sp.KFR",
+      "spesialisasi": "Rehabilitasi Medik",
+      "jadwal": [
+        { "hari": "Selasa", "jam": "09.00 - 12.00" },
+        { "hari": "Rabu",   "jam": "09.00 - 15.00" },
+        { "hari": "Jumat",  "jam": "09.00 - 15.00" }
+      ]
+    },
+    {
+      "nama": "dr. Jeini F. Thomas, Sp.B",
+      "spesialisasi": "Bedah",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "09.00 - 12.00" },
+        { "hari": "Rabu",   "jam": "09.00 - 11.00" },
+        { "hari": "Jumat",  "jam": "09.00 - 11.00" }
+      ]
+    },
+    {
+      "nama": "dr. Jovanka Manuhutu, Sp.B.S",
+      "spesialisasi": "Bedah Saraf",
+      "jadwal": [
+        { "hari": "Senin", "jam": "16.00 - 18.00" },
+        { "hari": "Jumat", "jam": "16.00 - 18.00" }
+      ]
+    },
+    {
+      "nama": "dr. Jusuf Tedjo, Sp.PD",
+      "spesialisasi": "Penyakit Dalam",
+      "jadwal": [
+        { "hari": "Senin", "jam": "12.00 - 16.00" },
+        { "hari": "Rabu",  "jam": "12.00 - 16.00" }
+      ]
+    },
+    {
+      "nama": "dr. Kristelina Tirtamulia, Sp.A",
+      "spesialisasi": "Anak",
+      "jadwal": [
+        { "hari": "Selasa", "jam": "12.00 - 14.00" },
+        { "hari": "Rabu",   "jam": "12.00 - 14.00" }
+      ]
+    },
+    {
+      "nama": "dr. Michael Runtulalo, Sp.OG",
+      "spesialisasi": "Kebidanan & Kandungan",
+      "jadwal": [
+        { "hari": "Selasa", "jam": "13.00 - 17.00" },
+        { "hari": "Rabu",   "jam": "13.00 - 17.00" }
+      ]
+    },
+    {
+      "nama": "dr. Moudy Lumentah, Sp.S",
+      "spesialisasi": "Saraf",
+      "jadwal": [
+        { "hari": "Selasa", "jam": "09.00 - 15.00" },
+        { "hari": "Jumat",  "jam": "09.00 - 15.00" },
+        { "hari": "Sabtu",  "jam": "09.00 - 12.00" }
+      ]
+    },
+    {
+      "nama": "dr. Olfi Tumbol, Sp.F",
+      "spesialisasi": "Forensik & Medikolegal",
+      "jadwal": [
+        { "hari": "Selasa", "jam": "09.00 - Selesai" },
+        { "hari": "Jumat",  "jam": "09.00 - Selesai" }
+      ]
+    },
+    {
+      "nama": "dr. Paul Wowiling, Sp.B",
+      "spesialisasi": "Bedah",
+      "jadwal": [
+        { "hari": "Selasa", "jam": "11.00 - 14.00" },
+        { "hari": "Kamis",  "jam": "11.00 - 14.00" }
+      ]
+    },
+    {
+      "nama": "dr. Paulina Wowiling, Sp.KFR",
+      "spesialisasi": "Rehabilitasi Medik",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "08.30 - 15.30" },
+        { "hari": "Kamis",  "jam": "08.30 - 15.30" },
+        { "hari": "Sabtu",  "jam": "08.30 - 14.30" }
+      ]
+    },
+    {
+      "nama": "dr. Pricilia Chendra, Sp.JP",
+      "spesialisasi": "Jantung & Pembuluh Darah",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "14.00 - 18.00" },
+        { "hari": "Rabu",   "jam": "10.00 - 14.00" },
+        { "hari": "Jumat",  "jam": "10.00 - 16.00" }
+      ]
+    },
+    {
+      "nama": "dr. Rillya Manoppo, Sp.M",
+      "spesialisasi": "Mata",
+      "jadwal": [
+        { "hari": "Kamis", "jam": "13.00 - 16.00" }
+      ]
+    },
+    {
+      "nama": "dr. Rizki Najoan, Sp.T.H.T.K.L",
+      "spesialisasi": "THT",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "10.00 - 15.00" },
+        { "hari": "Selasa", "jam": "14.00 - 17.00" },
+        { "hari": "Rabu",   "jam": "14.00 - 17.00" },
+        { "hari": "Kamis",  "jam": "14.00 - 17.00" }
+      ]
+    },
+    {
+      "nama": "dr. Saivera Kaunang",
+      "spesialisasi": "Umum",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "11.00 - Selesai" },
+        { "hari": "Selasa", "jam": "11.00 - Selesai" },
+        { "hari": "Rabu",   "jam": "11.00 - Selesai" },
+        { "hari": "Kamis",  "jam": "11.00 - Selesai" },
+        { "hari": "Jumat",  "jam": "11.00 - Selesai" },
+        { "hari": "Sabtu",  "jam": "11.00 - Selesai" }
+      ]
+    },
+    {
+      "nama": "dr. Seyla Mangowal, Sp.OG",
+      "spesialisasi": "Kebidanan & Kandungan",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "09.00 - 11.30" },
+        { "hari": "Selasa", "jam": "09.00 - 11.30" },
+        { "hari": "Sabtu",  "jam": "10.30 - 14.00" }
+      ]
+    },
+    {
+      "nama": "dr. T.H. Simanjuntak, Sp.PD",
+      "spesialisasi": "Penyakit Dalam",
+      "jadwal": [
+        { "hari": "Selasa", "jam": "11.00 - 17.00" },
+        { "hari": "Kamis",  "jam": "11.00 - 17.00" }
+      ]
+    },
+    {
+      "nama": "dr. Theresia Runtuwene, Sp.S (K)",
+      "spesialisasi": "Saraf",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "12.00 - 18.00" },
+        { "hari": "Rabu",   "jam": "12.00 - 18.00" },
+        { "hari": "Kamis",  "jam": "12.00 - 18.00" }
+      ]
+    },
+    {
+      "nama": "dr. Victor Rooroh, Sp.JP",
+      "spesialisasi": "Jantung & Pembuluh Darah",
+      "jadwal": [
+        { "hari": "Selasa", "jam": "10.00 - 14.00" },
+        { "hari": "Sabtu",  "jam": "10.00 - 14.00" }
+      ]
+    },
+    {
+      "nama": "dr. Vitta Tjiptabudi, Sp.PD",
+      "spesialisasi": "Penyakit Dalam",
+      "jadwal": [
+        { "hari": "Sabtu", "jam": "09.00 - 14.00" }
+      ]
+    },
+    {
+      "nama": "dr. William Poluan, Sp.OG",
+      "spesialisasi": "Kebidanan & Kandungan",
+      "jadwal": [
+        { "hari": "Jumat", "jam": "10.00 - 12.30" }
+      ]
+    },
+    {
+      "nama": "dr. Willy Satriya, Sp.B",
+      "spesialisasi": "Bedah",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "14.00 - 16.00" },
+        { "hari": "Sabtu",  "jam": "08.30 - 14.00" }
+      ]
+    },
+    {
+      "nama": "dr. Yamin Tongku, Sp.M",
+      "spesialisasi": "Mata",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "10.30 - 14.30" },
+        { "hari": "Selasa", "jam": "10.30 - 14.30" },
+        { "hari": "Jumat",  "jam": "09.00 - 12.30" }
+      ]
+    },
+    {
+      "nama": "dr. Yanever Lam, Sp.A",
+      "spesialisasi": "Anak",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "09.00 - 11.00 (Umum & Asuransi) / 12.00 - 16.00 (BPJS, Umum & Asuransi)" },
+        { "hari": "Jumat",  "jam": "12.00 - 16.00" }
+      ]
+    },
+    {
+      "nama": "dr. Jusuf Tedjo, Sp.PD",
+      "spesialisasi": "Penyakit Dalam",
+      "jadwal": [
+        { "hari": "Senin", "jam": "12.00 - 16.00" },
+        { "hari": "Rabu",  "jam": "12.00 - 16.00" }
+      ]
+    },
+    {
+      "nama": "drg. Hansen Wala, M.Kes",
+      "spesialisasi": "Gigi & Mulut",
+      "jadwal": [
+        { "hari": "Jumat", "jam": "14.00 - Selesai" }
+      ]
+    },
+    {
+      "nama": "drg. Rocky Budiman, SH",
+      "spesialisasi": "Gigi & Mulut",
+      "jadwal": [
+        { "hari": "Kamis", "jam": "09.00 - Selesai" }
+      ]
+    },
+    {
+      "nama": "drg. Yulia Milsan, M.Kes",
+      "spesialisasi": "Gigi & Mulut",
+      "jadwal": [
+        { "hari": "Senin",  "jam": "09.00 - Selesai" },
+        { "hari": "Selasa", "jam": "09.00 - Selesai" },
+        { "hari": "Rabu",   "jam": "13.00 - Selesai" },
+        { "hari": "Sabtu",  "jam": "12.00 - Selesai" }
+      ]
+    },
+    {
+      "nama": "drg. Yuliana, Sp.PM",
+      "spesialisasi": "Gigi & Mulut",
+      "jadwal": [
+        { "hari": "Selasa", "jam": "09.00 - 12.00" },
+        { "hari": "Jumat",  "jam": "09.00 - 12.00" },
+        { "hari": "Sabtu",  "jam": "09.00 - 12.00" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+<!-- Sidebar Navigation (Easy to Update) -->
+<div class="sidebar d-none d-md-block flex-shrink-0" style="width: 260px">
+  <div class="sidebar-brand">
+    <i class="bi bi-hospital me-2 text-primary"></i> RSGM Backend
+  </div>
+  <nav class="nav flex-column gap-1">
+    <!-- Section: Utama -->
+    <div class="sidebar-heading">Utama</div>
+    <a href="{% url 'backend_dashboard' %}">
+      <i class="bi bi-speedometer2 me-2"></i> Dashboard Janji Temu
+    </a>
+
+    <!-- Section: Klinik & Medis -->
+    <div class="sidebar-heading">Klinik & Medis</div>
+    <a href="{% url 'backend_patient_list' %}">
+      <i class="bi bi-people me-2"></i> Data Pasien
+    </a>
+    <a href="{% url 'backend_doctor_list' %}">
+      <i class="bi bi-person-badge me-2"></i> Master Dokter
+    </a>
+    <a href="{% url 'backend_department_list' %}">
+      <i class="bi bi-building-add me-2"></i> Master Poli / Dept
+    </a>
+
+    <!-- Section: Administrasi -->
+    <div class="sidebar-heading">Administrasi</div>
+    <a
+      href="#"
+      onclick="
+        alert('Fitur Laporan Harian belum aktif');
+        return false;
+      "
+    >
+      <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan Harian
+    </a>
+    <a href="{% url 'backend_payment_list' %}">
+      <i class="bi bi-cash-coin me-2"></i> Info Pembayaran
+    </a>
+    <a href="{% url 'backend_contact_list' %}">
+      <i class="bi bi-envelope me-2"></i> Pesan Kontak Masuk
+    </a>
+
+    <!-- Section: Sistem -->
+    <div class="sidebar-heading">Sistem</div>
+    <a
+      href="#"
+      onclick="
+        alert('Pengaturan Website');
+        return false;
+      "
+    >
+      <i class="bi bi-gear me-2"></i> Pengaturan Web
+    </a>
+    <a href="{% url 'home' %}" target="_blank">
+      <i class="bi bi-box-arrow-up-right me-2"></i> Lihat Frontend Web
+    </a>
+    <a
+      href="{% url 'backend_logout' %}"
+      class="text-danger mt-3"
+      style="color: #dc3545 !important"
+    >
+      <i class="bi bi-power me-2"></i> Logout Aplikasi
+    </a>
+  </nav>
+</div>

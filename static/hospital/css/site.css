@@ -1,4 +1,8 @@
 :root {
+  /* Skala px: 0.77 (dinaikkan +10% dari 0.7) */
+  --ui-scale: 0.77;
+  /* Header (topbar + navbar): +30% untuk logo, teks menu, tinggi bar */
+  --header-scale: 1.3;
   --brand: #003144;
   --brand-600: #00212e;
   --ink: #0f172a;
@@ -7,26 +11,59 @@
   --bg: #f6f8fb;
   --border: #e6eaf2;
   --hero: linear-gradient(135deg, var(--brand), #1f4055);
+  /* Tinggi area hero/banner (naik bertahap; terakhir +30%) */
+  --hero-banner-scale: 1.58;
 }
 
 .bg-primary {
   background-color: var(--brand) !important;
 }
 
+
+
+/* Header: area atas + navigasi (opsional wrapper .site-header) */
+.site-header {
+  position: relative;
+  z-index: 1035;
+}
+
+/* Font root: +10% dari skala sebelumnya — semua rem Bootstrap ikut */
 html {
-  font-size: 105%;
-  /* Adjusted from 110% */
+  font-size: 80.85%;
 }
 
 @media (min-width: 1200px) {
   html {
-    font-size: 120%;
-    /* Adjusted from 130% */
+    font-size: 92.4%;
   }
+}
 
+/* Lebar kontainer Bootstrap — semua breakpoint × --ui-scale */
+.container {
+  max-width: 100%;
+}
+
+@media (min-width: 576px) {
   .container {
-    max-width: 1320px;
-    /* Adjusted from 1400px */
+    max-width: calc(540px * var(--ui-scale)) !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: calc(720px * var(--ui-scale)) !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: calc(960px * var(--ui-scale)) !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    max-width: calc(1320px * var(--ui-scale)) !important;
   }
 }
 
@@ -36,7 +73,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
-  /* Improve readability at larger sizes */
 }
 
 .text-muted {
@@ -46,16 +82,16 @@ body {
 .topbar {
   background: #f8f9fd !important;
   border-bottom: 1px solid #e2e8f0;
-  font-size: 0.725rem !important; /* Slightly smaller */
-  height: 28px; /* Extremely compact */
+  font-size: calc(0.725rem * var(--header-scale)) !important;
+  height: calc(28px * var(--ui-scale) * var(--header-scale));
   display: flex;
   align-items: center;
 }
 
 @media (min-width: 768px) {
   .topbar {
-    height: 40px;
-    font-size: 0.75rem !important;
+    height: calc(40px * var(--ui-scale) * var(--header-scale));
+    font-size: calc(0.75rem * var(--header-scale)) !important;
   }
 }
 
@@ -63,26 +99,153 @@ body {
   color: #495057 !important;
 }
 
+.topbar a.text-muted:hover {
+  color: var(--brand) !important;
+}
+
 .navbar-brand {
-  font-size: 1rem !important;
+  font-size: calc(1rem * var(--header-scale)) !important;
+}
+
+.navbar-brand img,
+.navbar-brand-img {
+  /* Dasar 36px ×1.3 logo × --ui-scale × --header-scale (naik +30% sekali lagi) */
+  height: calc(36px * 1.3 * var(--ui-scale) * var(--header-scale)) !important;
+  width: auto !important;
+  max-height: none;
+}
+
+/* Bar navigasi: tinggi penuh untuk hover putih vertikal mentok atas–bawah */
+@media (min-width: 992px) {
+  .navbar-main.navbar-expand-lg {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .navbar-main.navbar-expand-lg > .container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    min-height: calc(3.5rem * var(--header-scale));
+  }
+
+  .navbar-main.navbar-expand-lg .navbar-brand {
+    align-self: center;
+    padding-top: calc(0.5rem * var(--header-scale));
+    padding-bottom: calc(0.5rem * var(--header-scale));
+  }
+
+  .navbar-main.navbar-expand-lg .navbar-toggler {
+    align-self: center;
+    padding: calc(0.25rem * var(--header-scale)) calc(0.5rem * var(--header-scale));
+    font-size: calc(1.25rem * var(--header-scale));
+  }
+
+  .navbar-main.navbar-expand-lg .navbar-collapse {
+    align-self: stretch;
+    flex-grow: 1;
+    display: flex !important;
+    justify-content: flex-end;
+    align-items: stretch;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .navbar-main.navbar-expand-lg .navbar-collapse .navbar-nav.nav-main {
+    height: 100%;
+    min-height: 100%;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 }
 
 .navbar-dark .navbar-nav .nav-link {
   color: rgba(255, 255, 255, 0.95);
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-size: calc(0.875rem * var(--header-scale));
+  font-weight: 400;
   text-transform: capitalize;
 }
 
-.navbar-dark .navbar-nav .nav-link:hover,
-.navbar-dark .navbar-nav .nav-link:focus {
+.navbar-dark .navbar-nav:not(.nav-main) .nav-link:hover,
+.navbar-dark .navbar-nav:not(.nav-main) .nav-link:focus {
   color: #ffffff;
+}
+
+.navbar-nav.nav-main {
+  --nav-menu-gap: calc(0.5rem * 1.3 * 1.5 * var(--header-scale));
+  gap: var(--nav-menu-gap);
+  flex-wrap: wrap;
+}
+
+@media (min-width: 992px) {
+  .navbar-expand-lg .navbar-nav.nav-main {
+    align-items: stretch !important;
+  }
+
+  .navbar-expand-lg .navbar-nav.nav-main .nav-item {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .navbar-expand-lg .navbar-nav.nav-main .nav-link {
+    display: flex;
+    align-items: center;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: calc(1.1rem * var(--header-scale));
+    padding-right: calc(1.1rem * var(--header-scale));
+    height: 100%;
+    min-height: 100%;
+    align-self: stretch;
+  }
+}
+
+.navbar-dark .navbar-nav.nav-main .nav-link {
+  border-radius: 0;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.navbar-dark .navbar-nav.nav-main .nav-link:hover,
+.navbar-dark .navbar-nav.nav-main .nav-link:focus-visible {
+  background-color: #ffffff;
+  color: var(--brand) !important;
+  box-shadow: 0 calc(2px * var(--ui-scale) * var(--header-scale)) calc(8px * var(--ui-scale) * var(--header-scale)) rgba(0, 0, 0, 0.08);
+}
+
+.navbar-dark .navbar-nav.nav-main .nav-link:focus {
+  outline: none;
+}
+
+@media (max-width: 991.98px) {
+  .navbar-main {
+    padding-top: calc(0.5rem * var(--header-scale));
+    padding-bottom: calc(0.5rem * var(--header-scale));
+  }
+
+  .navbar-nav.nav-main {
+    flex-direction: column;
+    align-items: stretch !important;
+    row-gap: calc(0.35rem * 1.3 * 1.5 * var(--header-scale));
+    width: 100%;
+  }
+
+  .navbar-nav.nav-main .nav-link {
+    padding-top: calc(0.5rem * 1.3 * 1.5 * var(--header-scale));
+    padding-bottom: calc(0.5rem * 1.3 * 1.5 * var(--header-scale));
+    padding-left: calc(0.75rem * var(--header-scale));
+    padding-right: calc(0.75rem * var(--header-scale));
+  }
 }
 
 .navbar .btn-light {
   color: var(--brand-600);
   border: 1px solid rgba(255, 255, 255, 0.35);
-  font-size: 0.85rem;
+  font-size: calc(0.85rem * var(--header-scale));
   font-weight: 600;
 }
 
@@ -99,7 +262,7 @@ body {
 }
 
 .hero h1 {
-  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  text-shadow: 0 calc(10px * var(--ui-scale)) calc(30px * var(--ui-scale)) rgba(0, 0, 0, 0.18);
 }
 
 .hero .lead {
@@ -125,8 +288,7 @@ body {
 .hero-banner {
   background: var(--brand);
   width: 100%;
-  height: 70vh;
-  /* Balanced 70vh for universal scaling */
+  height: calc(42vh * var(--hero-banner-scale));
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -135,55 +297,71 @@ body {
 .hero-banner-img {
   display: block;
   height: 100%;
-  /* Fill height exactly */
   width: auto;
-  /* Natural width, sides will be cropped */
   max-width: none;
-  /* Allow it to exceed container width */
 }
 
 .carousel-item {
-  height: 70vh;
+  height: calc(42vh * var(--hero-banner-scale));
   display: flex !important;
   justify-content: center;
   align-items: center;
   overflow: hidden;
 }
 
+@media (min-width: 992px) {
+  .hero-banner, .carousel-item {
+    height: calc(42vh * var(--hero-banner-scale) * 1.10);
+  }
+}
+
 .main-quick-actions {
   position: relative;
   z-index: 10;
-  margin-top: -6vh; /* Floating overlap */
+  /* Turunkan lagi 20% untuk desktop (negatif margin dari 4.8vh ke 3.6vh) */
+  margin-top: calc(-3.6vh * var(--hero-banner-scale));
   padding-bottom: 2rem;
+}
+
+/* Tiga kartu MCU / Janji Temu / WA — satu baris horizontal, lebar sama */
+.main-quick-actions .quick-actions-row {
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+
+.main-quick-actions .quick-actions-row .btn-quick-action {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
 }
 
 .btn-quick-action {
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: calc(20px * var(--ui-scale));
   padding: 1rem 1.75rem;
   display: flex;
   align-items: center;
   gap: 1rem;
   text-decoration: none;
   color: var(--ink);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 calc(12px * var(--ui-scale)) calc(28px * var(--ui-scale)) rgba(0, 0, 0, 0.06);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border: 1px solid rgba(0,0,0,0.02);
-  flex: 1 1 280px;
-  max-width: 380px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  flex: 1 1 calc(280px * var(--ui-scale));
+  max-width: calc(380px * var(--ui-scale));
 }
 
 .btn-quick-action:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.1);
+  transform: translateY(calc(-6px * var(--ui-scale)));
+  box-shadow: 0 calc(18px * var(--ui-scale)) calc(38px * var(--ui-scale)) rgba(0, 0, 0, 0.1);
   color: var(--brand);
   background: #ffffff;
 }
 
 .action-icon {
-  width: 54px;
-  height: 54px;
-  border-radius: 14px;
+  width: calc(54px * var(--ui-scale));
+  height: calc(54px * var(--ui-scale));
+  border-radius: calc(14px * var(--ui-scale));
   display: grid;
   place-items: center;
   font-size: 1.6rem;
@@ -202,7 +380,7 @@ body {
 
 .wa-icon {
   background: rgba(37, 211, 102, 0.1);
-  color: #25D366; /* Official WhatsApp Green */
+  color: #25d366;
 }
 
 .action-text {
@@ -221,72 +399,107 @@ body {
   display: block;
   font-size: 0.8rem;
   color: var(--muted);
-  margin-top: 2px;
+  margin-top: calc(2px * var(--ui-scale));
   line-height: 1.2;
 }
 
-/* Phase 2: Narrow Desktop/Tablet (768px - 1400px) - Mode Adjust/Fixed (No Crop) */
-@media (min-width: 768px) and (max-width: 1400px) {
-
+@media (min-width: 768px) and (max-width: 991.98px) {
   .hero-banner,
   .carousel-item {
-    height: auto !important;
+    /* Turunkan 40% dari ukuran normal iPad (kira-kira 16vh * scale) */
+    height: calc(16vh * var(--hero-banner-scale)) !important;
   }
 
-  .hero-banner-img {
-    width: 100% !important;
-    height: auto !important;
-    max-width: 100% !important;
-    transform: none !important;
-  }
-
-  .main-quick-actions {
-    margin-top: -3vh;
-    padding: 0 1rem 2rem;
-  }
-  .btn-quick-action {
-    flex: 1 1 45%;
-    max-width: none;
-  }
-}
-
-/* Phase 3: Mobile Mode (< 768px) - Mode Standard/Crop-Height (Rule #1) */
-@media (max-width: 767px) {
-  .main-quick-actions {
-    margin-top: -1.5vh; /* Reduced overlap so it doesn't block the thin banner */
-    padding: 0 15px 2rem;
-  }
-  .btn-quick-action {
-    flex: 1 1 100%;
-    min-width: 0;
-    padding: 0.85rem 1.25rem;
-    gap: 1rem;
-    border-radius: 16px;
-    max-width: none;
-  }
-  .action-icon {
-    width: 44px;
-    height: 44px;
-    font-size: 1.3rem;
-    border-radius: 12px;
-  }
-  .action-text strong {
-    font-size: 1.05rem;
-  }
-  .action-text small {
-    font-size: 0.75rem;
-  }
-  .hero-banner, .carousel-item {
-    height: 22vh !important;
-    border-radius: 0 0 24px 24px;
-  }
   .hero-banner-img {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover;
-    object-position: center;
-    max-width: none !important;
   }
+
+  .main-quick-actions {
+    /* Turunkan/geser kebawah lagi (berkurang negatif marginnya menjadi 1.2vh) */
+    margin-top: calc(-1.2vh * var(--hero-banner-scale));
+    padding: 0 1rem 2rem;
+  }
+
+  .main-quick-actions .quick-actions-row .btn-quick-action {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+    padding: 0.8rem 1.4rem;
+    gap: 0.8rem;
+  }
+
+  .action-icon {
+    width: calc(44px * var(--ui-scale));
+    height: calc(44px * var(--ui-scale));
+    font-size: 1.4rem;
+  }
+
+  .action-text strong {
+    font-size: 1rem;
+  }
+
+  .action-text small {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .main-quick-actions {
+    margin-top: calc(-1.5vh * var(--hero-banner-scale));
+    padding: 0 calc(15px * var(--ui-scale)) 2rem;
+  }
+
+  /* Layar sempit: buat 3 baris menu kebawah (stacking) */
+  .main-quick-actions .quick-actions-row {
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    overflow-x: visible;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: auto;
+    padding-bottom: 0;
+    gap: 0.75rem !important;
+  }
+
+  .main-quick-actions .quick-actions-row .btn-quick-action {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    padding: 0.85rem 1.25rem;
+    gap: 1rem;
+    border-radius: calc(18px * var(--ui-scale));
+    max-width: none;
+  }
+
+  .action-icon {
+    width: calc(48px * var(--ui-scale));
+    height: calc(48px * var(--ui-scale));
+    font-size: 1.35rem;
+    border-radius: calc(14px * var(--ui-scale));
+  }
+
+  .action-text strong {
+    font-size: 1.1rem;
+  }
+
+  .action-text small {
+    font-size: 0.8rem;
+  }
+
+  .hero-banner,
+  .carousel-item {
+    /* Turunkan 40% dari ukuran normal mobile (22vh * 0.6 = 13.2vh) */
+    height: calc(13.2vh * var(--hero-banner-scale)) !important;
+  }
+
+  .hero-banner-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+
   .carousel-control-prev,
   .carousel-control-next {
     width: 10%;
@@ -294,30 +507,28 @@ body {
   }
 }
 
-
-
 .icon-badge {
-  width: 68px;
-  height: 68px;
-  border-radius: 16px;
+  width: calc(68px * var(--ui-scale));
+  height: calc(68px * var(--ui-scale));
+  border-radius: calc(16px * var(--ui-scale));
   display: grid;
   place-items: center;
   font-weight: 700;
-  background: rgba(13, 110, 253, 0.10);
+  background: rgba(13, 110, 253, 0.1);
   color: var(--brand-600);
 }
 
 .card {
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: calc(14px * var(--ui-scale));
 }
 
 .card.shadow-sm {
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06) !important;
+  box-shadow: 0 calc(10px * var(--ui-scale)) calc(25px * var(--ui-scale)) rgba(15, 23, 42, 0.06) !important;
 }
 
 .card:hover {
-  transform: translateY(-1px);
+  transform: translateY(calc(-1px * var(--ui-scale)));
   transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
@@ -341,8 +552,8 @@ body {
 }
 
 .avatar {
-  width: 58px;
-  height: 58px;
+  width: calc(58px * var(--ui-scale));
+  height: calc(58px * var(--ui-scale));
   border-radius: 999px;
   background: #e9ecef;
   overflow: hidden;
@@ -350,8 +561,8 @@ body {
 }
 
 .avatar-lg {
-  width: 64px;
-  height: 64px;
+  width: calc(64px * var(--ui-scale));
+  height: calc(64px * var(--ui-scale));
 }
 
 .avatar img {
@@ -367,12 +578,152 @@ textarea {
   width: 100%;
 }
 
-.highlight-card {
-  background: linear-gradient(135deg, rgba(13, 110, 253, 0.10), rgba(10, 162, 192, 0.10));
+/* Beranda: lebar konten selaras antara kartu Cari Dokter dan blok institusi (sama-sama dalam .container) */
+.home-primary-column {
+  width: 100%;
+  max-width: 100%;
 }
 
-.highlight-card .text-muted {
-  color: #445066 !important;
+/* Gambaran singkat institusi — minimal, medis, satu palet */
+.institusi-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+.institusi-narrative-card,
+.institusi-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border) !important;
+  border-radius: calc(12px * var(--ui-scale));
+  box-shadow: none !important;
+}
+
+.institusi-narrative-card:hover,
+.institusi-stat-card:hover {
+  transform: none;
+  border-color: #d5dbe6 !important;
+}
+
+.institusi-stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 49, 68, 0.06);
+  color: var(--brand);
+  font-size: 1.1rem;
+}
+
+.institusi-stat-value {
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+/* About page: samakan tampilan kartu agar terasa seperti artikel */
+.about-article .card {
+  border: 1px solid var(--border);
+  border-radius: calc(12px * var(--ui-scale));
+  box-shadow: none !important;
+}
+
+.institusi-pt-logo img {
+  max-width: min(100%, 240px);
+  height: auto;
+  display: block;
+}
+
+.sjmj-affiliation-img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  object-fit: contain;
+}
+
+/* About page: perkecil gambar agar terasa lebih "artikel" */
+.about-article .sjmj-affiliation-img {
+  max-width: min(100%, 360px);
+}
+
+/* About page: pastikan 3 kartu statistik tampil sebagai 3 baris */
+.institusi-stats-stack {
+  display: flex;
+  flex-direction: column;
+  gap: calc(14px * var(--ui-scale));
+}
+
+.institusi-stats-stack .institusi-stat-card {
+  margin-bottom: 0 !important;
+}
+
+/* Beranda: section kerja sama mitra */
+.home-mitra-section {
+  padding-top: 0.25rem;
+}
+
+.home-mitra-logo-marquee {
+  overflow: hidden;
+  width: 100%;
+  mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+}
+
+.home-mitra-logo-track {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  width: max-content;
+  animation: home-mitra-scroll 24s linear infinite;
+}
+
+.home-mitra-logo-item {
+  flex: 0 0 auto;
+  height: 106px;
+  padding: 0 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+}
+
+.home-mitra-logo-item img {
+  height: 88px;
+  width: auto;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  display: block;
+}
+
+.home-mitra-logo-item img.home-mitra-logo-pln {
+  height: 114px;
+}
+
+.home-mitra-logo-item img.home-mitra-logo-fullerton {
+  height: 106px;
+}
+
+.home-mitra-logo-item img.home-mitra-logo-taspen {
+  height: 70px;
+}
+
+.home-mitra-logo-item img.home-mitra-logo-mandiri {
+  height: 101px;
+}
+
+@keyframes home-mitra-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 .table thead th {
@@ -394,17 +745,17 @@ textarea:focus {
 
 .fab-appointment {
   position: fixed;
-  right: 18px;
-  bottom: 18px;
+  right: calc(18px * var(--ui-scale));
+  bottom: calc(18px * var(--ui-scale));
   z-index: 1030;
   background: #0d6efd;
   color: #fff;
   text-decoration: none;
-  padding: 14px 18px;
+  padding: calc(14px * var(--ui-scale)) calc(18px * var(--ui-scale));
   border-radius: 999px;
   font-weight: 700;
   font-size: 1.05rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 calc(10px * var(--ui-scale)) calc(25px * var(--ui-scale)) rgba(0, 0, 0, 0.18);
 }
 
 .fab-appointment:hover {

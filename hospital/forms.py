@@ -63,3 +63,93 @@ class BackendAppointmentForm(forms.ModelForm):
             "message": forms.Textarea(attrs={"rows": 3}),
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
+
+from .models import Doctor, DoctorSchedule
+from django.forms import inlineformset_factory
+
+class BackendDoctorForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, (forms.CheckboxInput, forms.RadioSelect)):
+                field.widget.attrs.setdefault("class", "form-check-input")
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs.setdefault("class", "form-select")
+            else:
+                field.widget.attrs.setdefault("class", "form-control")
+
+    class Meta:
+        model = Doctor
+        fields = ["full_name", "department", "specialization", "title", "phone", "email", "license_number", "experience_years", "bio", "photo", "is_active"]
+        widgets = {
+            "bio": forms.Textarea(attrs={"rows": 3}),
+        }
+
+class DoctorScheduleForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.setdefault("class", "form-check-input")
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs.setdefault("class", "form-select")
+            else:
+                field.widget.attrs.setdefault("class", "form-control form-control-sm")
+
+    def has_changed(self):
+        has_changed = super().has_changed()
+        day = self.data.get(self.add_prefix('day_of_week'))
+        start_time = self.data.get(self.add_prefix('start_time'))
+        # Jika hari dan jam mulai kosong (misal pada extra form kosong), anggap tidak ada perubahan
+        if not day and not start_time and not self.instance.pk:
+            return False
+        return has_changed
+
+    class Meta:
+        model = DoctorSchedule
+        fields = ["day_of_week", "start_time", "end_time", "max_patients", "is_active"]
+        widgets = {
+            "start_time": forms.TimeInput(attrs={"type": "time"}),
+            "end_time": forms.TimeInput(attrs={"type": "time"}),
+        }
+
+DoctorScheduleFormSet = inlineformset_factory(
+    Doctor, DoctorSchedule,
+    form=DoctorScheduleForm,
+    extra=1,
+    can_delete=True
+)
+
+from .models import Department
+
+class BackendDepartmentForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.setdefault("class", "form-control")
+
+    class Meta:
+        model = Department
+        fields = ["name", "location", "floor_number", "phone", "description"]
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 3}),
+        }
+
+from .models import Patient
+
+class BackendPatientForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.Select):
+                field.widget.attrs.setdefault("class", "form-select")
+            else:
+                field.widget.attrs.setdefault("class", "form-control")
+                
+    class Meta:
+        model = Patient
+        fields = ["full_name", "national_id", "email", "phone", "date_of_birth", "gender", "blood_type", "address"]
+        widgets = {
+            "date_of_birth": forms.DateInput(attrs={"type": "date"}),
+            "address": forms.Textarea(attrs={"rows": 3}),
+        }

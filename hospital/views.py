@@ -5,7 +5,7 @@ from django.http import FileResponse, Http404
 from django.shortcuts import redirect, render
 
 from .forms import AppointmentForm, ContactForm
-from .models import Doctor
+from .models import Doctor, Department
 
 
 def logo_png(request):
@@ -37,8 +37,8 @@ def slideshow_image(request, filename):
 
 
 def home(request):
-    featured_doctors = Doctor.objects.filter(is_active=True).select_related("department")[:6]
-    return render(request, "hospital/home.html", {"featured_doctors": featured_doctors})
+    departments = Department.objects.all().order_by("name")
+    return render(request, "hospital/home.html", {"departments": departments})
 
 
 def about(request):
@@ -50,8 +50,45 @@ def services(request):
 
 
 def doctors(request):
-    items = Doctor.objects.filter(is_active=True).select_related("department")
-    return render(request, "hospital/doctors.html", {"doctors": items})
+    q = request.GET.get('q', '')
+    dept_id = request.GET.get('dept', '')
+    day_id = request.GET.get('day', '')
+
+    items = Doctor.objects.filter(is_active=True).select_related("department", "specialization").prefetch_related("schedules")
+    
+    if q:
+        items = items.filter(full_name__icontains=q)
+    if dept_id:
+        items = items.filter(department_id=dept_id)
+    if day_id and day_id.isdigit():
+        items = items.filter(schedules__day_of_week=int(day_id), schedules__is_active=True)
+
+    items = items.distinct()
+
+    from .models import Department
+    departments = Department.objects.all().order_by("name")
+    
+    days_choices = [
+        (0, 'Senin'), (1, 'Selasa'), (2, 'Rabu'), (3, 'Kamis'),
+        (4, 'Jumat'), (5, 'Sabtu'), (6, 'Minggu')
+    ]
+
+    total_count = items.count()
+
+    from django.core.paginator import Paginator
+    paginator = Paginator(items, 3) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "hospital/doctors.html", {
+        "doctors": page_obj,
+        "departments": departments,
+        "days_choices": days_choices,
+        "q": q,
+        "selected_dept": dept_id,
+        "selected_day": day_id,
+        "total_count": total_count,
+    })
 
 def doctor_detail(request, doctor_id):
     try:
@@ -89,7 +126,17 @@ def appointment_create(request):
             )
             return redirect("appointment_create")
     else:
-        form = AppointmentForm()
+        initial_data = {}
+        doctor_id = request.GET.get('doctor')
+        if doctor_id:
+            try:
+                from .models import Doctor
+                doctor = Doctor.objects.get(id=doctor_id)
+                initial_data['doctor'] = doctor
+                initial_data['department'] = doctor.department
+            except:
+                pass
+        form = AppointmentForm(initial=initial_data)
     return render(request, "hospital/appointment_form.html", {"form": form})
 
 
@@ -105,9 +152,10 @@ def contact(request):
     return render(request, "hospital/contact.html", {"form": form})
 
 
-from django.contrib.auth import login as auth_login, logout as auth_logout
+
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth import login as auth_login, logout as auth_logout
 from .models import Appointment, Patient, Doctor
 
 def is_staff_check(user): return user.is_active and user.is_staff
@@ -217,23 +265,236 @@ from .models import Payment, Department
 
 @staff_member_required
 def backend_patient_list(request):
-    items = Patient.objects.all().order_by("-created_at")
-    return render(request, "hospital/backend/generic_list.html", {"items": items, "title": "Kelola Pasien", "model_name": "Pasien"})
+    from django.db.models import Q
+    q = request.GET.get('q', '')
+    gender = request.GET.get('gender', '')
+    
+    items = Patient.objects.all()
+    if q:
+        items = items.filter(Q(full_name__icontains=q) | Q(national_id__icontains=q) | Q(phone__icontains=q))
+    if gender:
+        items = items.filter(gender=gender)
+        
+    items = items.order_by("-created_at")
+    
+    from django.core.paginator import Paginator
+    paginator = Paginator(items, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, "hospital/backend/generic_list.html", {
+        "items": page_obj, 
+        "title": "Kelola Pasien", 
+        "model_name": "Pasien",
+        "q": q,
+        "filter_gender": gender
+    })
+
+from .forms import BackendPatientForm
+
+@staff_member_required
+def backend_patient_create(request):
+    if request.method == "POST":
+        form = BackendPatientForm(request.POST)
+        if form.is_valid():
+            patient = form.save()
+            messages.success(request, f"Data pasien baru {patient.full_name} berhasil ditambahkan.")
+            return redirect("backend_patient_list")
+    else:
+        form = BackendPatientForm()
+        
+    return render(request, "hospital/backend/patient_form.html", {
+        "form": form,
+        "patient": None,
+        "title": "Tambah Pasien Baru"
+    })
+
+@staff_member_required
+def backend_patient_edit(request, patient_id):
+    try:
+        patient = Patient.objects.get(id=patient_id)
+    except Patient.DoesNotExist:
+        messages.error(request, "Pasien tidak ditemukan.")
+        return redirect("backend_patient_list")
+
+    if request.method == "POST":
+        form = BackendPatientForm(request.POST, instance=patient)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Data pasien {patient.full_name} berhasil diperbarui.")
+            return redirect("backend_patient_list")
+    else:
+        form = BackendPatientForm(instance=patient)
+        
+    return render(request, "hospital/backend/patient_form.html", {
+        "form": form,
+        "patient": patient,
+        "title": f"Edit Pasien: {patient.full_name}"
+    })
+
+from .forms import BackendDoctorForm, DoctorScheduleFormSet
 
 @staff_member_required
 def backend_doctor_list(request):
-    items = Doctor.objects.select_related("department").all().order_by("full_name")
-    return render(request, "hospital/backend/generic_list.html", {"items": items, "title": "Kelola Dokter", "model_name": "Dokter"})
+    from django.db.models import Q
+    q = request.GET.get('q', '')
+    dept_id = request.GET.get('dept', '')
+    
+    items = Doctor.objects.select_related("department").all()
+    if q:
+        items = items.filter(Q(full_name__icontains=q) | Q(phone__icontains=q) | Q(specialization__name__icontains=q))
+    if dept_id:
+        items = items.filter(department_id=dept_id)
+        
+    items = items.order_by("full_name")
+    departments = Department.objects.all().order_by("name")
+    
+    from django.core.paginator import Paginator
+    paginator = Paginator(items, 8)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, "hospital/backend/generic_list.html", {
+        "items": page_obj, 
+        "title": "Kelola Dokter", 
+        "model_name": "Dokter",
+        "q": q,
+        "filter_dept": dept_id,
+        "departments": departments,
+    })
+from django.db import transaction
+
+@staff_member_required
+def backend_doctor_create(request):
+    if request.method == "POST":
+        form = BackendDoctorForm(request.POST, request.FILES)
+        formset = DoctorScheduleFormSet(request.POST) 
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    doctor = form.save()
+                    formset = DoctorScheduleFormSet(request.POST, instance=doctor)
+                    if formset.is_valid():
+                        formset.save()
+                        messages.success(request, f"Data dokter baru {doctor.full_name} dan jadwalnya berhasil disimpan.")
+                        return redirect("backend_doctor_list")
+                    else:
+                        raise ValueError("Formset invalid") # triggers rollback to not save partial
+            except ValueError:
+                pass 
+    else:
+        form = BackendDoctorForm()
+        formset = DoctorScheduleFormSet()
+
+    return render(request, "hospital/backend/doctor_form.html", {
+        "form": form,
+        "formset": formset,
+        "doctor": None,
+        "title": "Tambah Dokter Baru"
+    })
+
+@staff_member_required
+def backend_doctor_edit(request, doctor_id):
+    try:
+        doctor = Doctor.objects.get(id=doctor_id)
+    except Doctor.DoesNotExist:
+        messages.error(request, "Dokter tidak ditemukan.")
+        return redirect("backend_doctor_list")
+
+    if request.method == "POST":
+        form = BackendDoctorForm(request.POST, request.FILES, instance=doctor)
+        formset = DoctorScheduleFormSet(request.POST, instance=doctor)
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            messages.success(request, f"Data dokter {doctor.full_name} dan jadwalnya berhasil diperbarui.")
+            return redirect("backend_doctor_list")
+    else:
+        form = BackendDoctorForm(instance=doctor)
+        formset = DoctorScheduleFormSet(instance=doctor)
+
+    return render(request, "hospital/backend/doctor_form.html", {
+        "form": form,
+        "formset": formset,
+        "doctor": doctor,
+        "title": f"Edit Dokter: {doctor.full_name}"
+    })
+
+@staff_member_required
+def backend_doctor_delete(request, doctor_id):
+    if request.method == "POST":
+        try:
+            doctor = Doctor.objects.get(id=doctor_id)
+            name = doctor.full_name
+            doctor.delete()
+            messages.success(request, f"Data dokter {name} berhasil dihapus permanen.")
+        except Doctor.DoesNotExist:
+            messages.error(request, "Dokter tidak ditemukan atau sudah dihapus.")
+    return redirect("backend_doctor_list")
 
 @staff_member_required
 def backend_payment_list(request):
     items = Payment.objects.select_related("appointment").all().order_by("-created_at")
     return render(request, "hospital/backend/generic_list.html", {"items": items, "title": "Pembayaran", "model_name": "Pembayaran"})
 
+from django.db.models import Count
+
 @staff_member_required
 def backend_department_list(request):
-    items = Department.objects.all().order_by("name")
-    return render(request, "hospital/backend/generic_list.html", {"items": items, "title": "Departemen / Poli", "model_name": "Departemen"})
+    items = Department.objects.annotate(total_doctors=Count('doctors')).order_by("name")
+    
+    from django.core.paginator import Paginator
+    paginator = Paginator(items, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, "hospital/backend/generic_list.html", {"items": page_obj, "title": "Departemen / Poli", "model_name": "Departemen"})
+
+from .forms import BackendDepartmentForm
+
+@staff_member_required
+def backend_department_create(request):
+    if request.method == "POST":
+        form = BackendDepartmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            dept = form.save()
+            messages.success(request, f"Data poli baru {dept.name} berhasil ditambahkan.")
+            return redirect("backend_department_list")
+    else:
+        form = BackendDepartmentForm()
+
+    return render(request, "hospital/backend/department_form.html", {
+        "form": form,
+        "department": None,
+        "doctors": [],
+        "title": "Tambah Poli Baru"
+    })
+
+@staff_member_required
+def backend_department_edit(request, dept_id):
+    try:
+        dept = Department.objects.get(id=dept_id)
+    except Department.DoesNotExist:
+        messages.error(request, "Departemen tidak ditemukan.")
+        return redirect("backend_department_list")
+        
+    if request.method == "POST":
+        form = BackendDepartmentForm(request.POST, request.FILES, instance=dept)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Poli {dept.name} berhasil diperbarui.")
+            return redirect("backend_department_list")
+    else:
+        form = BackendDepartmentForm(instance=dept)
+        
+    doctors = dept.doctors.all().order_by("full_name")
+    
+    return render(request, "hospital/backend/department_form.html", {
+        "form": form,
+        "department": dept,
+        "doctors": doctors,
+        "title": f"Edit Poli: {dept.name}"
+    })
 
 import time
 import re
@@ -471,3 +732,68 @@ def get_doctors_by_department(request):
     doctors = Doctor.objects.filter(department_id=department_id, is_active=True)
     results = [{'id': str(d.id), 'full_name': d.full_name} for d in doctors]
     return JsonResponse({'success': True, 'doctors': results})
+
+@staff_member_required
+def backend_contact_list(request):
+    from django.db.models import Q
+    from .models import ContactMessage
+    
+    q = request.GET.get('q', '')
+    status = request.GET.get('status', '')
+    # Load only the fields needed for the list view to avoid fetching large message bodies
+    items = ContactMessage.objects.all().only('id', 'full_name', 'email', 'subject', 'created_at', 'is_resolved')
+    if q:
+        items = items.filter(Q(full_name__icontains=q) | Q(email__icontains=q) | Q(subject__icontains=q))
+    if status:
+        is_resolved = status == 'resolved'
+        items = items.filter(is_resolved=is_resolved)
+    
+    items = items.order_by("-created_at")
+
+    # Simple, low-cost pagination: avoid .count() on large tables by fetching page_size + 1 rows
+    try:
+        page = int(request.GET.get('page', '1'))
+        if page < 1:
+            page = 1
+    except ValueError:
+        page = 1
+
+    page_size = 10
+    offset = (page - 1) * page_size
+
+    qs_slice = list(items[offset: offset + page_size + 1])
+    has_next = len(qs_slice) > page_size
+    contacts = qs_slice[:page_size]
+    has_previous = page > 1
+
+    return render(request, "hospital/backend/contact_list.html", {
+        "contacts": contacts,
+        "title": "Pesan Kontak Masuk",
+        "q": q,
+        "status": status,
+        "page": page,
+        "has_next": has_next,
+        "has_previous": has_previous,
+        "next_page": page + 1,
+        "previous_page": page - 1,
+        "page_size": page_size,
+    })
+
+
+def backend_contact_detail(request, contact_id):
+    """Return contact message details as JSON for modal loading to avoid fetching large text in list queries."""
+    from .models import ContactMessage
+    try:
+        cm = ContactMessage.objects.get(id=contact_id)
+        return JsonResponse({
+            'success': True,
+            'id': cm.id,
+            'full_name': cm.full_name,
+            'email': cm.email,
+            'subject': cm.subject,
+            'message': cm.message,
+            'created_at': cm.created_at.strftime('%d %b %Y, %H:%M'),
+            'is_resolved': cm.is_resolved,
+        })
+    except ContactMessage.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Not found'}, status=404)

@@ -1,17 +1,98 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Profil · RS Gunung Maria Tomohon{% endblock %}
 
 {% block content %}
   <div class="row g-4">
     <div class="col-lg-8">
-      <h1 class="h3 fw-bold">Profil Rumah Sakit</h1>
-      <p class="text-muted mb-0">
+      <article class="about-article">
+      <h1 class="h3 fw-bold mb-4">Profil Rumah Sakit</h1>
+
+      <p class="text-muted mb-4">
         Rumah Sakit Gunung Maria Tomohon merupakan salah satu institusi medis tertua di Sulawesi Utara—berakar dari fasilitas yang dikenal masyarakat sebagai “Rumah Sakit Bundar”
         sejak 1913. Rumah sakit ini memadukan misi kemanusiaan berbasis nilai keagamaan dengan tuntutan tata kelola rumah sakit modern yang profesional.
       </p>
 
-      <div class="card mt-3">
+      <div class="institusi-section home-primary-column mx-auto w-100 mb-5">
+        <div class="card institusi-narrative-card mb-3">
+          <div class="card-body p-4 p-lg-5">
+            <p class="institusi-label mb-2">Sejarah</p>
+            <h2 class="h5 fw-semibold text-dark mb-3">Berakar dari “Rumah Sakit Bundar” (1913)</h2>
+            <p class="text-secondary mb-0 lh-lg small">Warisan arsitektur kolonial yang khas tidak hanya menjadi identitas sejatinya, namun secara langsung menciptakan atmosfer terapeutik yang tenang demi mendukung masa pemulihan pasien.</p>
+          </div>
+        </div>
+
+        <div class="card institusi-narrative-card mb-3">
+          <div class="card-body p-4 p-lg-5">
+            <p class="institusi-label mb-2">Tata kelola</p>
+            <h2 class="h5 fw-semibold text-dark mb-3">Dedikasi PT Ratna Maria Tomohon</h2>
+            <div class="institusi-pt-logo mb-3">
+              <img src="{% static 'hospital/img/PT-RTT-300x95.png' %}" alt="Logo PT Ratna Maria Tomohon" class="img-fluid" loading="lazy" decoding="async">
+            </div>
+            <p class="text-secondary mb-0 lh-lg small">Dikelola penuh sebagai rumah sakit swasta mandiri (di bawah naungan organisasi Katolik) dengan menjunjung dedikasi pelayanan dan kepemimpinan profesional terpadu.</p>
+          </div>
+        </div>
+
+        <div class="sjmj-affiliation card institusi-narrative-card">
+          <div class="card-body p-4 p-lg-5">
+            <p class="institusi-label mb-2">Keterkaitan</p>
+            <h2 class="h5 fw-semibold text-dark mb-4">RS Gunung Maria Tomohon &amp; SJMJ Provinsi Manado</h2>
+            <div class="text-center text-md-start mb-4">
+              <img src="{% static 'hospital/img/sjmj-manado.webp' %}" alt="SJMJ Provinsi Manado" class="img-fluid sjmj-affiliation-img rounded-3" loading="lazy" decoding="async">
+            </div>
+            <p class="text-secondary mb-3 lh-lg small">RS Gunung Maria Tomohon berkiprah dalam satu kesinambungan misi dengan <strong class="text-dark fw-semibold">SJMJ Provinsi Manado</strong> (Serikat Jemaat Maria Jerusalemitarum). Sebagai rumah sakit di bawah naungan lembaga Katolik, kami memperkuat kerja sama pastoral dan pelayanan kesehatan yang selaras dengan nilai dan arahan jemaat di wilayah Sulawesi Utara.</p>
+            <p class="text-secondary mb-0 lh-lg small">Melalui hubungan ini, pelayanan kepada pasien tidak terpisah dari komitmen terhadap martabat manusia dan solidaritas dengan komunitas yang dilayani SJMJ di Manado dan sekitarnya.</p>
+          </div>
+        </div>
+
+        <div class="institusi-stats-stack">
+          <div class="card institusi-stat-card">
+            <div class="card-body p-4 d-flex flex-column h-100">
+              <div class="d-flex align-items-center justify-content-start mb-3">
+                <div class="institusi-stat-icon" aria-hidden="true">
+                  <i class="bi bi-people"></i>
+                </div>
+              </div>
+              <p class="institusi-label mb-2">Kunjungan rawat jalan</p>
+              <p class="institusi-stat-value mb-2">±59.504<span class="fs-6 fw-normal text-muted">/thn</span></p>
+              <p class="small text-muted mb-0">Rata-rata aktivitas mencapai ≈160+ pasien/hari.</p>
+            </div>
+          </div>
+
+          <div class="card institusi-stat-card">
+            <div class="card-body p-4 d-flex flex-column h-100">
+              <div class="d-flex align-items-center justify-content-start mb-3">
+                <div class="institusi-stat-icon" aria-hidden="true">
+                  <i class="bi bi-hospital"></i>
+                </div>
+              </div>
+              <p class="institusi-label mb-2">Kapasitas rawat inap</p>
+              <p class="institusi-stat-value mb-2">138–185 <span class="fs-6 fw-normal text-muted">TT</span></p>
+              <p class="small text-muted mb-0">Tempat tidur menyesuaikan kebutuhan operasional harian.</p>
+            </div>
+          </div>
+
+          <div class="card institusi-stat-card">
+            <div class="card-body p-4 d-flex flex-column h-100">
+              <div class="d-flex align-items-center justify-content-start mb-3">
+                <div class="institusi-stat-icon" aria-hidden="true">
+                  <i class="bi bi-heart-pulse"></i>
+                </div>
+              </div>
+              <p class="institusi-label mb-2">Fasilitas intensif spesialis</p>
+              <p class="institusi-stat-value mb-2 text-wrap">NICU <span class="fs-6 fw-normal text-muted mx-1">&amp;</span> PICU</p>
+              <p class="small text-muted mb-0">10 TT NICU/PICU; ICU 6 TT; IGD terpadu 11 bed.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      </article>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card">
         <div class="card-body">
           <h2 class="h5 fw-semibold mb-2">Evolusi historis & arsitektur sebagai instrumen terapi</h2>
           <div class="text-muted">
@@ -21,7 +102,7 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card mt-3">
         <div class="card-body">
           <h2 class="h5 fw-semibold mb-2">Tata kelola, legalitas, dan kepemimpinan</h2>
           <div class="text-muted">
@@ -31,7 +112,7 @@
         </div>
       </div>
 
-      <div class="row g-3 mt-1">
+      <div class="row g-3 mt-3">
         <div class="col-md-6">
           <div class="card h-100">
             <div class="card-body">
@@ -61,8 +142,7 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="col-lg-4">
+
       <div class="card">
         <div class="card-body">
           <div class="fw-semibold mb-2">Identitas institusi</div>

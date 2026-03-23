@@ -6,71 +6,220 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}RS Gunung Maria Tomohon{% endblock %}</title>
     <link rel="icon" href="{% url 'logo_png' %}" type="image/png" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
     <link rel="stylesheet" href="{% static 'hospital/css/site.css' %}" />
   </head>
   <body>
-    <div class="topbar">
-      <div class="container d-flex justify-content-center justify-content-lg-between align-items-center small text-nowrap">
-        <div class="text-muted d-none d-lg-block text-truncate pe-3">
-          Jl. Sejahtera No. 282, Kel. Kolongan, Kota Tomohon · Kode RS <span class="fw-semibold">7173051</span>
-        </div>
-        <div class="text-muted flex-shrink-0">
-          <span class="d-lg-none">Tomohon · </span>Telp <span class="fw-semibold">(0431) 351008</span>
-          <span class="d-none d-sm-inline"> · Email <span class="fw-semibold">rsgunungmaria@yahoo.co.id</span></span>
+    <header class="site-header">
+      <div class="topbar">
+        <div
+          class="container d-flex justify-content-center justify-content-lg-between align-items-center small text-nowrap"
+        >
+          <div class="text-muted d-none d-lg-block text-truncate pe-3">
+            Jl. Sejahtera No. 282, Kel. Kolongan, Kota Tomohon · Kode RS
+            <span class="fw-semibold">7173051</span>
+          </div>
+          <div class="text-muted flex-shrink-0">
+            <span class="d-lg-none">Tomohon · </span>Telp
+            <span class="fw-semibold">(0431) 351008</span>
+            <span class="d-none d-sm-inline">
+              · Email
+              <span class="fw-semibold">rsgunungmaria@yahoo.co.id</span></span
+            >
+            <span>
+              ·
+              <a
+                href="https://www.instagram.com/rsgmtomohon"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-muted text-decoration-none"
+                style="transition: color 0.2s"
+              >
+                <i class="bi bi-instagram"></i>
+                <span class="fw-semibold">rsgmtomohon</span>
+              </a>
+            </span>
+            <span>
+              ·
+              <a
+                href="https://web.facebook.com/humasrsgm.tomohon.1"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-muted text-decoration-none"
+                style="transition: color 0.2s"
+              >
+                <i class="bi bi-facebook"></i>
+                <span class="fw-semibold">Humas RSGM Tomohon</span>
+              </a>
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container">
-        <a class="navbar-brand fw-semibold d-flex align-items-center gap-2" href="{% url 'home' %}">
-          <img src="{% url 'title_logo_png' %}" alt="RS Gunung Maria" height="36" class="rounded" />
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="nav">
-          <ul class="navbar-nav ms-auto align-items-lg-center">
-            <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Beranda</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">Profil</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'services' %}">Layanan</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'doctors' %}">Dokter</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'appointment_create' %}">Janji Temu</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Kontak</a></li>
-            <li class="nav-item ms-lg-2">
-              <a class="btn btn-light btn-sm fw-semibold" href="{% url 'appointment_create' %}">Ajukan Janji Temu</a>
-            </li>
-          </ul>
+      <nav class="navbar navbar-main navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+          <a
+            class="navbar-brand fw-normal d-flex align-items-center gap-2"
+            href="{% url 'home' %}"
+          >
+            <img
+              src="{% url 'title_logo_png' %}"
+              alt="RS Gunung Maria"
+              height="61"
+              class="rounded navbar-brand-img"
+            />
+          </a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#nav"
+            aria-controls="nav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav nav-main ms-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'about' %}">Tentang</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'services' %}">Layanan</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'doctors' %}">Dokter</a>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
 
     {% block hero %}{% endblock %}
 
     <main class="container my-4">
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }} mb-3" role="alert">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-      {% block content %}{% endblock %}
+      {% if messages %} {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} mb-3" role="alert">
+        {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% block content %}{% endblock %}
     </main>
 
-    <footer class="border-top py-4">
-      <div class="container d-flex flex-column flex-md-row gap-2 justify-content-between align-items-center">
-        <div class="text-muted">© {% now "Y" %} RS Gunung Maria Tomohon</div>
-        <div class="text-muted small">
-          Telp: <span class="fw-semibold">(0431) 351008</span>
-          · Email: <span class="fw-semibold">rsgunungmaria@yahoo.co.id</span>
-          · <a href="/dashboard/" class="text-muted text-decoration-none fw-bold"><i class="bi bi-speedometer2"></i> Dashboard RSGM</a>
+    <footer
+      class="border-top"
+      style="background-color: #f8f9fa; padding: 40px 20px"
+    >
+      <div class="container">
+        <h5 class="mb-4 text-center">Lokasi & Kontak Rumah Sakit</h5>
+        <div class="row align-items-start mb-4">
+          <div class="col-md-6">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4492.546273337722!2d124.8355513!3d1.3210537999999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x32876c97344c7811%3A0x2e1bebb56fc3a369!2sGunung%20Maria%20Hospital!5e1!3m2!1sid!2sid!4v1774248991374!5m2!1sid!2sid"
+              width="100%"
+              height="300"
+              style="border: 0"
+              allowfullscreen=""
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+            <p class="mt-3">
+              <strong>Alamat:</strong> Jl. Sejahtera No. 282, Kel. Kolongan,
+              Kota Tomohon · Kode RS 7173051
+            </p>
+          </div>
+          <div class="col-md-6">
+            <div
+              style="
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                border: 1px solid #dee2e6;
+              "
+            >
+              <h6 class="mb-3">Form Kontak</h6>
+              <p class="text-muted small mb-3">
+                Punya pertanyaan? Kirim pesan, tim kami akan menindalakanjuti.
+              </p>
+              <form method="POST" action="{% url 'contact' %}">
+                {% csrf_token %}
+                <div class="row mb-2">
+                  <div class="col-6">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      placeholder="Nama lengkap"
+                      name="name"
+                      required
+                    />
+                  </div>
+                  <div class="col-6">
+                    <input
+                      type="email"
+                      class="form-control form-control-sm"
+                      placeholder="Email"
+                      name="email"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    placeholder="Subjek"
+                    name="subject"
+                    required
+                  />
+                </div>
+                <div class="mb-2">
+                  <textarea
+                    class="form-control form-control-sm"
+                    placeholder="Pesan"
+                    name="message"
+                    rows="3"
+                    required
+                  ></textarea>
+                </div>
+                <div>
+                  <button type="submit" class="btn btn-dark btn-sm">
+                    Kirim pesan
+                  </button>
+                  <button type="reset" class="btn btn-outline-dark btn-sm">
+                    Kembali
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <hr class="my-3" />
+        <div
+          class="d-flex flex-column flex-md-row gap-2 justify-content-between align-items-center"
+        >
+          <div class="text-muted small">
+            © {% now "Y" %} RS Gunung Maria Tomohon
+          </div>
+          <div class="text-muted small">
+            Telp: <span class="fw-semibold">(0431) 351008</span> · Email:
+            <span class="fw-semibold">rsgunungmaria@yahoo.co.id</span> ·
+            <a
+              href="/dashboard/"
+              class="text-muted text-decoration-none fw-bold"
+              ><i class="bi bi-speedometer2"></i> Dashboard RSGM</a
+            >
+          </div>
         </div>
       </div>
     </footer>
 
-    <a class="fab-appointment d-lg-none" href="{% url 'appointment_create' %}" aria-label="Ajukan janji temu">Janji Temu</a>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
-

@@ -74,10 +74,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 import os
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from .env file when python-dotenv is installed.
+if load_dotenv is not None:
+    load_dotenv()
 
 DATABASES = {
     'default': {
@@ -129,5 +133,5 @@ STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-MEDIA_URL = "media/"
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

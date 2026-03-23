@@ -177,6 +177,10 @@
       const docField = document.getElementById("id_doctor");
 
       if (deptField && docField) {
+        // Read initial doctor selection provided by Django
+        let initialDocId = docField.value;
+        let isInitialLoad = true;
+
         // Function to update status and fetch doctors
         const updateDocState = () => {
           const deptId = deptField.value;
@@ -185,6 +189,9 @@
             docField.innerHTML = '<option value="">---------</option>';
             docField.title = "Silakan pilih Poli/Departemen terlebih dahulu";
           } else {
+            let currentSelected = isInitialLoad ? initialDocId : docField.value;
+            isInitialLoad = false;
+
             docField.disabled = true; // Lock while fetching
             docField.innerHTML = '<option value="">Loading...</option>';
             
@@ -195,15 +202,21 @@
                 docField.title = "";
                 let html = '<option value="">---------</option>';
                 if (data.success && data.doctors && data.doctors.length > 0) {
+                  let docFound = false;
                   data.doctors.forEach(doc => {
                     html += `<option value="${doc.id}">${doc.full_name}</option>`;
+                    if (doc.id === currentSelected) docFound = true;
                   });
                   docField.innerHTML = html;
                   
-                  // --- NEW: Automatically pick a random doctor from the list ---
-                  const randomIndex = Math.floor(Math.random() * data.doctors.length);
-                  const randomDoc = data.doctors[randomIndex];
-                  docField.value = randomDoc.id;
+                  if (docFound) {
+                      docField.value = currentSelected;
+                  } else {
+                      // Automatically pick a random doctor from the list if previous selection is invalid
+                      const randomIndex = Math.floor(Math.random() * data.doctors.length);
+                      const randomDoc = data.doctors[randomIndex];
+                      docField.value = randomDoc.id;
+                  }
                 } else {
                   docField.innerHTML = html;
                 }

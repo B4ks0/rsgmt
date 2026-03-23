@@ -29,9 +29,18 @@ urlpatterns = [
     
     # Custom Backend Lists
     path("dashboard/patients/", views.backend_patient_list, name="backend_patient_list"),
+    path("dashboard/patients/add/", views.backend_patient_create, name="backend_patient_create"),
+    path("dashboard/patients/<uuid:patient_id>/edit/", views.backend_patient_edit, name="backend_patient_edit"),
     path("dashboard/doctors/", views.backend_doctor_list, name="backend_doctor_list"),
+    path("dashboard/doctors/add/", views.backend_doctor_create, name="backend_doctor_create"),
+    path("dashboard/doctors/<uuid:doctor_id>/edit/", views.backend_doctor_edit, name="backend_doctor_edit"),
+    path("dashboard/doctors/<uuid:doctor_id>/delete/", views.backend_doctor_delete, name="backend_doctor_delete"),
     path("dashboard/payments/", views.backend_payment_list, name="backend_payment_list"),
+    path("dashboard/contacts/", views.backend_contact_list, name="backend_contact_list"),
+    path("dashboard/contacts/<int:contact_id>/detail/", views.backend_contact_detail, name="backend_contact_detail"),
     path("dashboard/departments/", views.backend_department_list, name="backend_department_list"),
+    path("dashboard/departments/add/", views.backend_department_create, name="backend_department_create"),
+    path("dashboard/departments/<int:dept_id>/edit/", views.backend_department_edit, name="backend_department_edit"),
     
     # API endpoints
     path("api/ocr-ktp/", views.ocr_ktp, name="ocr_ktp"),
