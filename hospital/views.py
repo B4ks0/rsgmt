@@ -530,6 +530,45 @@ def get_doctors_by_department(request):
     results = [{'id': str(d.id), 'full_name': d.full_name} for d in doctors]
     return JsonResponse({'success': True, 'doctors': results})
 
+def get_doctor_available_dates(request):
+    """Get available dates for a doctor in the next 60 days"""
+    from datetime import datetime, timedelta
+    from .models import ScheduleException
+    
+    doctor_id = request.GET.get('doctor_id')
+    
+    if not doctor_id:
+        return JsonResponse({'success': False, 'error': 'doctor_id required'})
+    
+    try:
+        doctor = Doctor.objects.get(id=doctor_id)
+    except Doctor.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Doctor not found'})
+    
+    # Get doctor's schedules
+    schedules = doctor.schedules.filter(is_active=True)
+    available_days = set(s.day_of_week for s in schedules)
+    
+    # Generate available dates for next 60 days
+    today = datetime.now().date()
+    available_dates = []
+    
+    for i in range(60):
+        check_date = today + timedelta(days=i)
+        day_of_week = check_date.weekday()
+        
+        # Check if it's a practice day for this doctor
+        if day_of_week in available_days:
+            # Check for exceptions
+            exception = ScheduleException.objects.filter(doctor=doctor, exception_date=check_date).first()
+            if exception:
+                if exception.is_available:
+                    available_dates.append(check_date.isoformat())
+            else:
+                available_dates.append(check_date.isoformat())
+    
+    return JsonResponse({'success': True, 'available_dates': available_dates})
+
 @staff_member_required
 def backend_contact_list(request):
     from django.db.models import Q

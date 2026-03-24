@@ -18,6 +18,7 @@ urlpatterns = [
     # API endpoints
     path("api/submit-contact/", views.contact, name="api_submit_contact"),
     path("api/get-doctors-by-dept/", views.get_doctors_by_department, name="get_doctors_by_dept"),
+    path("api/get-doctor-available-dates/", views.get_doctor_available_dates, name="get_doctor_available_dates"),
     
     # Custom Backend Dashboard
     path("dashboard/login/", views.backend_login, name="backend_login"),

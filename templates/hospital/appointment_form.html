@@ -37,11 +37,6 @@
                 {% for e in form.email.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
               </div>
               <div class="col-md-6">
-                <label class="form-label">Tanggal yang diinginkan <span class="text-danger">*</span></label>
-                {{ form.preferred_date }}
-                {% for e in form.preferred_date.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
-              </div>
-              <div class="col-md-6">
                 <label class="form-label">Poli/Departemen <span class="text-danger">*</span></label>
                 {{ form.department }}
                 {% for e in form.department.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
@@ -51,7 +46,79 @@
                 {{ form.doctor }}
                 {% for e in form.doctor.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
               </div>
+            </div>
+
+            <!-- Calendar Date Selection Section -->
+            <div class="row mb-4 mt-4">
               <div class="col-12">
+                <div class="card border-0 bg-light">
+                  <div class="card-body">
+                    <h6 class="card-title fw-bold mb-3">
+                      <i class="bi bi-calendar3 me-2 text-primary"></i>Pilih Tanggal Janji Temu
+                    </h6>
+                    
+                    <!-- Calendar Navigation -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" id="prevMonth">
+                        <i class="bi bi-chevron-left"></i>
+                      </button>
+                      <h6 class="mb-0" id="calendarMonth">Januari 2026</h6>
+                      <button type="button" class="btn btn-sm btn-outline-secondary" id="nextMonth">
+                        <i class="bi bi-chevron-right"></i>
+                      </button>
+                    </div>
+
+                    <!-- Calendar Grid -->
+                    <div class="table-responsive">
+                      <table class="table table-sm table-borderless text-center">
+                        <thead>
+                          <tr class="text-muted small fw-bold">
+                            <td>Min</td>
+                            <td>Sen</td>
+                            <td>Sel</td>
+                            <td>Rab</td>
+                            <td>Kam</td>
+                            <td>Jum</td>
+                            <td>Sab</td>
+                          </tr>
+                        </thead>
+                        <tbody id="calendarDates"></tbody>
+                      </table>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="row g-2 mt-3 pt-2 border-top small">
+                      <div class="col-6 col-md-3">
+                        <span class="badge bg-secondary">Sudah lewat</span>
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <span class="badge bg-primary">Hari ini</span>
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <span class="badge bg-success">Tersedia</span>
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <span class="badge bg-secondary">Tidak praktek</span>
+                      </div>
+                    </div>
+
+                    <!-- Selected Date Info -->
+                    <div class="alert alert-info mt-3 mb-0 d-none" id="selectedDateInfo">
+                      <i class="bi bi-info-circle me-2"></i>
+                      Anda memilih: <strong id="selectedDateDisplay">-</strong>
+                    </div>
+
+                    <!-- Hidden input for form submission -->
+                    {{ form.preferred_date }}
+                    {% for e in form.preferred_date.errors %}<div class="text-danger small mt-2">{{ e }}</div>{% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+
                 <label class="form-label">Keluhan/Catatan (opsional)</label>
                 {{ form.message }}
                 {% for e in form.message.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
@@ -158,6 +225,144 @@
         updateDocState();
         deptField.addEventListener("change", updateDocState);
       }
+
+      // === Calendar Date Picker Logic ===
+      let currentMonth = new Date().getMonth();
+      let currentYear = new Date().getFullYear();
+      let selectedDate = null;
+      let availableDates = [];
+
+      const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                         "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+      const renderCalendar = () => {
+        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+        
+        let calendarHTML = '<tr>';
+        
+        // Previous month's days (gray)
+        for (let i = firstDay - 1; i >= 0; i--) {
+          const day = daysInPrevMonth - i;
+          calendarHTML += `<td><button type="button" class="btn btn-sm text-secondary" disabled>${day}</button></td>`;
+        }
+        
+        // Current month's days
+        const today = new Date();
+        for (let day = 1; day <= daysInMonth; day++) {
+          const date = new Date(currentYear, currentMonth, day);
+          const dateString = date.toISOString().split('T')[0];
+          
+          let btnClass = 'btn btn-sm';
+          let isDisabled = false;
+          let isClickable = false;
+          
+          if (date < today) {
+            // Past dates - gray
+            btnClass += ' btn-secondary text-white';
+            isDisabled = true;
+          } else if (date.toDateString() === today.toDateString()) {
+            // Today - blue
+            btnClass += ' btn-primary text-white';
+            isClickable = true;
+          } else if (availableDates.includes(dateString)) {
+            // Available - green
+            btnClass += ' btn-success text-white';
+            isClickable = true;
+          } else {
+            // Not available - gray
+            btnClass += ' btn-secondary text-white';
+            isDisabled = true;
+          }
+          
+          const onClickAttr = isClickable ? `onclick="selectDate('${dateString}', this)"` : '';
+          const disabledAttr = isDisabled ? 'disabled' : '';
+          
+          calendarHTML += `<td><button type="button" class="${btnClass}" ${disabledAttr} ${onClickAttr}>${day}</button></td>`;
+        }
+        
+        // Next month's days (gray)
+        const totalCells = (document.querySelectorAll('#calendarDates tr:first-child td').length || 7);
+        const lastDayCell = (firstDay + daysInMonth) % 7;
+        if (lastDayCell !== 0) {
+          for (let day = 1; day <= (7 - lastDayCell); day++) {
+            calendarHTML += `<td><button type="button" class="btn btn-sm text-secondary" disabled>${day}</button></td>`;
+          }
+        }
+        
+        calendarHTML += '</tr>';
+        
+        document.getElementById('calendarMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        document.getElementById('calendarDates').innerHTML = calendarHTML;
+      };
+
+      window.selectDate = (dateString, element) => {
+        selectedDate = dateString;
+        document.getElementById('id_preferred_date').value = dateString;
+        
+        // Remove active class from all buttons
+        document.querySelectorAll('#calendarDates button').forEach(btn => {
+          btn.classList.remove('btn-info');
+        });
+        
+        // Add active class to selected date
+        element.classList.add('btn-info');
+        
+        // Show selected date info
+        const date = new Date(dateString);
+        const dayName = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][date.getDay()];
+        const dateDisplay = `${dayName}, ${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+        
+        document.getElementById('selectedDateInfo').classList.remove('d-none');
+        document.getElementById('selectedDateDisplay').textContent = dateDisplay;
+      };
+
+      // Fetch available dates when doctor changes
+      const docField = document.getElementById("id_doctor");
+      if (docField) {
+        docField.addEventListener("change", () => {
+          const doctorId = docField.value;
+          if (doctorId) {
+            fetch(`/api/get-doctor-available-dates/?doctor_id=${doctorId}`)
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  availableDates = data.available_dates;
+                  renderCalendar();
+                }
+              })
+              .catch(err => console.error('Error fetching available dates:', err));
+          } else {
+            availableDates = [];
+            renderCalendar();
+          }
+        });
+      }
+
+      // Calendar navigation
+      document.getElementById('prevMonth').addEventListener('click', (e) => {
+        e.preventDefault();
+        currentMonth--;
+        if (currentMonth < 0) {
+          currentMonth = 11;
+          currentYear--;
+        }
+        renderCalendar();
+      });
+
+      document.getElementById('nextMonth').addEventListener('click', (e) => {
+        e.preventDefault();
+        currentMonth++;
+        if (currentMonth > 11) {
+          currentMonth = 0;
+          currentYear++;
+        }
+        renderCalendar();
+      });
+
+      // Initial calendar render
+      renderCalendar();
     });
   </script>
 {% endblock %}
