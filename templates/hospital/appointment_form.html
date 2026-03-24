@@ -245,7 +245,7 @@
           
           const calendarDatesElement = document.getElementById('calendarDates');
           if (!calendarDatesElement) {
-            console.error('✗ FATAL: Calendar tbody #calendarDates does not exist!');
+            console.error('✗ Calendar tbody not found!');
             return;
           }
           
@@ -255,118 +255,131 @@
           const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
           const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
           
-          console.log('Calendar: ' + monthNames[currentMonth] + ' ' + currentYear);
+          console.log('Rendering: ' + monthNames[currentMonth] + ' ' + currentYear);
           console.log('firstDay=' + firstDay + ', daysInMonth=' + daysInMonth);
           
-          let currentRow = document.createElement('tr');
-          let colTracker = 0;  // Track actual column position 0-6
-          let totalCells = 0;
-          
-          // Add previous month's padding
-          console.log('Adding padding for previous month (' + firstDay + ' cells)...');
-          for (let i = 0; i < firstDay; i++) {
-            const day = daysInPrevMonth - (firstDay - 1 - i);
-            const cell = document.createElement('td');
-            cell.className = 'p-1';
-            
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'btn btn-sm w-100 text-secondary';
-            btn.disabled = true;
-            btn.textContent = day;
-            
-            cell.appendChild(btn);
-            currentRow.appendChild(cell);
-            colTracker++;
-            totalCells++;
-          }
-          
-          // Add current month's days
-          console.log('Adding ' + daysInMonth + ' days from current month...');
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          let daysAdded = 0;
           
-          for (let day = 1; day <= daysInMonth; day++) {
-            // Check if we need a new row (when colTracker reaches 7)
-            if (colTracker > 0 && colTracker % 7 === 0) {
-              calendarDatesElement.appendChild(currentRow);
-              currentRow = document.createElement('tr');
-              console.log('  → New row created (col=' + colTracker + ')');
-            }
-            
+          let currentRow = null;
+          let col = 0;  // Column position 0-6
+          let totalDays = 0;
+          
+          // Helper function to create a date cell
+          const createDateCell = (day, isCurrentMonth) => {
             const cell = document.createElement('td');
             cell.className = 'p-1';
-            
-            const date = new Date(currentYear, currentMonth, day);
-            date.setHours(0, 0, 0, 0);
-            const dateString = date.toISOString().split('T')[0];
             
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'btn btn-sm w-100';
+            btn.disabled = true;  // default disabled
             btn.textContent = day;
             
-            let colorType = 'unknown';
-            let isClickable = false;
-            
-            if (date < today) {
+            if (!isCurrentMonth) {
+              // Other months - gray, disabled
               btn.classList.add('btn-secondary', 'text-white');
-              btn.disabled = true;
-              colorType = 'gray-past';
-            } else if (date.getTime() === today.getTime()) {
-              btn.classList.add('btn-primary', 'text-white', 'fw-bold');
-              isClickable = true;
-              colorType = 'blue-today';
-            } else if (availableDates.length > 0 && availableDates.includes(dateString)) {
-              btn.classList.add('btn-success', 'text-white');
-              isClickable = true;
-              colorType = 'green-available';
-            } else if (availableDates.length === 0) {
-              btn.classList.add('btn-success', 'text-white');
-              isClickable = true;
-              colorType = 'green-default';
             } else {
-              btn.classList.add('btn-secondary', 'text-white');
-              btn.disabled = true;
-              colorType = 'gray-unavail';
-            }
-            
-            if (isClickable) {
-              btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                selectDate(dateString, this);
-              });
+              // Current month - logic for colors
+              const date = new Date(currentYear, currentMonth, day);
+              date.setHours(0, 0, 0, 0);
+              const dateString = date.toISOString().split('T')[0];
+              
+              if (date < today) {
+                // Past - gray, disabled
+                btn.classList.add('btn-secondary', 'text-white');
+                btn.disabled = true;
+              } else if (date.getTime() === today.getTime()) {
+                // Today - blue
+                btn.classList.add('btn-primary', 'text-white', 'fw-bold');
+                btn.disabled = false;
+                btn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  selectDate(dateString, this);
+                });
+              } else if (availableDates.length > 0 && availableDates.includes(dateString)) {
+                // Available - green
+                btn.classList.add('btn-success', 'text-white');
+                btn.disabled = false;
+                btn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  selectDate(dateString, this);
+                });
+              } else if (availableDates.length === 0) {
+                // No doctor selected - all future dates green
+                btn.classList.add('btn-success', 'text-white');
+                btn.disabled = false;
+                btn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  selectDate(dateString, this);
+                });
+              } else {
+                // Not available - gray, disabled
+                btn.classList.add('btn-secondary', 'text-white');
+                btn.disabled = true;
+              }
             }
             
             cell.appendChild(btn);
+            return cell;
+          };
+          
+          // Add previous month's padding
+          console.log('Adding padding for previous month...');
+          for (let i = 0; i < firstDay; i++) {
+            if (col === 0) {
+              currentRow = document.createElement('tr');
+            }
+            
+            const day = daysInPrevMonth - (firstDay - 1 - i);
+            const cell = createDateCell(day, false);
             currentRow.appendChild(cell);
-            colTracker++;
-            totalCells++;
-            daysAdded++;
+            
+            col++;
+            if (col === 7) {
+              calendarDatesElement.appendChild(currentRow);
+              col = 0;
+            }
+          }
+          
+          // Add current month's days
+          console.log('Adding current month days...');
+          for (let day = 1; day <= daysInMonth; day++) {
+            if (col === 0) {
+              currentRow = document.createElement('tr');
+            }
+            
+            const cell = createDateCell(day, true);
+            currentRow.appendChild(cell);
+            
+            col++;
+            totalDays++;
+            if (col === 7) {
+              calendarDatesElement.appendChild(currentRow);
+              col = 0;
+            }
           }
           
           // Add next month's padding
-          const nextMonthPadding = (7 - (colTracker % 7)) % 7;
+          const nextMonthPadding = (7 - col) % 7;
           console.log('Adding padding for next month (' + nextMonthPadding + ' cells)...');
-          for (let day = 1; day <= nextMonthPadding; day++) {
-            const cell = document.createElement('td');
-            cell.className = 'p-1';
+          for (let i = 0; i < nextMonthPadding; i++) {
+            if (col === 0) {
+              currentRow = document.createElement('tr');
+            }
             
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'btn btn-sm w-100 text-secondary';
-            btn.disabled = true;
-            btn.textContent = day;
-            
-            cell.appendChild(btn);
+            const cell = createDateCell(i + 1, false);
             currentRow.appendChild(cell);
-            colTracker++;
-            totalCells++;
+            
+            col++;
+            if (col === 7) {
+              calendarDatesElement.appendChild(currentRow);
+              col = 0;
+            }
           }
           
-          // Append final row
-          if (currentRow.children.length > 0) {
+          // Append remaining row if any
+          if (col > 0) {
             calendarDatesElement.appendChild(currentRow);
           }
           
@@ -380,21 +393,19 @@
           const totalRows = calendarDatesElement.querySelectorAll('tr').length;
           const totalButtons = calendarDatesElement.querySelectorAll('button').length;
           
-          console.log('✓ Render complete!');
-          console.log('  Rows: ' + totalRows + ' | Total cells: ' + totalCells + ' | Buttons: ' + totalButtons);
-          console.log('  Days added: ' + daysAdded);
+          console.log('✓ Calendar rendered!');
+          console.log('  Rows: ' + totalRows + ' | Total buttons: ' + totalButtons);
+          console.log('  Days: ' + totalDays);
           
           if (totalButtons >= 28) {
-            console.log('✓✓✓ SUCCESS! Calendar rendered correctly!');
-          } else {
-            console.error('⚠️  WARNING: Expected ~35 buttons but got ' + totalButtons);
+            console.log('✓✓✓ SUCCESS!');
           }
           
           console.log('╔════════════════════════════════════╗');
           console.log('║  RENDER CALENDAR END                ║');
           console.log('╚════════════════════════════════════╝\n');
         } catch (error) {
-          console.error('💥 EXCEPTION in renderCalendar():', error.message);
+          console.error('💥 ERROR:', error.message);
           console.error(error.stack);
         }
       };
