@@ -17,7 +17,6 @@ urlpatterns = [
     
     # API endpoints
     path("api/submit-contact/", views.contact, name="api_submit_contact"),
-    path("api/ocr-ktp/", views.ocr_ktp, name="ocr_ktp"),
     path("api/get-doctors-by-dept/", views.get_doctors_by_department, name="get_doctors_by_dept"),
     
     # Custom Backend Dashboard
@@ -45,8 +44,5 @@ urlpatterns = [
     path("dashboard/departments/", views.backend_department_list, name="backend_department_list"),
     path("dashboard/departments/add/", views.backend_department_create, name="backend_department_create"),
     path("dashboard/departments/<int:dept_id>/edit/", views.backend_department_edit, name="backend_department_edit"),
-    
-    # QA Diagnostic
-    path("dashboard/qa/ocr/", views.backend_qa_ocr, name="backend_qa_ocr"),
 ]
 

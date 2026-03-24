@@ -15,25 +15,6 @@
           <form method="post" enctype="multipart/form-data" novalidate id="appointmentForm">
             {% csrf_token %}
             
-            <!-- OCR Auto Fill Section -->
-            <div class="row mb-4 bg-light p-3 rounded-3 border">
-              <div class="col-12 mb-2">
-                <label class="form-label fw-bold text-primary"><i class="bi bi-person-vcard me-2"></i>Isi Data Otomatis dengan KTP (OCR Scan)</label>
-                <div class="small text-muted mb-2">Unggah foto KTP Anda, dan sistem AI kami akan membaca NIK & Nama secara otomatis. (Opsional tapi disarankan)</div>
-              </div>
-              <div class="col-md-9 mb-2 mb-md-0">
-                {{ form.ktp_photo }}
-                {% for e in form.ktp_photo.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
-              </div>
-              <div class="col-md-3">
-                <button type="button" id="btnScanKtp" class="btn btn-outline-primary w-100 fw-bold">
-                  <i class="bi bi-upc-scan me-1"></i> Scan KTP
-                </button>
-              </div>
-              <div id="ocrStatus" class="col-12 small mt-2 d-none">
-                <!-- Status OCR akan muncul di sini -->
-              </div>
-            </div>
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">NIK (No. KTP) <span class="text-danger">*</span></label>
@@ -119,59 +100,6 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      const btnScan = document.getElementById("btnScanKtp");
-      const statusDiv = document.getElementById("ocrStatus");
-      const fileInput = document.querySelector('input[name="ktp_photo"]');
-      
-      if(btnScan && fileInput) {
-        btnScan.addEventListener("click", function() {
-          if(!fileInput.files || fileInput.files.length === 0) {
-            statusDiv.className = "col-12 small mt-2 text-danger fw-semibold";
-            statusDiv.innerHTML = "<i class='bi bi-exclamation-circle me-1'></i>Silakan pilih foto KTP terlebih dahulu sebelum di-scan.";
-            statusDiv.classList.remove("d-none");
-            return;
-          }
-          
-          const formData = new FormData();
-          formData.append('ktp_image', fileInput.files[0]);
-          
-          // Show loading
-          statusDiv.className = "col-12 small mt-2 text-primary fw-semibold";
-          statusDiv.innerHTML = "<span class='spinner-border spinner-border-sm me-2' role='status' aria-hidden='true'></span>Memproses gambar dengan AI (OCR)... Mohon tunggu.";
-          statusDiv.classList.remove("d-none");
-          btnScan.disabled = true;
-          
-          fetch("{% url 'ocr_ktp' %}", {
-            method: 'POST',
-            body: formData,
-            headers: {
-              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-          })
-          .then(res => res.json())
-          .then(data => {
-            btnScan.disabled = false;
-            if(data.success && data.data && data.data.nik) {
-              const nikField = document.querySelector('input[name="national_id"]');
-              if(nikField) nikField.value = data.data.nik;
-              
-              // Note: Name field is now manual as per requested logic
-              
-              statusDiv.className = "col-12 small mt-2 text-success fw-bold";
-              statusDiv.innerHTML = "<i class='bi bi-check-circle-fill me-1'></i>Berhasil Mendeteksi NIK! Silakan isi Nama Lengkap secara manual.";
-            } else {
-              statusDiv.className = "col-12 small mt-2 text-warning fw-bold border p-2 rounded bg-white";
-              statusDiv.innerHTML = "<i class='bi bi-exclamation-triangle-fill me-1 text-danger'></i>Sistem AI gagal menemukan NIK pada gambar ini. Silakan isi NIK dan Nama secara manual.";
-            }
-          })
-          .catch(err => {
-            btnScan.disabled = false;
-            statusDiv.className = "col-12 small mt-2 text-danger fw-semibold";
-            statusDiv.innerHTML = "<i class='bi bi-bug-fill me-1'></i>Terjadi kesalahan saat menghubungi sistem OCR.";
-          });
-        });
-      }
-
       // --- Dependent Logic: Lock Doctor field before Department selected ---
       const deptField = document.getElementById("id_department");
       const docField = document.getElementById("id_doctor");

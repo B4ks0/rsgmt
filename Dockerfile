@@ -13,8 +13,6 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     libmariadb-dev \
     pkg-config \
-    tesseract-ocr \
-    libtesseract-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
