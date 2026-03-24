@@ -272,7 +272,10 @@
             
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'btn btn-sm w-100';
+            btn.className = 'btn w-100';
+            btn.style.minHeight = '2.5rem';
+            btn.style.fontSize = '0.95rem';
+            btn.style.fontWeight = '600';
             btn.disabled = true;  // default disabled
             btn.textContent = day;
             
