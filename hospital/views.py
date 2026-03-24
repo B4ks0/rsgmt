@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from django.contrib import messages
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect, render
 
 from .forms import AppointmentForm
@@ -545,7 +545,7 @@ def get_doctor_available_dates(request):
     except Doctor.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Doctor not found'})
     
-    # Get doctor's schedules
+    # Get doctor's schedules (Monday=0, Sunday=6)
     schedules = doctor.schedules.filter(is_active=True)
     available_days = set(s.day_of_week for s in schedules)
     
@@ -555,11 +555,11 @@ def get_doctor_available_dates(request):
     
     for i in range(60):
         check_date = today + timedelta(days=i)
-        day_of_week = check_date.weekday()
+        day_of_week = check_date.weekday()  # Monday=0, Sunday=6
         
         # Check if it's a practice day for this doctor
         if day_of_week in available_days:
-            # Check for exceptions
+            # Check for exceptions (override dates)
             exception = ScheduleException.objects.filter(doctor=doctor, exception_date=check_date).first()
             if exception:
                 if exception.is_available:
@@ -567,6 +567,7 @@ def get_doctor_available_dates(request):
             else:
                 available_dates.append(check_date.isoformat())
     
+    print(f"DEBUG: Doctor {doctor.id} available dates: {available_dates[:5]}...")  # Debug log
     return JsonResponse({'success': True, 'available_dates': available_dates})
 
 @staff_member_required

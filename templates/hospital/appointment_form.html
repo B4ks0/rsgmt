@@ -251,6 +251,9 @@
           let calendarHTML = '';
           let dayCounter = 0;
           let generatedDays = 0;
+          let availableCount = 0;
+          let pastCount = 0;
+          let todayFound = false;
           
           // Start first row
           calendarHTML += '<tr>';
@@ -278,22 +281,32 @@
             let btnClass = 'btn btn-sm w-100';
             let isDisabled = false;
             let isClickable = false;
+            let colorType = 'unknown';
             
             if (date < today) {
               btnClass += ' btn-secondary text-white';
               isDisabled = true;
+              colorType = 'past';
+              pastCount++;
             } else if (date.getTime() === today.getTime()) {
               btnClass += ' btn-primary text-white fw-bold';
               isClickable = true;
+              colorType = 'today';
+              todayFound = true;
             } else if (availableDates.length > 0 && availableDates.includes(dateString)) {
               btnClass += ' btn-success text-white';
               isClickable = true;
+              colorType = 'available';
+              availableCount++;
             } else if (availableDates.length === 0) {
               btnClass += ' btn-success text-white';
               isClickable = true;
+              colorType = 'available (no filter)';
+              availableCount++;
             } else {
               btnClass += ' btn-secondary text-white';
               isDisabled = true;
+              colorType = 'unavailable';
             }
             
             const onClickAttr = isClickable ? `onclick="selectDate('${dateString}', this); return false;"` : '';
@@ -315,8 +328,8 @@
           
           calendarHTML += '</tr>';
           
-          console.log('Generated total cells:', dayCounter, 'Current month days:', generatedDays, 'HTML length:', calendarHTML.length);
-          console.log('HTML first 250 chars:', calendarHTML.substring(0, 250));
+          console.log('Generated:', generatedDays, 'days | Past:', pastCount, '| Today:', todayFound ? 'YES' : 'NO', '| Available:', availableCount);
+          console.log('Total HTML length:', calendarHTML.length);
           
           // Update month header
           const monthHeader = document.getElementById('calendarMonth');
@@ -331,11 +344,8 @@
           const calendarDatesElement = document.getElementById('calendarDates');
           if (calendarDatesElement) {
             calendarDatesElement.innerHTML = calendarHTML;
-            console.log('✓ Calendar rendered successfully!');
-            
-            // Verify dates were added
             const buttons = calendarDatesElement.querySelectorAll('button');
-            console.log('Total buttons in calendar:', buttons.length);
+            console.log('✓ Calendar rendered! Total buttons:', buttons.length);
           } else {
             console.error('✗ Calendar element #calendarDates not found!');
           }
@@ -370,23 +380,45 @@
       // Fetch available dates when doctor changes
       const docField = document.getElementById("id_doctor");
       if (docField) {
+        console.log('Doctor field found, setting up change listener');
         docField.addEventListener("change", () => {
           const doctorId = docField.value;
+          console.log('=== DOCTOR SELECTED ===');
+          console.log('Doctor ID:', doctorId);
+          console.log('Doctor name:', docField.options[docField.selectedIndex]?.text);
+          
           if (doctorId) {
-            fetch(`/api/get-doctor-available-dates/?doctor_id=${doctorId}`)
-              .then(res => res.json())
+            const apiUrl = `/api/get-doctor-available-dates/?doctor_id=${doctorId}`;
+            console.log('Fetching from:', apiUrl);
+            
+            fetch(apiUrl)
+              .then(res => {
+                console.log('API Response status:', res.status);
+                return res.json();
+              })
               .then(data => {
+                console.log('API Response data:', data);
                 if (data.success) {
                   availableDates = data.available_dates;
+                  console.log('Available dates set:', availableDates.length, 'dates');
+                  console.log('First 5 dates:', availableDates.slice(0, 5));
                   renderCalendar();
+                  console.log('Calendar re-rendered after fetching dates');
+                } else {
+                  console.error('API error:', data.error);
                 }
               })
-              .catch(err => console.error('Error fetching available dates:', err));
+              .catch(err => {
+                console.error('Network error fetching available dates:', err);
+              });
           } else {
+            console.log('No doctor selected, clearing available dates');
             availableDates = [];
             renderCalendar();
           }
         });
+      } else {
+        console.error('Doctor field #id_doctor not found!');
       }
 
       // Calendar navigation
