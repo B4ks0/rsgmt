@@ -111,6 +111,13 @@ class Appointment(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=['status']),  # For filtering by status
+            models.Index(fields=['-booked_at']),  # For ordering and listing
+            models.Index(fields=['doctor', 'appointment_date']),  # For doctor schedules
+            models.Index(fields=['patient']),  # For patient appointments
+            models.Index(fields=['status', '-booked_at']),  # For dashboard filtering + ordering
+        ]
 
     def __str__(self):
         name = self.patient.full_name if self.patient else self.full_name

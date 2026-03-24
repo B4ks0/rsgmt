@@ -117,7 +117,7 @@ def doctor_detail(request, doctor_id):
 
 def appointment_create(request):
     if request.method == "POST":
-        form = AppointmentForm(request.POST)
+        form = AppointmentForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             messages.success(
@@ -205,15 +205,24 @@ def backend_logout(request):
 @staff_member_required
 def backend_dashboard(request):
     """ Custom Backend Dashboard tailored for Hospital tracking """
-    appointments = Appointment.objects.select_related("patient", "doctor", "department").all().order_by("-booked_at")
+    from django.core.paginator import Paginator
     
+    # Get counts without pagination to avoid multiple queries
     total_patients = Patient.objects.count()
     total_doctors = Doctor.objects.count()
-    total_appointments = appointments.count()
-    pending_appointments = appointments.filter(status='requested').count()
+    total_appointments = Appointment.objects.count()
+    pending_appointments = Appointment.objects.filter(status='requested').count()
+    
+    # Get paginated appointments
+    all_appointments = Appointment.objects.select_related("patient", "doctor", "department").order_by("-booked_at")
+    
+    paginator = Paginator(all_appointments, 25)  # Show 25 appointments per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     context = {
-        "appointments": appointments,
+        "appointments": page_obj,
+        "page_obj": page_obj,
         "total_patients": total_patients,
         "total_doctors": total_doctors,
         "total_appointments": total_appointments,
@@ -518,7 +527,6 @@ import time
 import re
 import difflib
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from PIL import Image, ImageOps, ImageFilter
 
 def preprocess_for_ocr(img, threshold=130):
@@ -679,11 +687,8 @@ def backend_qa_ocr(request):
     }
     
     return render(request, "hospital/backend/qa_ocr.html", context)
-    
-    return render(request, "hospital/backend/qa_ocr.html", context)
 
 
-@csrf_exempt
 def ocr_ktp(request):
     if request.method == 'POST' and request.FILES.get('ktp_image'):
         image_file = request.FILES['ktp_image']
