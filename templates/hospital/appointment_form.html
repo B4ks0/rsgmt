@@ -445,17 +445,32 @@
 
       // Force initial calendar render
       console.log('\n=== PAGE LOAD: RENDERING CALENDAR ===');
+      
+      // Test: Verify the calendar element exists and is accessible
+      const testElement = document.getElementById('calendarDates');
+      console.log('calendarDates element exists:', !!testElement);
+      console.log('Element type:', testElement ? testElement.tagName : 'N/A');
+      console.log('(Element parent:', testElement ? testElement.parentElement.tagName : 'N/A', ')');
+      
+      // Force render
       renderCalendar();
       
       // Double-check render after small delay
       setTimeout(function() {
-        console.log('Double-checking calendar render...');
+        console.log('\n--- 200ms Check ---');
         const calTableBody = document.getElementById('calendarDates');
-        if (calTableBody && calTableBody.innerHTML.length === 0) {
-          console.log('Calendar is empty! Force rendering again...');
-          renderCalendar();
-        } else if (calTableBody) {
-          console.log('✓ Calendar has content. Buttons count:', calTableBody.querySelectorAll('button').length);
+        if (calTableBody) {
+          const content = calTableBody.innerHTML;
+          console.log('Calendar element innerHTML length:', content.length);
+          console.log('Buttons count:', calTableBody.querySelectorAll('button').length);
+          if (content.length === 0) {
+            console.error('⚠️  Calendar tbody is EMPTY! Forcing render again...');
+            renderCalendar();
+          } else {
+            console.log('✓ Calendar has content');
+          }
+        } else {
+          console.error('⚠️  Calendar element #calendarDates not found!');
         }
       }, 200);
     });
