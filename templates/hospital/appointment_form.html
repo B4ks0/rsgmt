@@ -240,21 +240,31 @@
         const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
         
-        let calendarHTML = '<tr>';
+        let calendarHTML = '';
+        let dayCounter = 0;
+        
+        // Start first row
+        calendarHTML += '<tr>';
         
         // Previous month's days (gray)
         for (let i = firstDay - 1; i >= 0; i--) {
           const day = daysInPrevMonth - i;
           calendarHTML += `<td><button type="button" class="btn btn-sm text-secondary" disabled>${day}</button></td>`;
+          dayCounter++;
         }
         
         // Current month's days
         const today = new Date();
         for (let day = 1; day <= daysInMonth; day++) {
+          // Start new row if needed
+          if (dayCounter > 0 && dayCounter % 7 === 0) {
+            calendarHTML += '</tr><tr>';
+          }
+          
           const date = new Date(currentYear, currentMonth, day);
           const dateString = date.toISOString().split('T')[0];
           
-          let btnClass = 'btn btn-sm';
+          let btnClass = 'btn btn-sm w-100';
           let isDisabled = false;
           let isClickable = false;
           
@@ -276,18 +286,19 @@
             isDisabled = true;
           }
           
-          const onClickAttr = isClickable ? `onclick="selectDate('${dateString}', this)"` : '';
+          const onClickAttr = isClickable ? `onclick="selectDate('${dateString}', this); return false;"` : '';
           const disabledAttr = isDisabled ? 'disabled' : '';
           
-          calendarHTML += `<td><button type="button" class="${btnClass}" ${disabledAttr} ${onClickAttr}>${day}</button></td>`;
+          calendarHTML += `<td class="p-1"><button type="button" class="${btnClass}" ${disabledAttr} ${onClickAttr}>${day}</button></td>`;
+          dayCounter++;
         }
         
         // Next month's days (gray)
-        const totalCells = (document.querySelectorAll('#calendarDates tr:first-child td').length || 7);
         const lastDayCell = (firstDay + daysInMonth) % 7;
         if (lastDayCell !== 0) {
           for (let day = 1; day <= (7 - lastDayCell); day++) {
-            calendarHTML += `<td><button type="button" class="btn btn-sm text-secondary" disabled>${day}</button></td>`;
+            calendarHTML += `<td class="p-1"><button type="button" class="btn btn-sm w-100 text-secondary" disabled>${day}</button></td>`;
+            dayCounter++;
           }
         }
         
