@@ -157,15 +157,18 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class ContactMessage(models.Model):
-    full_name = models.CharField(max_length=160)
-    email = models.EmailField()
-    subject = models.CharField(max_length=180)
+    full_name = models.CharField(max_length=160, db_index=True)
+    email = models.EmailField(db_index=True)
+    subject = models.CharField(max_length=180, db_index=True)
     message = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_resolved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    is_resolved = models.BooleanField(default=False, db_index=True)
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=['-created_at', 'is_resolved']),
+        ]
 
     def __str__(self) -> str:
         return f"{self.full_name}: {self.subject}"

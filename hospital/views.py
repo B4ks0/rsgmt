@@ -738,32 +738,39 @@ def backend_contact_list(request):
     from django.db.models import Q
     from .models import ContactMessage
     
-    q = request.GET.get('q', '')
-    status = request.GET.get('status', '')
-    # Load only the fields needed for the list view to avoid fetching large message bodies
+    q = request.GET.get('q', '').strip()[:100]  # Limit to 100 chars to prevent DoS
+    status = request.GET.get('status', '').strip()
+    
+    # Load only the fields needed for the list view
     items = ContactMessage.objects.all().only('id', 'full_name', 'email', 'subject', 'created_at', 'is_resolved')
+    
     if q:
         items = items.filter(Q(full_name__icontains=q) | Q(email__icontains=q) | Q(subject__icontains=q))
-    if status:
-        is_resolved = status == 'resolved'
-        items = items.filter(is_resolved=is_resolved)
+    
+    if status == 'resolved':
+        items = items.filter(is_resolved=True)
+    elif status == 'unresolved':
+        items = items.filter(is_resolved=False)
     
     items = items.order_by("-created_at")
 
-    # Simple, low-cost pagination: avoid .count() on large tables by fetching page_size + 1 rows
+    # Pagination without converting to list (avoids memory issue)
     try:
         page = int(request.GET.get('page', '1'))
         if page < 1:
             page = 1
-    except ValueError:
+    except (ValueError, TypeError):
         page = 1
 
     page_size = 10
     offset = (page - 1) * page_size
 
-    qs_slice = list(items[offset: offset + page_size + 1])
-    has_next = len(qs_slice) > page_size
-    contacts = qs_slice[:page_size]
+    # Fetch one extra to detect if there's a next page without .count()
+    page_items = items[offset:offset + page_size + 1]
+    page_list = list(page_items)  # ONLY the current page items, not entire dataset
+    
+    has_next = len(page_list) > page_size
+    contacts = page_list[:page_size]
     has_previous = page > 1
 
     return render(request, "hospital/backend/contact_list.html", {
@@ -780,6 +787,7 @@ def backend_contact_list(request):
     })
 
 
+@staff_member_required
 def backend_contact_detail(request, contact_id):
     """Return contact message details as JSON for modal loading to avoid fetching large text in list queries."""
     from .models import ContactMessage

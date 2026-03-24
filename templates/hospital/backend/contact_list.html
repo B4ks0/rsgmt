@@ -161,88 +161,18 @@
                     </td>
                     <td class="text-end pe-4">
                       <button
-                        class="btn btn-sm btn-outline-primary rounded-pill"
-                        data-bs-toggle="modal"
-                        data-bs-target="#contactModal{{ contact.id }}"
+                        class="btn btn-sm btn-outline-primary rounded-pill view-contact-btn"
+                        data-contact-id="{{ contact.id }}"
+                        data-contact-name="{{ contact.full_name }}"
+                        data-contact-email="{{ contact.email }}"
+                        data-contact-subject="{{ contact.subject }}"
+                        data-contact-date="{{ contact.created_at|date:'d M Y, H:i' }}"
+                        data-contact-resolved="{% if contact.is_resolved %}1{% else %}0{% endif %}"
                       >
                         <i class="bi bi-eye me-1"></i> Lihat Detail
                       </button>
                     </td>
                   </tr>
-
-                  <!-- Modal Detail -->
-                  <div
-                    class="modal fade"
-                    id="contactModal{{ contact.id }}"
-                    tabindex="-1"
-                    aria-labelledby="contactModalLabel{{ contact.id }}"
-                    aria-hidden="true"
-                  >
-                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title fw-bold" id="contactModalLabel{{ contact.id }}">
-                            <i class="bi bi-envelope-open me-2 text-primary"></i>Detail Pesan Kontak
-                          </h5>
-                          <button
-                            type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"
-                          ></button>
-                        </div>
-                        <div class="modal-body">
-                          <div class="mb-3">
-                            <label class="form-label text-muted small fw-semibold">Nama Pengirim</label>
-                            <p class="fw-semibold mb-0">{{ contact.full_name }}</p>
-                          </div>
-                          <hr class="my-2">
-                          <div class="mb-3">
-                            <label class="form-label text-muted small fw-semibold">Email</label>
-                            <p class="mb-0">
-                              <a href="mailto:{{ contact.email }}" class="text-decoration-none">{{ contact.email }}</a>
-                            </p>
-                          </div>
-                          <hr class="my-2">
-                          <div class="mb-3">
-                            <label class="form-label text-muted small fw-semibold">Subjek</label>
-                            <p class="fw-semibold mb-0">{{ contact.subject }}</p>
-                          </div>
-                          <hr class="my-2">
-                          <div class="mb-3">
-                            <label class="form-label text-muted small fw-semibold">Pesan</label>
-                            <div id="contactMessage{{ contact.id }}" class="bg-light p-3 rounded border" style="min-height: 100px;">
-                              <div class="text-muted">Memuat...</div>
-                            </div>
-                          </div>
-                          <hr class="my-2">
-                          <div class="row g-3">
-                            <div class="col-md-6">
-                              <label class="form-label text-muted small fw-semibold">Diterima pada</label>
-                              <p class="text-muted mb-0">{{ contact.created_at|date:"d M Y, H:i" }}</p>
-                            </div>
-                            <div class="col-md-6">
-                              <label class="form-label text-muted small fw-semibold">Status</label>
-                              <p class="mb-0">
-                                {% if contact.is_resolved %}
-                                <span class="badge bg-success px-3 py-2">
-                                  <i class="bi bi-check-circle me-1"></i> Sudah Ditanggapi
-                                </span>
-                                {% else %}
-                                <span class="badge bg-warning text-dark px-3 py-2">
-                                  <i class="bi bi-clock-history me-1"></i> Menunggu Respon
-                                </span>
-                                {% endif %}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                   {% empty %}
                   <tr>
                     <td colspan="6" class="text-center py-5 text-muted">
@@ -279,30 +209,126 @@
         </nav>
       </div>
       
+      <!-- Single Reusable Modal for all contacts -->
+      <div class="modal fade" id="contactDetailModal" tabindex="-1" aria-labelledby="contactDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title fw-bold" id="contactDetailModalLabel">
+                <i class="bi bi-envelope-open me-2 text-primary"></i>Detail Pesan Kontak
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label text-muted small fw-semibold">Nama Pengirim</label>
+                <p class="fw-semibold mb-0" id="modalContactName">-</p>
+              </div>
+              <hr class="my-2">
+              <div class="mb-3">
+                <label class="form-label text-muted small fw-semibold">Email</label>
+                <p class="mb-0">
+                  <a href="#" id="modalContactEmail" class="text-decoration-none">-</a>
+                </p>
+              </div>
+              <hr class="my-2">
+              <div class="mb-3">
+                <label class="form-label text-muted small fw-semibold">Subjek</label>
+                <p class="fw-semibold mb-0" id="modalContactSubject">-</p>
+              </div>
+              <hr class="my-2">
+              <div class="mb-3">
+                <label class="form-label text-muted small fw-semibold">Pesan</label>
+                <div id="modalContactMessage" class="bg-light p-3 rounded border" style="min-height: 100px;">
+                  <div class="text-muted">Memuat...</div>
+                </div>
+              </div>
+              <hr class="my-2">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label text-muted small fw-semibold">Diterima pada</label>
+                  <p class="text-muted mb-0" id="modalContactDate">-</p>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-muted small fw-semibold">Status</label>
+                  <p class="mb-0" id="modalContactStatus">-</p>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <script>
         document.addEventListener('DOMContentLoaded', function() {
-          // When any contact modal is shown, fetch its full message
-          var modalSelector = '[id^="contactModal"]';
-          var modals = document.querySelectorAll(modalSelector);
-          modals.forEach(function(modal) {
-            modal.addEventListener('show.bs.modal', function(event) {
-              var id = modal.id.replace('contactModal','');
-              var container = document.getElementById('contactMessage' + id);
-              if (!container) return;
-              if (container.dataset.loaded === '1') return;
-              fetch('/dashboard/contacts/' + id + '/detail/')
-                .then(function(resp) { return resp.json(); })
-                .then(function(data) {
-                  if (data.success) {
-                    // simple newline -> <br> conversion
-                    container.innerHTML = data.message.replace(/\n/g, '<br>');
-                    container.dataset.loaded = '1';
-                  } else {
-                    container.innerHTML = '<div class="text-danger">Gagal memuat pesan.</div>';
-                  }
-                })
-                .catch(function() { container.innerHTML = '<div class="text-danger">Gagal memuat pesan.</div>'; });
-            });
+          var modal = new bootstrap.Modal(document.getElementById('contactDetailModal'), {});
+          
+          // Use event delegation on tbody - prevents memory leak from individual event listeners
+          var tbody = document.querySelector('table tbody');
+          if (!tbody) return;
+          
+          tbody.addEventListener('click', function(event) {
+            var btn = event.target.closest('.view-contact-btn');
+            if (!btn) return;
+            
+            var contactId = btn.dataset.contactId;
+            var contactName = btn.dataset.contactName || '';
+            var contactEmail = btn.dataset.contactEmail || '';
+            var contactSubject = btn.dataset.contactSubject || '';
+            var contactDate = btn.dataset.contactDate || '';
+            var contactResolved = btn.dataset.contactResolved || '0';
+
+            // Set text content (safe - no XSS risk)
+            document.getElementById('modalContactName').textContent = contactName;
+            var emailLink = document.getElementById('modalContactEmail');
+            emailLink.textContent = contactEmail;
+            emailLink.href = 'mailto:' + contactEmail;
+            document.getElementById('modalContactSubject').textContent = contactSubject;
+            document.getElementById('modalContactDate').textContent = contactDate;
+
+            // Build and insert status badge safely
+            var statusContainer = document.getElementById('modalContactStatus');
+            statusContainer.innerHTML = '';
+            var badgeSpan = document.createElement('span');
+            badgeSpan.className = contactResolved === '1' ? 'badge bg-success px-3 py-2' : 'badge bg-warning text-dark px-3 py-2';
+            
+            var icon = document.createElement('i');
+            icon.className = contactResolved === '1' ? 'bi bi-check-circle me-1' : 'bi bi-clock-history me-1';
+            badgeSpan.appendChild(icon);
+            
+            var text = document.createTextNode(contactResolved === '1' ? ' Sudah Ditanggapi' : ' Menunggu Respon');
+            badgeSpan.appendChild(text);
+            statusContainer.appendChild(badgeSpan);
+
+            // Reset message container
+            var messageContainer = document.getElementById('modalContactMessage');
+            messageContainer.innerHTML = '<div class="text-muted">Memuat...</div>';
+
+            // Fetch full message content
+            fetch('/dashboard/contacts/' + contactId + '/detail/')
+              .then(function(resp) { return resp.json(); })
+              .then(function(data) {
+                if (data.success && data.message) {
+                  // Use textContent for safety, then convert newlines to <br>
+                  var safeDiv = document.createElement('div');
+                  safeDiv.textContent = data.message;
+                  var html = safeDiv.innerHTML.replace(/\n/g, '<br>');
+                  messageContainer.innerHTML = html;
+                } else {
+                  messageContainer.textContent = 'Gagal memuat pesan.';
+                  messageContainer.style.color = '#dc3545';
+                }
+              })
+              .catch(function(err) { 
+                messageContainer.textContent = 'Gagal memuat pesan.';
+                messageContainer.style.color = '#dc3545';
+              });
+
+            // Show modal
+            modal.show();
           });
         });
       </script>
