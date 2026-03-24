@@ -242,83 +242,124 @@
           console.log('=== renderCalendar() START ===');
           console.log('Month:', currentMonth, 'Year:', currentYear, 'Available dates:', availableDates.length);
           
+          const calendarDatesElement = document.getElementById('calendarDates');
+          if (!calendarDatesElement) {
+            console.error('✗ Calendar element not found!');
+            return;
+          }
+          
+          // CLEAR existing content
+          calendarDatesElement.innerHTML = '';
+          console.log('Cleared calendar tbody');
+          
           const firstDay = new Date(currentYear, currentMonth, 1).getDay();
           const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
           const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
           
-          let calendarHTML = '';
+          console.log('firstDay:', firstDay, 'daysInMonth:', daysInMonth);
+          
           let dayCounter = 0;
+          let currentRow = document.createElement('tr');
+          let dayCount = 0;
           
-          // Start first row
-          calendarHTML += '<tr>';
-          
-          // Previous month's days (gray)
+          // Add previous month's days (gray, disabled)
           for (let i = firstDay - 1; i >= 0; i--) {
             const day = daysInPrevMonth - i;
-            calendarHTML += '<td class="p-1"><button type="button" class="btn btn-sm w-100 text-secondary" disabled>' + day + '</button></td>';
+            const cell = document.createElement('td');
+            cell.className = 'p-1';
+            
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-sm w-100 text-secondary';
+            btn.disabled = true;
+            btn.textContent = day;
+            
+            cell.appendChild(btn);
+            currentRow.appendChild(cell);
             dayCounter++;
           }
           
-          // Current month's days
+          // Add current month's days
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           
           for (let day = 1; day <= daysInMonth; day++) {
+            // Start new row if needed
             if (dayCounter > 0 && dayCounter % 7 === 0) {
-              calendarHTML += '</tr><tr>';
+              calendarDatesElement.appendChild(currentRow);
+              currentRow = document.createElement('tr');
+              dayCounter = 0;
             }
+            
+            const cell = document.createElement('td');
+            cell.className = 'p-1';
             
             const date = new Date(currentYear, currentMonth, day);
             date.setHours(0, 0, 0, 0);
             const dateString = date.toISOString().split('T')[0];
             
-            let btnClass = 'btn btn-sm w-100';
-            let isDisabled = false;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-sm w-100';
+            btn.textContent = day;
+            
+            // Determine button style
+            let styling = '';
             let isClickable = false;
             
             if (date < today) {
-              btnClass += ' btn-secondary text-white';
-              isDisabled = true;
+              btn.classList.add('btn-secondary', 'text-white');
+              btn.disabled = true;
             } else if (date.getTime() === today.getTime()) {
-              btnClass += ' btn-primary text-white fw-bold';
+              btn.classList.add('btn-primary', 'text-white', 'fw-bold');
               isClickable = true;
             } else if (availableDates.length > 0 && availableDates.includes(dateString)) {
-              btnClass += ' btn-success text-white';
+              btn.classList.add('btn-success', 'text-white');
               isClickable = true;
             } else if (availableDates.length === 0) {
-              btnClass += ' btn-success text-white';
+              btn.classList.add('btn-success', 'text-white');
               isClickable = true;
             } else {
-              btnClass += ' btn-secondary text-white';
-              isDisabled = true;
+              btn.classList.add('btn-secondary', 'text-white');
+              btn.disabled = true;
             }
             
-            let buttonHTML = '<td class="p-1"><button type="button" class="' + btnClass + '"';
+            // Add click handler if clickable
             if (isClickable) {
-              buttonHTML += ' onclick="selectDate(\'' + dateString + '\', this); return false;"';
+              btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                selectDate(dateString, this);
+              });
             }
-            if (isDisabled) {
-              buttonHTML += ' disabled';
-            }
-            buttonHTML += '>' + day + '</button></td>';
             
-            calendarHTML += buttonHTML;
+            cell.appendChild(btn);
+            currentRow.appendChild(cell);
             dayCounter++;
           }
           
-          // Next month's days (gray)
+          // Add next month's days (gray, disabled)
           const lastDayCell = (firstDay + daysInMonth) % 7;
           if (lastDayCell !== 0) {
             for (let day = 1; day <= (7 - lastDayCell); day++) {
-              calendarHTML += '<td class="p-1"><button type="button" class="btn btn-sm w-100 text-secondary" disabled>' + day + '</button></td>';
+              const cell = document.createElement('td');
+              cell.className = 'p-1';
+              
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'btn btn-sm w-100 text-secondary';
+              btn.disabled = true;
+              btn.textContent = day;
+              
+              cell.appendChild(btn);
+              currentRow.appendChild(cell);
               dayCounter++;
             }
           }
           
-          calendarHTML += '</tr>';
-          
-          console.log('Generated HTML length:', calendarHTML.length);
-          console.log('Sample:', calendarHTML.substring(0, 500));
+          // Add final row if it has content
+          if (dayCounter > 0) {
+            calendarDatesElement.appendChild(currentRow);
+          }
           
           // Update month header
           const monthHeader = document.getElementById('calendarMonth');
@@ -326,18 +367,8 @@
             monthHeader.textContent = monthNames[currentMonth] + ' ' + currentYear;
           }
           
-          // Update calendar dates
-          const calendarDatesElement = document.getElementById('calendarDates');
-          console.log('Searching for #calendarDates...');
-          
-          if (calendarDatesElement) {
-            console.log('Element found! Setting innerHTML...');
-            calendarDatesElement.innerHTML = calendarHTML;
-            console.log('✓ SUCCESS! Calendar rendered with', calendarDatesElement.querySelectorAll('button').length, 'buttons');
-          } else {
-            console.error('✗✗✗ FAILED: Calendar element #calendarDates not found in DOM!');
-            alert('ERROR: Calendar element not found! Check console.');
-          }
+          const totalButtons = calendarDatesElement.querySelectorAll('button').length;
+          console.log('✓ Calendar rendered! Total buttons:', totalButtons);
           console.log('=== renderCalendar() END ===\n');
         } catch (error) {
           console.error('ERROR in renderCalendar():', error);
