@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.http import FileResponse, Http404
 from django.shortcuts import redirect, render
 
-from .forms import AppointmentForm, ContactForm
+from .forms import AppointmentForm
 from .models import Doctor, Department
 
 
@@ -141,15 +141,33 @@ def appointment_create(request):
 
 
 def contact(request):
+    """API endpoint for submitting contact form via AJAX"""
     if request.method == "POST":
-        form = ContactForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Pesan berhasil dikirim. Terima kasih telah menghubungi kami.")
-            return redirect("contact")
-    else:
-        form = ContactForm()
-    return render(request, "hospital/contact.html", {"form": form})
+        from django.http import JsonResponse
+        try:
+            full_name = request.POST.get('full_name', '').strip()
+            email = request.POST.get('email', '').strip()
+            subject = request.POST.get('subject', '').strip()
+            message = request.POST.get('message', '').strip()
+            
+            # Validate fields
+            if not (full_name and email and subject and message):
+                return JsonResponse({'success': False, 'error': 'All fields are required'}, status=400)
+            
+            # Create and save contact message
+            from .models import ContactMessage
+            ContactMessage.objects.create(
+                full_name=full_name,
+                email=email,
+                subject=subject,
+                message=message
+            )
+            
+            return JsonResponse({'success': True, 'message': 'Contact message saved successfully'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+    return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
 
 
 

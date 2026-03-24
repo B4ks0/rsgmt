@@ -148,7 +148,7 @@
               <p class="text-muted small mb-3">
                 Punya pertanyaan? Kirim pesan, tim kami akan menindalakanjuti.
               </p>
-              <form method="POST" action="{% url 'contact' %}">
+              <form id="footerContactForm" method="POST" action="#">
                 {% csrf_token %}
                 <div class="row mb-2">
                   <div class="col-6">
@@ -156,7 +156,7 @@
                       type="text"
                       class="form-control form-control-sm"
                       placeholder="Nama lengkap"
-                      name="name"
+                      name="full_name"
                       required
                     />
                   </div>
@@ -189,8 +189,9 @@
                   ></textarea>
                 </div>
                 <div>
-                  <button type="submit" class="btn btn-dark btn-sm">
-                    Kirim pesan
+                  <button type="submit" id="contactSubmitBtn" class="btn btn-dark btn-sm">
+                    <span id="contactBtnText">Kirim pesan</span>
+                    <span id="contactBtnSpinner" class="spinner-border spinner-border-sm ms-2" style="display:none;"></span>
                   </button>
                   <button type="reset" class="btn btn-outline-dark btn-sm">
                     Kembali
@@ -221,5 +222,52 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Handle footer contact form submission via AJAX
+      document.addEventListener('DOMContentLoaded', function() {
+        var contactForm = document.getElementById('footerContactForm');
+        if (!contactForm) return;
+        
+        contactForm.addEventListener('submit', function(event) {
+          event.preventDefault();
+          
+          var formData = new FormData(contactForm);
+          var submitBtn = document.getElementById('contactSubmitBtn');
+          var btnText = document.getElementById('contactBtnText');
+          var spinner = document.getElementById('contactBtnSpinner');
+          
+          // Disable button and show spinner
+          submitBtn.disabled = true;
+          btnText.style.display = 'none';
+          spinner.style.display = 'inline-block';
+          
+          // Submit form via AJAX
+          fetch('{% url "api_submit_contact" %}', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Show success message
+              alert('Pesan berhasil dikirim! Tim kami akan menanggapi segera.');
+              contactForm.reset();
+            } else {
+              alert('Gagal mengirim pesan. Silakan coba lagi.');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan. Silakan coba lagi.');
+          })
+          .finally(() => {
+            // Re-enable button and hide spinner
+            submitBtn.disabled = false;
+            btnText.style.display = 'inline';
+            spinner.style.display = 'none';
+          });
+        });
+      });
+    </script>
   </body>
 </html>
