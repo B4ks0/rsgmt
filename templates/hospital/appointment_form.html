@@ -238,94 +238,111 @@
                          "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
       const renderCalendar = () => {
-        console.log('renderCalendar() called. Month:', currentMonth, 'Year:', currentYear, 'Available dates:', availableDates);
-        
-        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-        const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
-        
-        console.log('firstDay:', firstDay, 'daysInMonth:', daysInMonth);
-        
-        let calendarHTML = '';
-        let dayCounter = 0;
-        
-        // Start first row
-        calendarHTML += '<tr>';
-        
-        // Previous month's days (gray)
-        for (let i = firstDay - 1; i >= 0; i--) {
-          const day = daysInPrevMonth - i;
-          calendarHTML += `<td class="p-1"><button type="button" class="btn btn-sm w-100 text-secondary" disabled>${day}</button></td>`;
-          dayCounter++;
-        }
-        
-        // Current month's days
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Reset time for proper comparison
-        
-        for (let day = 1; day <= daysInMonth; day++) {
-          // Start new row if needed
-          if (dayCounter > 0 && dayCounter % 7 === 0) {
-            calendarHTML += '</tr><tr>';
-          }
+        try {
+          console.log('=== renderCalendar() START ===');
+          console.log('Month:', currentMonth, 'Year:', currentYear, 'Available dates count:', availableDates.length);
           
-          const date = new Date(currentYear, currentMonth, day);
-          date.setHours(0, 0, 0, 0); // Reset time for proper comparison
-          const dateString = date.toISOString().split('T')[0];
+          const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+          const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+          const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
           
-          let btnClass = 'btn btn-sm w-100';
-          let isDisabled = false;
-          let isClickable = false;
+          console.log('Calendar math - firstDay:', firstDay, 'daysInMonth:', daysInMonth, 'prevMonth days:', daysInPrevMonth);
           
-          if (date < today) {
-            // Past dates - gray (disabled)
-            btnClass += ' btn-secondary text-white';
-            isDisabled = true;
-          } else if (date.getTime() === today.getTime()) {
-            // Today - highlighted blue
-            btnClass += ' btn-primary text-white fw-bold';
-            isClickable = true;
-          } else if (availableDates.length > 0 && availableDates.includes(dateString)) {
-            // Available dates - green
-            btnClass += ' btn-success text-white';
-            isClickable = true;
-          } else if (availableDates.length === 0) {
-            // No doctor selected - all future dates are available
-            btnClass += ' btn-success text-white';
-            isClickable = true;
-          } else {
-            // Not available - gray (disabled)
-            btnClass += ' btn-secondary text-white';
-            isDisabled = true;
-          }
+          let calendarHTML = '';
+          let dayCounter = 0;
+          let generatedDays = 0;
           
-          const onClickAttr = isClickable ? `onclick="selectDate('${dateString}', this); return false;"` : '';
-          const disabledAttr = isDisabled ? 'disabled' : '';
+          // Start first row
+          calendarHTML += '<tr>';
           
-          calendarHTML += `<td class="p-1"><button type="button" class="${btnClass}" ${disabledAttr} ${onClickAttr}>${day}</button></td>`;
-          dayCounter++;
-        }
-        
-        // Next month's days (gray)
-        const lastDayCell = (firstDay + daysInMonth) % 7;
-        if (lastDayCell !== 0) {
-          for (let day = 1; day <= (7 - lastDayCell); day++) {
+          // Previous month's days (gray)
+          for (let i = firstDay - 1; i >= 0; i--) {
+            const day = daysInPrevMonth - i;
             calendarHTML += `<td class="p-1"><button type="button" class="btn btn-sm w-100 text-secondary" disabled>${day}</button></td>`;
             dayCounter++;
           }
-        }
-        
-        calendarHTML += '</tr>';
-        
-        console.log('Generated calendarHTML length:', calendarHTML.length, 'HTML preview:', calendarHTML.substring(0, 200));
-        
-        document.getElementById('calendarMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
-        const calendarDatesElement = document.getElementById('calendarDates');
-        if (calendarDatesElement) {
-          calendarDatesElement.innerHTML = calendarHTML;
-          console.log('Calendar rendered successfully. Element innerHTML updated.');
-        } else {
-          console.error('Calendar element not found:', 'calendarDates');
+          
+          // Current month's days
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          for (let day = 1; day <= daysInMonth; day++) {
+            if (dayCounter > 0 && dayCounter % 7 === 0) {
+              calendarHTML += '</tr><tr>';
+            }
+            
+            const date = new Date(currentYear, currentMonth, day);
+            date.setHours(0, 0, 0, 0);
+            const dateString = date.toISOString().split('T')[0];
+            
+            let btnClass = 'btn btn-sm w-100';
+            let isDisabled = false;
+            let isClickable = false;
+            
+            if (date < today) {
+              btnClass += ' btn-secondary text-white';
+              isDisabled = true;
+            } else if (date.getTime() === today.getTime()) {
+              btnClass += ' btn-primary text-white fw-bold';
+              isClickable = true;
+            } else if (availableDates.length > 0 && availableDates.includes(dateString)) {
+              btnClass += ' btn-success text-white';
+              isClickable = true;
+            } else if (availableDates.length === 0) {
+              btnClass += ' btn-success text-white';
+              isClickable = true;
+            } else {
+              btnClass += ' btn-secondary text-white';
+              isDisabled = true;
+            }
+            
+            const onClickAttr = isClickable ? `onclick="selectDate('${dateString}', this); return false;"` : '';
+            const disabledAttr = isDisabled ? 'disabled' : '';
+            
+            calendarHTML += `<td class="p-1"><button type="button" class="${btnClass}" ${disabledAttr} ${onClickAttr}>${day}</button></td>`;
+            dayCounter++;
+            generatedDays++;
+          }
+          
+          // Next month's days (gray)
+          const lastDayCell = (firstDay + daysInMonth) % 7;
+          if (lastDayCell !== 0) {
+            for (let day = 1; day <= (7 - lastDayCell); day++) {
+              calendarHTML += `<td class="p-1"><button type="button" class="btn btn-sm w-100 text-secondary" disabled>${day}</button></td>`;
+              dayCounter++;
+            }
+          }
+          
+          calendarHTML += '</tr>';
+          
+          console.log('Generated total cells:', dayCounter, 'Current month days:', generatedDays, 'HTML length:', calendarHTML.length);
+          console.log('HTML first 250 chars:', calendarHTML.substring(0, 250));
+          
+          // Update month header
+          const monthHeader = document.getElementById('calendarMonth');
+          if (monthHeader) {
+            monthHeader.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            console.log('Month header updated');
+          } else {
+            console.error('Month header element not found');
+          }
+          
+          // Update calendar dates
+          const calendarDatesElement = document.getElementById('calendarDates');
+          if (calendarDatesElement) {
+            calendarDatesElement.innerHTML = calendarHTML;
+            console.log('✓ Calendar rendered successfully!');
+            
+            // Verify dates were added
+            const buttons = calendarDatesElement.querySelectorAll('button');
+            console.log('Total buttons in calendar:', buttons.length);
+          } else {
+            console.error('✗ Calendar element #calendarDates not found!');
+          }
+          console.log('=== renderCalendar() END ===');
+        } catch (error) {
+          console.error('ERROR in renderCalendar():', error);
+          console.error('Stack:', error.stack);
         }
       };
 
@@ -393,14 +410,26 @@
         renderCalendar();
       });
 
-      // Initial calendar render on DOM ready
-      if (document.readyState === 'loading') {
-        // DOM still loading
-        setTimeout(() => renderCalendar(), 100);
-      } else {
-        // DOM already loaded
+      // Initial calendar render - use multiple approaches to ensure execution
+      console.log('=== INITIALIZING CALENDAR ===');
+      console.log('document.readyState:', document.readyState);
+      
+      try {
         renderCalendar();
+        console.log('Initial renderCalendar() called directly');
+      } catch (e) {
+        console.error('Error calling renderCalendar():', e);
       }
+      
+      // Also schedule it for next tick to be safe
+      setTimeout(() => {
+        try {
+          renderCalendar();
+          console.log('renderCalendar() called via setTimeout');
+        } catch (e) {
+          console.error('Error in setTimeout renderCalendar():', e);
+        }
+      }, 10);
     });
   </script>
 {% endblock %}
