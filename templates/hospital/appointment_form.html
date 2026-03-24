@@ -239,29 +239,33 @@
 
       const renderCalendar = () => {
         try {
-          console.log('=== renderCalendar() START ===');
-          console.log('Month:', currentMonth, 'Year:', currentYear, 'Available dates:', availableDates.length);
+          console.log('\n╔════════════════════════════════════╗');
+          console.log('║  RENDER CALENDAR START              ║');
+          console.log('╚════════════════════════════════════╝');
           
           const calendarDatesElement = document.getElementById('calendarDates');
+          console.log('1. Calendar element found:', !!calendarDatesElement);
+          
           if (!calendarDatesElement) {
-            console.error('✗ Calendar element not found!');
+            console.error('✗ FATAL: Calendar tbody #calendarDates does not exist!');
             return;
           }
           
-          // CLEAR existing content
+          console.log('2. Clearing calendar tbody...');
           calendarDatesElement.innerHTML = '';
-          console.log('Cleared calendar tbody');
           
           const firstDay = new Date(currentYear, currentMonth, 1).getDay();
           const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
           const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
           
-          console.log('firstDay:', firstDay, 'daysInMonth:', daysInMonth);
+          console.log('3. Calendar math: firstDay=' + firstDay + ', daysInMonth=' + daysInMonth);
           
           let dayCounter = 0;
           let currentRow = document.createElement('tr');
-          let dayCount = 0;
+          let rowsCreated = 0;
+          let cellsCreated = 0;
           
+          console.log('4. Adding previous month padding...');
           // Add previous month's days (gray, disabled)
           for (let i = firstDay - 1; i >= 0; i--) {
             const day = daysInPrevMonth - i;
@@ -276,17 +280,21 @@
             
             cell.appendChild(btn);
             currentRow.appendChild(cell);
+            cellsCreated++;
             dayCounter++;
           }
+          console.log('   → Added ' + cellsCreated + ' padding cells');
           
-          // Add current month's days
+          console.log('5. Adding current month days...');
           const today = new Date();
           today.setHours(0, 0, 0, 0);
+          let daysAdded = 0;
           
           for (let day = 1; day <= daysInMonth; day++) {
             // Start new row if needed
             if (dayCounter > 0 && dayCounter % 7 === 0) {
               calendarDatesElement.appendChild(currentRow);
+              rowsCreated++;
               currentRow = document.createElement('tr');
               dayCounter = 0;
             }
@@ -303,28 +311,31 @@
             btn.className = 'btn btn-sm w-100';
             btn.textContent = day;
             
-            // Determine button style
-            let styling = '';
+            let colorClass = 'unknown';
             let isClickable = false;
             
             if (date < today) {
               btn.classList.add('btn-secondary', 'text-white');
               btn.disabled = true;
+              colorClass = 'past';
             } else if (date.getTime() === today.getTime()) {
               btn.classList.add('btn-primary', 'text-white', 'fw-bold');
               isClickable = true;
+              colorClass = 'today';
             } else if (availableDates.length > 0 && availableDates.includes(dateString)) {
               btn.classList.add('btn-success', 'text-white');
               isClickable = true;
+              colorClass = 'available';
             } else if (availableDates.length === 0) {
               btn.classList.add('btn-success', 'text-white');
               isClickable = true;
+              colorClass = 'available-default';
             } else {
               btn.classList.add('btn-secondary', 'text-white');
               btn.disabled = true;
+              colorClass = 'unavailable';
             }
             
-            // Add click handler if clickable
             if (isClickable) {
               btn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -334,11 +345,15 @@
             
             cell.appendChild(btn);
             currentRow.appendChild(cell);
+            cellsCreated++;
             dayCounter++;
+            daysAdded++;
           }
+          console.log('   → Added ' + daysAdded + ' current month days');
           
-          // Add next month's days (gray, disabled)
+          console.log('6. Adding next month padding...');
           const lastDayCell = (firstDay + daysInMonth) % 7;
+          let nextMonthPadding = 0;
           if (lastDayCell !== 0) {
             for (let day = 1; day <= (7 - lastDayCell); day++) {
               const cell = document.createElement('td');
@@ -352,26 +367,46 @@
               
               cell.appendChild(btn);
               currentRow.appendChild(cell);
+              cellsCreated++;
               dayCounter++;
+              nextMonthPadding++;
             }
           }
+          console.log('   → Added ' + nextMonthPadding + ' next month padding cells');
           
+          console.log('7. Appending final row...');
           // Add final row if it has content
           if (dayCounter > 0) {
             calendarDatesElement.appendChild(currentRow);
+            rowsCreated++;
           }
           
-          // Update month header
+          console.log('8. Updating month header...');
           const monthHeader = document.getElementById('calendarMonth');
           if (monthHeader) {
             monthHeader.textContent = monthNames[currentMonth] + ' ' + currentYear;
           }
           
+          console.log('9. Verification:');
+          const totalRows = calendarDatesElement.querySelectorAll('tr').length;
           const totalButtons = calendarDatesElement.querySelectorAll('button').length;
-          console.log('✓ Calendar rendered! Total buttons:', totalButtons);
-          console.log('=== renderCalendar() END ===\n');
+          const totalCells = calendarDatesElement.querySelectorAll('td').length;
+          
+          console.log('   Rows created: ' + rowsCreated + ', actual in DOM: ' + totalRows);
+          console.log('   Cells created: ' + cellsCreated + ', actual in DOM: ' + totalCells);
+          console.log('   Buttons created: ' + daysAdded + ' days, actual in DOM: ' + totalButtons);
+          
+          if (totalButtons > 0) {
+            console.log('✓✓✓ SUCCESS! Calendar rendered with ' + totalButtons + ' buttons!');
+          } else {
+            console.error('✗✗✗ FAILED! No buttons found in calendar!');
+          }
+          
+          console.log('╔════════════════════════════════════╗');
+          console.log('║  RENDER CALENDAR END                ║');
+          console.log('╚════════════════════════════════════╝\n');
         } catch (error) {
-          console.error('ERROR in renderCalendar():', error);
+          console.error('💥 EXCEPTION in renderCalendar():', error.message);
           console.error(error.stack);
         }
       };
