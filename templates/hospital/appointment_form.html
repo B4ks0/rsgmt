@@ -109,8 +109,10 @@
                     </div>
 
                     <!-- Hidden input for form submission -->
-                    {{ form.preferred_date }}
-                    {% for e in form.preferred_date.errors %}<div class="text-danger small mt-2">{{ e }}</div>{% endfor %}
+                    <div style="display: none;">
+                      {{ form.preferred_date }}
+                      {% for e in form.preferred_date.errors %}<div class="text-danger small mt-2">{{ e }}</div>{% endfor %}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -236,9 +238,13 @@
                          "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
       const renderCalendar = () => {
+        console.log('renderCalendar() called. Month:', currentMonth, 'Year:', currentYear, 'Available dates:', availableDates);
+        
         const firstDay = new Date(currentYear, currentMonth, 1).getDay();
         const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+        
+        console.log('firstDay:', firstDay, 'daysInMonth:', daysInMonth);
         
         let calendarHTML = '';
         let dayCounter = 0;
@@ -249,12 +255,14 @@
         // Previous month's days (gray)
         for (let i = firstDay - 1; i >= 0; i--) {
           const day = daysInPrevMonth - i;
-          calendarHTML += `<td><button type="button" class="btn btn-sm text-secondary" disabled>${day}</button></td>`;
+          calendarHTML += `<td class="p-1"><button type="button" class="btn btn-sm w-100 text-secondary" disabled>${day}</button></td>`;
           dayCounter++;
         }
         
         // Current month's days
         const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time for proper comparison
+        
         for (let day = 1; day <= daysInMonth; day++) {
           // Start new row if needed
           if (dayCounter > 0 && dayCounter % 7 === 0) {
@@ -262,6 +270,7 @@
           }
           
           const date = new Date(currentYear, currentMonth, day);
+          date.setHours(0, 0, 0, 0); // Reset time for proper comparison
           const dateString = date.toISOString().split('T')[0];
           
           let btnClass = 'btn btn-sm w-100';
@@ -269,19 +278,23 @@
           let isClickable = false;
           
           if (date < today) {
-            // Past dates - gray
+            // Past dates - gray (disabled)
             btnClass += ' btn-secondary text-white';
             isDisabled = true;
-          } else if (date.toDateString() === today.toDateString()) {
-            // Today - blue
-            btnClass += ' btn-primary text-white';
+          } else if (date.getTime() === today.getTime()) {
+            // Today - highlighted blue
+            btnClass += ' btn-primary text-white fw-bold';
             isClickable = true;
-          } else if (availableDates.includes(dateString)) {
-            // Available - green
+          } else if (availableDates.length > 0 && availableDates.includes(dateString)) {
+            // Available dates - green
+            btnClass += ' btn-success text-white';
+            isClickable = true;
+          } else if (availableDates.length === 0) {
+            // No doctor selected - all future dates are available
             btnClass += ' btn-success text-white';
             isClickable = true;
           } else {
-            // Not available - gray
+            // Not available - gray (disabled)
             btnClass += ' btn-secondary text-white';
             isDisabled = true;
           }
@@ -304,8 +317,16 @@
         
         calendarHTML += '</tr>';
         
+        console.log('Generated calendarHTML length:', calendarHTML.length, 'HTML preview:', calendarHTML.substring(0, 200));
+        
         document.getElementById('calendarMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
-        document.getElementById('calendarDates').innerHTML = calendarHTML;
+        const calendarDatesElement = document.getElementById('calendarDates');
+        if (calendarDatesElement) {
+          calendarDatesElement.innerHTML = calendarHTML;
+          console.log('Calendar rendered successfully. Element innerHTML updated.');
+        } else {
+          console.error('Calendar element not found:', 'calendarDates');
+        }
       };
 
       window.selectDate = (dateString, element) => {
@@ -372,8 +393,14 @@
         renderCalendar();
       });
 
-      // Initial calendar render
-      renderCalendar();
+      // Initial calendar render on DOM ready
+      if (document.readyState === 'loading') {
+        // DOM still loading
+        setTimeout(() => renderCalendar(), 100);
+      } else {
+        // DOM already loaded
+        renderCalendar();
+      }
     });
   </script>
 {% endblock %}
