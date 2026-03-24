@@ -177,15 +177,16 @@
     <script>
       // Move modals to body immediately on page load
       function moveModalsToBody() {
-        const modals = document.querySelectorAll('.modal');
-        console.log('Found', modals.length, 'modals');
+        const modals = document.querySelectorAll('.modal:not([data-moved])');
         
-        modals.forEach((modal, index) => {
+        modals.forEach((modal) => {
+          // Mark this modal as already moved to prevent reprocessing
+          modal.setAttribute('data-moved', 'true');
+          
           // Force move to body
           document.body.appendChild(modal);
-          console.log('Moved modal', index, 'to body');
           
-          // Ensure no transform or z-index restrictions
+          // Ensure proper positioning
           modal.style.position = 'fixed';
           modal.style.top = '0';
           modal.style.left = '0';
@@ -195,17 +196,8 @@
 
       // Run on DOMContentLoaded
       document.addEventListener('DOMContentLoaded', function() {
+        // Single run on page load
         moveModalsToBody();
-
-        // Also observe for dynamically added modals
-        const observer = new MutationObserver(function(mutations) {
-          moveModalsToBody();
-        });
-
-        observer.observe(document.documentElement, {
-          childList: true,
-          subtree: true
-        });
 
         // Handle modal events
         const modalElements = document.querySelectorAll('.modal');
@@ -219,10 +211,6 @@
           });
         });
       });
-
-      // Also try moving modals after short delay for safety
-      setTimeout(moveModalsToBody, 100);
-      setTimeout(moveModalsToBody, 500);
     </script>
 
     {% block extra_js %}{% endblock %}
