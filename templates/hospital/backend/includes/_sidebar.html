@@ -1,65 +1,123 @@
-<!-- Sidebar Navigation (Easy to Update) -->
-<div class="sidebar d-none d-md-block flex-shrink-0" style="width: 260px">
-  <div class="sidebar-brand">
-    <i class="bi bi-hospital me-2 text-primary"></i> RSGM Backend
+{% load static %}
+<!-- Sidebar Navigation -->
+<div class="sidebar d-none d-md-flex flex-column flex-shrink-0" style="width: 260px; min-height: 100vh;">
+
+  <!-- Brand -->
+  <div class="sidebar-brand d-flex align-items-center gap-2">
+    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width:34px;height:34px;flex-shrink:0;">
+      <i class="bi bi-hospital-fill text-white" style="font-size:1rem;"></i>
+    </div>
+    <div>
+      <div style="font-size:0.95rem;font-weight:700;line-height:1.2;">RSGM Backend</div>
+      <div style="font-size:0.7rem;color:#adb5bd;font-weight:400;">RS Gunung Maria Tomohon</div>
+    </div>
   </div>
-  <nav class="nav flex-column gap-1">
-    <!-- Section: Utama -->
+
+  <!-- User Info -->
+  {% if user.is_authenticated %}
+  <div class="px-3 py-2 mb-1" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+    <div class="d-flex align-items-center gap-2">
+      <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:28px;height:28px;flex-shrink:0;">
+        <i class="bi bi-person-fill" style="font-size:0.85rem;color:#e9ecef;"></i>
+      </div>
+      <div>
+        <div style="font-size:0.8rem;color:#e9ecef;font-weight:600;line-height:1.2;">{{ user.get_full_name|default:user.username }}</div>
+        <div style="font-size:0.7rem;color:#6c757d;">{% if user.is_superuser %}Superadmin{% else %}Staff{% endif %}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Navigation -->
+  <nav class="nav flex-column gap-1 flex-grow-1 pt-2 pb-3">
+
+    <!-- Utama -->
     <div class="sidebar-heading">Utama</div>
-    <a href="{% url 'backend_dashboard' %}">
-      <i class="bi bi-speedometer2 me-2"></i> Dashboard Janji Temu
+    <a href="{% url 'backend_dashboard' %}" class="{% if request.resolver_match.url_name == 'backend_dashboard' %}active{% endif %}">
+      <i class="bi bi-speedometer2 me-2"></i> Dashboard
     </a>
 
-    <!-- Section: Klinik & Medis -->
-    <div class="sidebar-heading">Klinik & Medis</div>
-    <a href="{% url 'backend_patient_list' %}">
+    <!-- Klinik & Medis -->
+    <div class="sidebar-heading mt-3">Klinik &amp; Medis</div>
+    <a href="{% url 'backend_patient_list' %}" class="{% if 'patient' in request.resolver_match.url_name %}active{% endif %}">
       <i class="bi bi-people me-2"></i> Data Pasien
     </a>
-    <a href="{% url 'backend_doctor_list' %}">
+    <a href="{% url 'backend_doctor_list' %}" class="{% if 'doctor' in request.resolver_match.url_name %}active{% endif %}">
       <i class="bi bi-person-badge me-2"></i> Master Dokter
     </a>
-    <a href="{% url 'backend_department_list' %}">
-      <i class="bi bi-building-add me-2"></i> Master Poli / Dept
+    <a href="{% url 'backend_department_list' %}" class="{% if 'department' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-building me-2"></i> Master Poli / Dept
     </a>
 
-    <!-- Section: Administrasi -->
-    <div class="sidebar-heading">Administrasi</div>
-    <a
-      href="#"
-      onclick="
-        alert('Fitur Laporan Harian belum aktif');
-        return false;
-      "
-    >
-      <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan Harian
-    </a>
-    <a href="{% url 'backend_payment_list' %}">
+    <!-- Administrasi -->
+    <div class="sidebar-heading mt-3">Administrasi</div>
+    <a href="{% url 'backend_payment_list' %}" class="{% if 'payment' in request.resolver_match.url_name %}active{% endif %}">
       <i class="bi bi-cash-coin me-2"></i> Info Pembayaran
     </a>
-    <a href="{% url 'backend_contact_list' %}">
-      <i class="bi bi-envelope me-2"></i> Pesan Kontak Masuk
+    <a href="{% url 'backend_contact_list' %}" class="{% if 'contact' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-envelope me-2"></i> Pesan Kontak
+    </a>
+    <a href="#" class="sidebar-disabled" tabindex="-1" aria-disabled="true">
+      <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan Harian
+      <span class="sidebar-badge">Segera</span>
     </a>
 
-    <!-- Section: Sistem -->
-    <div class="sidebar-heading">Sistem</div>
-    <a
-      href="#"
-      onclick="
-        alert('Pengaturan Website');
-        return false;
-      "
-    >
+    <!-- Sistem -->
+    <div class="sidebar-heading mt-3">Sistem</div>
+    <a href="{% url 'home' %}" target="_blank" rel="noopener">
+      <i class="bi bi-box-arrow-up-right me-2"></i> Lihat Website
+    </a>
+    <a href="#" class="sidebar-disabled" tabindex="-1" aria-disabled="true">
       <i class="bi bi-gear me-2"></i> Pengaturan Web
+      <span class="sidebar-badge">Segera</span>
     </a>
-    <a href="{% url 'home' %}" target="_blank">
-      <i class="bi bi-box-arrow-up-right me-2"></i> Lihat Frontend Web
-    </a>
-    <a
-      href="{% url 'backend_logout' %}"
-      class="text-danger mt-3"
-      style="color: #dc3545 !important"
-    >
-      <i class="bi bi-power me-2"></i> Logout Aplikasi
-    </a>
+
+    <!-- Spacer + Logout -->
+    <div class="mt-auto pt-3" style="border-top:1px solid rgba(255,255,255,0.08);">
+      <a href="{% url 'backend_logout' %}" class="sidebar-logout">
+        <i class="bi bi-box-arrow-left me-2"></i> Logout
+      </a>
+    </div>
+
   </nav>
 </div>
+
+<style>
+  .sidebar-disabled {
+    color: #495057 !important;
+    cursor: default !important;
+    pointer-events: none;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sidebar-disabled:hover {
+    background: transparent !important;
+    border-radius: 0 !important;
+    margin-right: 0 !important;
+  }
+  .sidebar-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.1);
+    color: #6c757d;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .sidebar-logout {
+    color: #f87171 !important;
+    padding: 10px 20px;
+    display: block;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    border-radius: 0 20px 20px 0;
+    margin-right: 15px;
+  }
+  .sidebar-logout:hover {
+    background-color: rgba(220, 53, 69, 0.15) !important;
+    color: #ff6b6b !important;
+  }
+</style>

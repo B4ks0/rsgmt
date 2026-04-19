@@ -7,18 +7,26 @@
   <style>
     .form-label { font-weight: 600; font-size: 0.85rem; color: #495057; }
     .table-schedule th { font-weight: 600; font-size: 0.8rem; color: #6c757d; text-transform: uppercase; }
-    /* Fix Bootstrap fixed positioning with zoom: 0.7 */
-    .modal-backdrop { width: calc(100vw / 0.7) !important; height: calc(100vh / 0.7) !important; top: 0; left: 0; right: auto; bottom: auto; }
-    .modal { width: calc(100vw / 0.7) !important; height: calc(100vh / 0.7) !important; top: 0; left: 0; right: auto; bottom: auto; }
   </style>
 {% endblock %}
 
 {% block content %}
 
     <div class="container-fluid py-0 px-0 px-md-1">
-  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-    <h3 class="fw-bold mb-0"><i class="bi bi-person-vcard text-primary me-2"></i> {{ title }}</h3>
-    <a href="{% url 'backend_doctor_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar</a>
+  <div class="d-flex justify-content-between align-items-start mb-4 pb-3 border-bottom">
+    <div>
+      <h3 class="fw-bold mb-1"><i class="bi bi-person-vcard text-primary me-2"></i>{{ title }}</h3>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 small text-muted">
+          <li class="breadcrumb-item"><a href="{% url 'backend_dashboard' %}" class="text-decoration-none">Dashboard</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'backend_doctor_list' %}" class="text-decoration-none">Master Dokter</a></li>
+          <li class="breadcrumb-item active">{{ title }}</li>
+        </ol>
+      </nav>
+    </div>
+    <a href="{% url 'backend_doctor_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 flex-shrink-0">
+      <i class="bi bi-arrow-left me-1"></i> Kembali
+    </a>
   </div>
 
   <form method="post" enctype="multipart/form-data" novalidate>
@@ -188,8 +196,10 @@
     </div>
   </form>
 
-<!-- Modal Pangkas Profil -->
-<div class="modal fade" id="cropModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="cropModalLabel" aria-hidden="true" style="z-index: 1060;">
+{% endblock content %}
+
+{% block modals %}
+<div class="modal fade" id="cropModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="cropModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4">
       <div class="modal-header border-bottom-0">
@@ -206,49 +216,12 @@
     </div>
   </div>
 </div>
+{% endblock modals %}
 
-<!-- Toast Placement -->
-<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
-  <!-- Django Messages -->
-  {% if messages %}
-    {% for message in messages %}
-    <div class="toast align-items-center text-bg-{{ message.tags|default:'info' }} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body">
-          {{ message }}
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-    </div>
-    {% endfor %}
-  {% endif %}
-
-  <!-- Form Errors -->
-  {% if form.errors or formset.errors %}
-    <div class="toast align-items-center text-bg-danger border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> Pengisian form gagal. Mohon periksa kembali isian yang berwarna merah dan coba kembali. Pastikan foto juga dipilih ulang jika ter-reset.
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-    </div>
-  {% endif %}
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Toasts Setup
-    var toastElList = [].slice.call(document.querySelectorAll('.toast'));
-    var toastList = toastElList.map(function(toastEl) {
-      if (toastEl.classList.contains('text-bg-error')) {
-        toastEl.classList.replace('text-bg-error', 'text-bg-danger');
-      }
-      return new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
-    });
-    toastList.forEach(toast => toast.show());
 
     // Profile Photo Preview & Cropper
     const photoInput = document.querySelector('input[type="file"][name="photo"]');

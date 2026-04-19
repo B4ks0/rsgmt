@@ -12,28 +12,32 @@ def logo_png(request):
     logo_path = Path(__file__).resolve().parent.parent / "rsgumato_logo.png"
     if not logo_path.exists():
         raise Http404("Logo not found")
-    return FileResponse(open(logo_path, "rb"), content_type="image/png")
+    return FileResponse(logo_path.open("rb"), content_type="image/png")
 
 
 def title_logo_png(request):
     logo_path = Path(__file__).resolve().parent.parent / "title_logo.png"
     if not logo_path.exists():
         raise Http404("Title logo not found")
-    return FileResponse(open(logo_path, "rb"), content_type="image/png")
+    return FileResponse(logo_path.open("rb"), content_type="image/png")
 
 
 def main_banner(request):
     banner_path = Path(__file__).resolve().parent.parent / "#JanganTungguGejala.png"
     if not banner_path.exists():
         raise Http404("Banner not found")
-    return FileResponse(open(banner_path, "rb"), content_type="image/png")
+    return FileResponse(banner_path.open("rb"), content_type="image/png")
 
+
+_ALLOWED_SLIDESHOW = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
 
 def slideshow_image(request, filename):
+    if filename not in _ALLOWED_SLIDESHOW:
+        raise Http404("Slideshow image not found")
     img_path = Path(__file__).resolve().parent.parent / "slideshow" / f"{filename}.png"
     if not img_path.exists():
         raise Http404("Slideshow image not found")
-    return FileResponse(open(img_path, "rb"), content_type="image/png")
+    return FileResponse(img_path.open("rb"), content_type="image/png")
 
 
 def home(request):
@@ -43,6 +47,10 @@ def home(request):
 
 def about(request):
     return render(request, "hospital/about.html")
+
+
+def mitra_list(request):
+    return render(request, "hospital/mitra_list.html")
 
 
 def services(request):
@@ -116,28 +124,28 @@ def doctor_detail(request, doctor_id):
 
 
 def appointment_create(request):
+    success_flag = False
     if request.method == "POST":
         form = AppointmentForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(
-                request,
-                "Permintaan janji temu berhasil dikirim. Tim kami akan menghubungi Anda untuk konfirmasi.",
-            )
+            request.session['appointment_success'] = True
             return redirect("appointment_create")
     else:
         initial_data = {}
         doctor_id = request.GET.get('doctor')
+        success_flag = request.session.pop('appointment_success', False)
+
         if doctor_id:
             try:
                 from .models import Doctor
                 doctor = Doctor.objects.get(id=doctor_id)
                 initial_data['doctor'] = doctor
                 initial_data['department'] = doctor.department
-            except:
+            except (Doctor.DoesNotExist, ValueError):
                 pass
         form = AppointmentForm(initial=initial_data)
-    return render(request, "hospital/appointment_form.html", {"form": form})
+    return render(request, "hospital/appointment_form.html", {"form": form, "is_success": success_flag})
 
 
 def contact(request):
@@ -164,8 +172,8 @@ def contact(request):
             )
             
             return JsonResponse({'success': True, 'message': 'Contact message saved successfully'})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        except Exception:
+            return JsonResponse({'success': False, 'error': 'Terjadi kesalahan server. Silakan coba lagi.'}, status=500)
     
     return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
 
@@ -188,7 +196,11 @@ def backend_login(request):
             user = form.get_user()
             if user.is_staff:
                 auth_login(request, user)
-                return redirect(request.GET.get("next", "backend_dashboard"))
+                from django.utils.http import url_has_allowed_host_and_scheme
+                next_url = request.GET.get("next", "")
+                if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                    return redirect(next_url)
+                return redirect("backend_dashboard")
             else:
                 messages.error(request, "Akses ditolak. Hubungi Administrator.")
         else:
@@ -206,6 +218,7 @@ def backend_logout(request):
 def backend_dashboard(request):
     """ Custom Backend Dashboard tailored for Hospital tracking """
     from django.core.paginator import Paginator
+    from django.db.models import Q
     
     # Get counts without pagination to avoid multiple queries
     total_patients = Patient.objects.count()
@@ -213,12 +226,49 @@ def backend_dashboard(request):
     total_appointments = Appointment.objects.count()
     pending_appointments = Appointment.objects.filter(status='requested').count()
     
+    # Get search query & filters
+    q = request.GET.get('q', '').strip()
+    f_doctor = request.GET.get('doctor', '')
+    f_dept = request.GET.get('dept', '')
+    f_status = request.GET.get('status', '')
+    f_type = request.GET.get('ptype', '')
+    
     # Get paginated appointments
     all_appointments = Appointment.objects.select_related("patient", "doctor", "department").order_by("-booked_at")
+    
+    if q:
+        filter_q = (
+            Q(patient__full_name__icontains=q) | 
+            Q(full_name__icontains=q) | 
+            Q(patient__national_id__icontains=q) | 
+            Q(national_id__icontains=q) | 
+            Q(patient__phone__icontains=q) | 
+            Q(phone__icontains=q) | 
+            Q(queue_number__icontains=q)
+        )
+        all_appointments = all_appointments.filter(filter_q)
+        
+    if f_doctor:
+        all_appointments = all_appointments.filter(doctor_id=f_doctor)
+    if f_dept:
+        all_appointments = all_appointments.filter(department_id=f_dept)
+    if f_status:
+        all_appointments = all_appointments.filter(status=f_status)
+    if f_type == 'new':
+        all_appointments = all_appointments.filter(is_new_patient=True)
+    elif f_type == 'existing':
+        all_appointments = all_appointments.filter(is_new_patient=False)
+        
+    all_appointments = all_appointments.distinct()
     
     paginator = Paginator(all_appointments, 25)  # Show 25 appointments per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    
+    # Supply lists for dropdowns
+    doctors_list = Doctor.objects.filter(is_active=True).order_by('full_name')
+    depts_list = Department.objects.all().order_by('name')
+    status_choices = Appointment.Status.choices
     
     context = {
         "appointments": page_obj,
@@ -227,6 +277,14 @@ def backend_dashboard(request):
         "total_doctors": total_doctors,
         "total_appointments": total_appointments,
         "pending_appointments": pending_appointments,
+        "q": q,
+        "f_doctor": f_doctor,
+        "f_dept": f_dept,
+        "f_status": f_status,
+        "f_type": f_type,
+        "doctors_list": doctors_list,
+        "depts_list": depts_list,
+        "status_choices": status_choices,
     }
     return render(request, "hospital/backend/dashboard.html", context)
 
@@ -525,14 +583,17 @@ def backend_department_edit(request, dept_id):
 
 
 def get_doctors_by_department(request):
-    department_id = request.GET.get('department_id')
-    doctors = Doctor.objects.filter(department_id=department_id, is_active=True)
+    department_id = request.GET.get('department_id', '').strip()
+    if not department_id or not department_id.isdigit():
+        return JsonResponse({'success': True, 'doctors': []})
+    doctors = Doctor.objects.filter(department_id=int(department_id), is_active=True).only('id', 'full_name')
     results = [{'id': str(d.id), 'full_name': d.full_name} for d in doctors]
     return JsonResponse({'success': True, 'doctors': results})
 
 def get_doctor_available_dates(request):
     """Get available dates for a doctor in the next 60 days"""
-    from datetime import datetime, timedelta
+    from datetime import timedelta
+    from django.utils import timezone
     from .models import ScheduleException
     
     doctor_id = request.GET.get('doctor_id')
@@ -550,7 +611,7 @@ def get_doctor_available_dates(request):
     available_days = set(s.day_of_week for s in schedules)
     
     # Generate available dates for next 60 days
-    today = datetime.now().date()
+    today = timezone.now().date()
     available_dates = []
     
     for i in range(60):
@@ -566,9 +627,20 @@ def get_doctor_available_dates(request):
                     available_dates.append(check_date.isoformat())
             else:
                 available_dates.append(check_date.isoformat())
+                
+    photo_path = '/static/hospital/img/default-doctor.png'
+    if getattr(doctor, 'photo_url', None):
+        photo_path = doctor.photo_url
+    elif getattr(doctor, 'photo', None) and hasattr(doctor.photo, 'url'):
+        photo_path = doctor.photo.url
+        
+    doctor_info = {
+        'full_name': doctor.full_name,
+        'department': doctor.department.name if doctor.department else '',
+        'photo_url': photo_path,
+    }
     
-    print(f"DEBUG: Doctor {doctor.id} available dates: {available_dates[:5]}...")  # Debug log
-    return JsonResponse({'success': True, 'available_dates': available_dates})
+    return JsonResponse({'success': True, 'available_dates': available_dates, 'doctor_info': doctor_info})
 
 @staff_member_required
 def backend_contact_list(request):

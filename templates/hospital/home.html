@@ -203,11 +203,25 @@ Maria Tomohon{% endblock %} {% block hero %}
 <section class="home-mitra-section home-primary-column mx-auto w-100 mb-5">
   <p class="institusi-label mb-2 text-center">Kerja Sama</p>
   <h2 class="h4 fw-semibold text-dark mb-3 text-center">
-    Mitra Utama RS Gunung Maria Tomohon
+    Mitra Penjamin
   </h2>
 
   <div class="home-mitra-logo-marquee" aria-label="Logo mitra kerja sama">
+    <div class="home-mitra-logo-overlay">
+      <a href="{% url 'mitra_list' %}" class="home-mitra-overlay-btn">
+        Lihat Semua Mitra
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
     <div class="home-mitra-logo-track">
+      <div class="home-mitra-logo-item">
+        <img
+          src="{% static 'hospital/img/kerjasama/bpjs-kes-removebg-preview.png' %}"
+          alt="Logo BPJS Kesehatan"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
       <div class="home-mitra-logo-item">
         <img
           src="{% static 'hospital/img/kerjasama/35_logo_aia.png' %}"
@@ -258,15 +272,7 @@ Maria Tomohon{% endblock %} {% block hero %}
           decoding="async"
         />
       </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/pln-2016-1280x-q95.png' %}"
-          alt="Logo PT PLN Persero"
-          class="home-mitra-logo-pln"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
+
       <div class="home-mitra-logo-item">
         <img
           src="{% static 'hospital/img/kerjasama/PRIMARY LOGO Mandiri Inhealth-01 PNG.png' %}"
@@ -276,11 +282,23 @@ Maria Tomohon{% endblock %} {% block hero %}
           decoding="async"
         />
       </div>
+      <div class="home-mitra-logo-item" style="min-width: auto; padding: 0; margin: 0 -15px;">
+        <img src="{% static 'hospital/img/kerjasama/Allianz.svg.png' %}" style="width: 130px; height: auto;" alt="Logo Allianz" loading="lazy" decoding="async" />
+      </div>
 
       <div class="home-mitra-logo-item">
         <img
-          src="{% static 'hospital/img/kerjasama/35_logo_aia.png' %}"
+          src="{% static 'hospital/img/kerjasama/bpjs-kes-removebg-preview.png' %}"
           alt=""
+          loading="lazy"
+          decoding="async"
+          aria-hidden="true"
+        />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img
+          src="{% static 'hospital/img/kerjasama/35_logo_aia.png' %}"
+          alt="AIA
           loading="lazy"
           decoding="async"
           aria-hidden="true"
@@ -289,7 +307,7 @@ Maria Tomohon{% endblock %} {% block hero %}
       <div class="home-mitra-logo-item">
         <img
           src="{% static 'hospital/img/kerjasama/admedika-logo.png' %}"
-          alt=""
+          alt="AdMedika"
           loading="lazy"
           decoding="async"
           aria-hidden="true"
@@ -298,7 +316,7 @@ Maria Tomohon{% endblock %} {% block hero %}
       <div class="home-mitra-logo-item">
         <img
           src="{% static 'hospital/img/kerjasama/detail-logo-taspen-png-hd_237-design.png' %}"
-          alt=""
+          alt="Taspen"
           class="home-mitra-logo-taspen"
           loading="lazy"
           decoding="async"
@@ -308,7 +326,7 @@ Maria Tomohon{% endblock %} {% block hero %}
       <div class="home-mitra-logo-item">
         <img
           src="{% static 'hospital/img/kerjasama/Logo Jasa Raharja.png' %}"
-          alt=""
+          alt="Jasa Raharja"
           loading="lazy"
           decoding="async"
           aria-hidden="true"
@@ -317,7 +335,7 @@ Maria Tomohon{% endblock %} {% block hero %}
       <div class="home-mitra-logo-item">
         <img
           src="{% static 'hospital/img/kerjasama/logo lippo insurance.png' %}"
-          alt=""
+          alt="Lippo Insurance"
           loading="lazy"
           decoding="async"
           aria-hidden="true"
@@ -326,32 +344,111 @@ Maria Tomohon{% endblock %} {% block hero %}
       <div class="home-mitra-logo-item">
         <img
           src="{% static 'hospital/img/kerjasama/logo-fullerton-health.webp' %}"
-          alt=""
+          alt="Fullerton Health"
           class="home-mitra-logo-fullerton"
           loading="lazy"
           decoding="async"
           aria-hidden="true"
         />
       </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/pln-2016-1280x-q95.png' %}"
-          alt=""
-          class="home-mitra-logo-pln"
-          loading="lazy"
-          decoding="async"
-          aria-hidden="true"
-        />
-      </div>
+
       <div class="home-mitra-logo-item">
         <img
           src="{% static 'hospital/img/kerjasama/PRIMARY LOGO Mandiri Inhealth-01 PNG.png' %}"
-          alt=""
+          alt="Mandiri Inhealth"
           class="home-mitra-logo-mandiri"
           loading="lazy"
           decoding="async"
           aria-hidden="true"
         />
+      </div>
+      <div class="home-mitra-logo-item" style="min-width: auto; padding: 0; margin: 0 -15px;">
+        <img src="{% static 'hospital/img/kerjasama/Allianz.svg.png' %}" style="width: 130px; height: auto;" alt="" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="home-mitra-section home-primary-column mx-auto w-100 mb-5">
+  <h2 class="h4 fw-semibold text-dark mb-3 text-center">
+    Mitra Institusi & Pendidikan
+  </h2>
+
+  <div class="home-mitra-logo-marquee" aria-label="Logo mitra institusi pendidikan">
+    <div class="home-mitra-logo-overlay">
+      <a href="{% url 'mitra_list' %}" class="home-mitra-overlay-btn">
+        Lihat Semua Mitra
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+    <div class="home-mitra-logo-track" style="animation-direction: reverse;">
+      <!-- Set 1 -->
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/fmipa ukit.png' %}" alt="Logo FMIPA UKIT" loading="lazy" decoding="async" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/Logo-Unima-2023.png' %}" alt="Logo Unima" loading="lazy" decoding="async" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/pln-2016-1280x-q95.png' %}" alt="Logo PT PLN Persero" loading="lazy" decoding="async" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/Stikes gunung maria.png' %}" alt="Logo STIKES Gunung Maria" loading="lazy" decoding="async" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/unika de la salle manado.png' %}" alt="Logo Unika De La Salle" loading="lazy" decoding="async" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/palang merah - indonesia.png' %}" style="transform: scale(0.7); margin: 0 -20px;" alt="Logo PMI" loading="lazy" decoding="async" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/Telkom_Indonesia_logo.png' %}" alt="Logo Telkom Indonesia" loading="lazy" decoding="async" />
+      </div>
+
+      <!-- Set 2 -->
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/fmipa ukit.png' %}" alt="Fakultas Matematika dan Ilmu Pengetahuan Alam Universitas Kristen Indonesia Tomohon" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/Logo-Unima-2023.png' %}" alt="Universitas Negeri Manado" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/pln-2016-1280x-q95.png' %}" alt="PT PLN Persero" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/Stikes gunung maria.png' %}" alt="Sekolah Tinggi Ilmu Kesehatan Gunung Maria Tomohon" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/unika de la salle manado.png' %}" alt="Universitas Katolik De La Salle Manado" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/palang merah - indonesia.png' %}" style="transform: scale(0.7); margin: 0 -20px;" alt="Palang Merah Indonesia" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/Telkom_Indonesia_logo.png' %}" alt="PT Telkom Indonesia" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+
+      <!-- Set 3 -->
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/fmipa ukit.png' %}" alt="Fakultas Matematika dan Ilmu Pengetahuan Alam Universitas Kristen Indonesia Tomohon" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/Logo-Unima-2023.png' %}" alt="Universitas Negeri Manado" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/pln-2016-1280x-q95.png' %}" alt="PT PLN Persero" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/Stikes gunung maria.png' %}" alt="Sekolah Tinggi Ilmu Kesehatan Gunung Maria Tomohon" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/unika de la salle manado.png' %}" alt="Universitas Katolik De La Salle Manado" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/palang merah - indonesia.png' %}" style="transform: scale(0.7); margin: 0 -20px;" alt="Palang Merah Indonesia" loading="lazy" decoding="async" aria-hidden="true" />
+      </div>
+      <div class="home-mitra-logo-item">
+        <img src="{% static 'hospital/img/kerjasama/Telkom_Indonesia_logo.png' %}" alt="PT Telkom Indonesia" loading="lazy" decoding="async" aria-hidden="true" />
       </div>
     </div>
   </div>

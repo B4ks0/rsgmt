@@ -4,11 +4,30 @@ from .models import Appointment, ContactMessage
 
 
 class AppointmentForm(forms.ModelForm):
+    is_new_patient = forms.TypedChoiceField(
+        coerce=lambda x: x == 'True',
+        choices=((False, 'Sudah Pernah'), (True, 'Baru Pertama Kali')),
+        widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
+        label="Apakah Anda sudah pernah berobat di RS Gunung Maria Tomohon?"
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
             base = "form-select" if name in {"department", "doctor"} else "form-control"
             field.widget.attrs.setdefault("class", base)
+        self.fields["full_name"].required = True
+        self.fields["national_id"].required = True
+        self.fields["phone"].required = True
+        self.fields["doctor"].required = True
+        self.fields["preferred_date"].required = True
+
+    def clean_preferred_date(self):
+        from django.utils import timezone
+        date = self.cleaned_data.get("preferred_date")
+        if date and date < timezone.now().date():
+            raise forms.ValidationError("Tanggal tidak boleh di masa lalu.")
+        return date
 
     class Meta:
         model = Appointment
@@ -17,6 +36,7 @@ class AppointmentForm(forms.ModelForm):
             "national_id",
             "phone",
             "email",
+            "is_new_patient",
             "ktp_photo",
             "department",
             "doctor",

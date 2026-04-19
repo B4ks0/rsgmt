@@ -107,6 +107,7 @@ class Appointment(models.Model):
     phone = models.CharField(max_length=40, blank=True)
     message = models.TextField(blank=True)
     email = models.EmailField(blank=True)
+    is_new_patient = models.BooleanField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -122,6 +123,47 @@ class Appointment(models.Model):
     def __str__(self):
         name = self.patient.full_name if self.patient else self.full_name
         return f"{name} ({self.appointment_date or self.preferred_date})"
+
+    @property
+    def get_whatsapp_url(self):
+        import urllib.parse
+        phone_num = self.patient.phone if self.patient else self.phone
+        if not phone_num:
+            return "#"
+        
+        phone_num = ''.join(filter(str.isdigit, phone_num))
+        if phone_num.startswith("08"):
+            phone_num = "628" + phone_num[2:]
+        elif phone_num.startswith("8"):
+            phone_num = "628" + phone_num[1:]
+        elif phone_num.startswith("0"):
+            phone_num = "62" + phone_num[1:]
+            
+        name = self.patient.full_name if self.patient else self.full_name
+        doctor_name = self.doctor.full_name if self.doctor else "Dokter"
+        
+        raw_poli = self.department.name if self.department else (self.doctor.department.name if self.doctor else "")
+        # Remove redundant Poli/Poliklinik prefixes
+        if raw_poli.lower().startswith("poli "):
+            raw_poli = raw_poli[5:]
+        elif raw_poli.lower().startswith("poliklinik "):
+            raw_poli = raw_poli[11:]
+        
+        poli_text = f"Poli {raw_poli.strip()}" if raw_poli else "Poliklinik"
+        
+        appointment_dt = self.appointment_date or self.preferred_date
+        
+        # Localize date string (basic indonesian fallback)
+        if appointment_dt:
+            months = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+            date_str = f"{appointment_dt.day} {months[appointment_dt.month]} {appointment_dt.year}"
+        else:
+            date_str = "jadwal yang akan ditentukan"
+            
+        text = f"Halo Bapak/Ibu {name},\n\nTerima kasih telah membuat jadwal janji temu di RS Gunung Maria Tomohon. Kami ingin mengonfirmasi jadwal kunjungan Anda dengan {doctor_name} di {poli_text} pada tanggal {date_str}.\n\nMohon balas pesan ini untuk menyatakan konfirmasi kehadiran Anda. Terima kasih!"
+        
+        encoded_text = urllib.parse.quote(text)
+        return f"https://wa.me/{phone_num}?text={encoded_text}"
 
 class AppointmentHistory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

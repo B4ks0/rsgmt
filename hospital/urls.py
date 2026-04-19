@@ -10,6 +10,7 @@ urlpatterns = [
     path("assets/slideshow/<str:filename>.png", views.slideshow_image, name="slideshow_image"),
     path("", views.home, name="home"),
     path("about/", views.about, name="about"),
+    path("mitra/", views.mitra_list, name="mitra_list"),
     path("services/", views.services, name="services"),
     path("doctors/", views.doctors, name="doctors"),
     path("doctors/<uuid:doctor_id>/", views.doctor_detail, name="doctor_detail"),

@@ -1,4 +1,5 @@
 {% extends "hospital/backend/base_backend.html" %}
+{% load static %}
 
 {% block title %}Dashboard - RS Gunung Maria{% endblock %}
 
@@ -15,7 +16,7 @@
                 >
                   Total Pasien Terdaftar
                 </div>
-                <h2 class="mb-0 fw-bold">{{ total_patients }}</h2>
+                <h2 class="mb-0 fw-bold" id="val-patients">{{ total_patients }}</h2>
               </div>
             </div>
           </div>
@@ -28,7 +29,7 @@
                 >
                   Total Dokter Aktif
                 </div>
-                <h2 class="mb-0 fw-bold">{{ total_doctors }}</h2>
+                <h2 class="mb-0 fw-bold" id="val-doctors">{{ total_doctors }}</h2>
               </div>
             </div>
           </div>
@@ -44,7 +45,7 @@
                 >
                   Menunggu Konfirmasi
                 </div>
-                <h2 class="mb-0 fw-bold text-warning">
+                <h2 class="mb-0 fw-bold text-warning" id="val-pending">
                   {{ pending_appointments }}
                 </h2>
               </div>
@@ -62,7 +63,7 @@
                 >
                   Total Janji Temu
                 </div>
-                <h2 class="mb-0 fw-bold text-success">
+                <h2 class="mb-0 fw-bold text-success" id="val-total">
                   {{ total_appointments }}
                 </h2>
               </div>
@@ -72,16 +73,78 @@
 
         <!-- Live Appointments Table -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-          <div
-            class="card-header bg-white p-4 border-bottom-0 d-flex justify-content-between align-items-center"
-          >
-            <h5 class="mb-0 fw-bold">Live: Antrean Janji Temu</h5>
-            <a
-              href="{% url 'backend_appointment_add' %}"
-              class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold"
-            >
-              <i class="bi bi-plus-lg me-1"></i> Buat Janji Baru
-            </a>
+          <div class="card-header bg-white p-4 border-bottom-0">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+              <h5 class="mb-0 fw-bold">Live: Antrean Janji Temu</h5>
+              
+              <div class="text-md-end mt-2 mt-md-0">
+                <button onclick="playTingDingTing()" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold me-2 mb-2 mb-md-0">
+                  <i class="bi bi-volume-up-fill me-1"></i> Tes Suara
+                </button>
+                <a
+                  href="{% url 'backend_appointment_add' %}"
+                  class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold mb-2 mb-md-0"
+                >
+                  <i class="bi bi-plus-lg me-1"></i> Buat Janji Baru
+                </a>
+              </div>
+            </div>
+
+            <form action="{% url 'backend_dashboard' %}" method="GET" class="row g-2 align-items-center">
+              <div class="col-12 col-md-3">
+                <div class="input-group shadow-sm rounded-pill overflow-hidden h-100">
+                  <span class="input-group-text bg-light border-0 px-3">
+                    <i class="bi bi-search text-muted"></i>
+                  </span>
+                  <!-- Pressing 'Enter' inside this input will auto-submit the form because of the hidden submit button below -->
+                  <input type="text" name="q" value="{{ q }}" class="form-control border-0 bg-light shadow-none" placeholder="Nama, No, NIK..." />
+                </div>
+              </div>
+              
+              <div class="col-6 col-md-2">
+                <select name="doctor" class="form-select border-0 bg-light shadow-sm rounded-pill text-muted" onchange="this.form.submit()">
+                  <option value="">Semua Dokter</option>
+                  {% for d in doctors_list %}
+                  <option value="{{ d.id }}" {% if f_doctor == d.id|stringformat:"s" %}selected{% endif %}>{{ d.full_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-6 col-md-2">
+                <select name="dept" class="form-select border-0 bg-light shadow-sm rounded-pill text-muted" onchange="this.form.submit()">
+                  <option value="">Semua Poli</option>
+                  {% for dept in depts_list %}
+                  <option value="{{ dept.id }}" {% if f_dept == dept.id|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-6 col-md-2">
+                <select name="status" class="form-select border-0 bg-light shadow-sm rounded-pill text-muted" onchange="this.form.submit()">
+                  <option value="">Semua Status</option>
+                  {% for val, name in status_choices %}
+                  <option value="{{ val }}" {% if f_status == val %}selected{% endif %}>{{ name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-6 col-md-2">
+                <select name="ptype" class="form-select border-0 bg-light shadow-sm rounded-pill text-muted" onchange="this.form.submit()">
+                  <option value="">Semua Pasien</option>
+                  <option value="new" {% if f_type == 'new' %}selected{% endif %}>Baru (Pertama Kali)</option>
+                  <option value="existing" {% if f_type == 'existing' %}selected{% endif %}>Pasien Lama</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-1 d-flex gap-1 justify-content-end mt-2 mt-md-0">
+                <button type="submit" class="d-none" aria-hidden="true"></button>
+                {% if q or f_doctor or f_dept or f_status or f_type %}
+                <a href="{% url 'backend_dashboard' %}" class="btn btn-light rounded-circle shadow-sm text-muted" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;" title="Reset Filter">
+                  <i class="bi bi-x-lg"></i>
+                </a>
+                {% endif %}
+              </div>
+            </form>
           </div>
           <div class="card-body p-0">
             <div class="table-responsive">
@@ -111,12 +174,16 @@
                     </th>
                   </tr>
                 </thead>
-                <tbody class="border-top-0">
+                <tbody class="border-top-0" id="liveTableBody">
                   {% for appt in appointments %}
                   <tr>
                     <td class="ps-4">
                       <div class="fw-bold text-dark">
-                        {{ appt.appointment_date|date:"d M Y"|default:appt.preferred_date|date:"d M Y" }}
+                        {% if appt.appointment_date %}
+                          {{ appt.appointment_date|date:"d M Y" }}
+                        {% else %}
+                          {{ appt.preferred_date|date:"d M Y" }}
+                        {% endif %}
                       </div>
                       <div class="small text-muted">
                         <i class="bi bi-clock me-1"></i>{{ appt.appointment_time|default:"Belum Ditentukan" }}
@@ -140,8 +207,10 @@
                       <div class="small text-muted">
                         <i class="bi bi-telephone me-1"></i>{% if appt.patient %}{{ appt.patient.phone }}{% else %}{{ appt.phone }}{% endif %}
                       </div>
+                    </td>
+                    <td>
                       <div class="fw-semibold text-primary">
-                        {% if appt.doctor %}{{ appt.doctor.full_name }}{% else %}Belum Ditentukan{% endif %}
+                        {% if appt.doctor %}<a href="{% url 'backend_doctor_edit' appt.doctor.id %}" class="text-decoration-none">{{ appt.doctor.full_name }}</a>{% else %}Belum Ditentukan{% endif %}
                       </div>
                       <div class="small text-muted">
                         {% if appt.department %}{{ appt.department.name }}{% elif appt.doctor %}{{ appt.doctor.department.name }}{% endif %}
@@ -176,8 +245,7 @@
                         style="max-width: 180px; font-size: 0.9rem"
                         title="{{ appt.chief_complaint|default:appt.message }}"
                       >
-                        {{ appt.chief_complaint|default:appt.message|default:"-"
-                        }}
+                        {{ appt.chief_complaint|default:appt.message|default:"-" }}
                       </div>
                     </td>
                     <td class="text-end pe-4">
@@ -232,6 +300,29 @@
                         </form>
                         {% endif %}
 
+                        <!-- View Popup -->
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-light border rounded-circle shadow-sm"
+                          style="width: 32px; height: 32px"
+                          title="Lihat Detail Janji Temu"
+                          data-bs-toggle="modal"
+                          data-bs-target="#viewModal{{ appt.id }}"
+                        >
+                          <i class="bi bi-eye text-info"></i>
+                        </button>
+
+                        <!-- WhatsApp Direct -->
+                        <a
+                          href="{{ appt.get_whatsapp_url }}"
+                          target="_blank"
+                          class="btn btn-sm btn-light border rounded-circle shadow-sm"
+                          style="width: 32px; height: 32px"
+                          title="Hubungi Pasien via WA"
+                        >
+                          <i class="bi bi-whatsapp text-success"></i>
+                        </a>
+
                         <!-- Seamless Custom Edit & Delete -->
                         <a
                           href="{% url 'backend_appointment_edit' appt.id %}"
@@ -280,4 +371,191 @@
             </div>
           </div>
         </div>
+{% endblock %}
+
+<!-- Modal container lives OUTSIDE the polled table so open modals survive refresh -->
+{% block modals %}
+<div id="apptModalContainer">
+  {% for appt in appointments %}
+  <div class="modal fade text-start" id="viewModal{{ appt.id }}" tabindex="-1" aria-labelledby="viewModalLabel{{ appt.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-header bg-light border-0 px-4 py-3">
+          <h5 class="modal-title fw-bold text-dark" id="viewModalLabel{{ appt.id }}">
+            <i class="bi bi-journal-text me-2 text-primary"></i>Detail Janji Temu
+          </h5>
+          <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body px-4 py-4" style="white-space: normal;">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <h6 class="text-muted text-uppercase mb-3" style="font-size: 0.8rem; letter-spacing: 0.5px;">Data Pasien</h6>
+              <table class="table table-borderless table-sm mb-0">
+                <tr>
+                  <td class="text-muted" style="width: 140px;">Nama Lengkap</td>
+                  <td class="fw-semibold text-dark">: {% if appt.patient %}{{ appt.patient.full_name }}{% else %}{{ appt.full_name|default:"-" }}{% endif %}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted">No. HP/WA</td>
+                  <td class="fw-semibold text-dark">: {% if appt.patient %}{{ appt.patient.phone }}{% else %}{{ appt.phone|default:"-" }}{% endif %}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted">NIK</td>
+                  <td class="fw-semibold text-dark">: {% if appt.patient %}{{ appt.patient.national_id|default:"-" }}{% else %}{{ appt.national_id|default:"-" }}{% endif %}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted">Email</td>
+                  <td class="fw-semibold text-dark">: {% if appt.patient %}{{ appt.patient.email|default:"-" }}{% else %}{{ appt.email|default:"-" }}{% endif %}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-muted text-uppercase mb-3" style="font-size: 0.8rem; letter-spacing: 0.5px;">Informasi Medis</h6>
+              <table class="table table-borderless table-sm mb-0">
+                <tr>
+                  <td class="text-muted" style="width: 140px;">Dokter</td>
+                  <td class="fw-semibold text-primary">: {% if appt.doctor %}{{ appt.doctor.full_name }}{% else %}-{% endif %}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted">Poliklinik</td>
+                  <td class="fw-semibold text-dark">: {% if appt.department %}{{ appt.department.name }}{% elif appt.doctor %}{{ appt.doctor.department.name }}{% else %}-{% endif %}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted">Tanggal</td>
+                  <td class="fw-semibold text-dark">: {% if appt.appointment_date %}{{ appt.appointment_date|date:"d M Y" }}{% else %}{{ appt.preferred_date|date:"d M Y" }}{% endif %}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted">Waktu</td>
+                  <td class="fw-semibold text-dark">: {{ appt.appointment_time|default:"Belum Ditentukan" }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted">Status</td>
+                  <td class="fw-semibold">:
+                    {% if appt.status == 'requested' %}<span class="text-warning">Menunggu</span>
+                    {% elif appt.status == 'confirmed' %}<span class="text-primary">Dikonfirmasi</span>
+                    {% elif appt.status == 'completed' %}<span class="text-success">Selesai Berobat</span>
+                    {% elif appt.status == 'cancelled' %}<span class="text-danger">Batal</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-12 mt-4">
+              <h6 class="text-muted text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 0.5px;">Keluhan Singkat</h6>
+              <div class="p-3 bg-light rounded-3 text-dark text-break" style="font-size: 0.95rem;">
+                {{ appt.chief_complaint|default:appt.message|default:"Tidak ada keluhan tertulis."|linebreaksbr }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light border-0 px-4 py-3">
+          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+          <a href="{% url 'backend_appointment_edit' appt.id %}" class="btn btn-primary rounded-pill px-4">Edit Lengkap</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock modals %}
+
+{% block extra_js %}
+<!-- Hidden Audio element -->
+<audio id="notifAudioPlayer" style="display:none;" preload="auto" onerror="console.warn('Audio notifikasi tidak dapat dimuat:', this.src);">
+    <source src="{% static 'audio/hospital-notif.mp3' %}?v=1" type="audio/mpeg">
+</audio>
+
+<script>
+  let lastSeenTotal = parseInt(document.getElementById('val-total').textContent.trim()) || 0;
+  let lastSeenPending = parseInt(document.getElementById('val-pending').textContent.trim()) || 0;
+
+  function playTingDingTing() {
+      const audioPlayer = document.getElementById('notifAudioPlayer');
+      audioPlayer.pause();
+      audioPlayer.currentTime = 0;
+      audioPlayer.volume = 1.0;
+      audioPlayer.play().catch(error => {
+          console.warn('Pemutaran diblokir browser:', error);
+          showLiveToast('🎵 Browser mencegah suara notifikasi! Silakan klik sembarang tempat, atau klik "Tes Suara" dulu di atas.');
+      });
+  }
+
+  function showLiveToast(message) {
+      const container = document.querySelector('.toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast align-items-center text-bg-success border-0 shadow-lg mb-3`;
+      toast.setAttribute('role', 'alert');
+      toast.setAttribute('aria-live', 'assertive');
+      toast.setAttribute('aria-atomic', 'true');
+      toast.dataset.bsDelay = "10000";
+      toast.innerHTML = `<div class="d-flex pl-2 py-1"><div class="toast-body fw-bold" style="font-size: 0.95rem;"><i class="bi bi-bell-fill me-2 fs-5 align-middle"></i> ${message}</div><button type="button" class="btn-close btn-close-white me-3 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>`;
+      container.appendChild(toast);
+      const bsToast = new bootstrap.Toast(toast);
+      bsToast.show();
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+  }
+
+  setInterval(() => {
+      fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(r => r.text())
+      .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          
+          const newTotalEl = doc.getElementById('val-total');
+          const newPendingEl = doc.getElementById('val-pending');
+          
+          // only proceed if we got valid html dashboard
+          if (!newTotalEl || !newPendingEl) return;
+          
+          const newTotal = parseInt(newTotalEl.textContent.trim());
+          const newPending = parseInt(newPendingEl.textContent.trim());
+          
+          const isModalOpen = !!document.querySelector('.modal.show');
+
+          if (newTotal > lastSeenTotal) {
+              const diff = newTotal - lastSeenTotal;
+
+              document.getElementById('liveTableBody').innerHTML = doc.getElementById('liveTableBody').innerHTML;
+              if (!isModalOpen) {
+                  const freshModals = doc.getElementById('apptModalContainer');
+                  if (freshModals) {
+                      document.getElementById('apptModalContainer').innerHTML = freshModals.innerHTML;
+                      if (typeof moveModalsToBody === 'function') moveModalsToBody();
+                  }
+              }
+              document.getElementById('val-pending').textContent = newPending;
+              document.getElementById('val-total').textContent = newTotal;
+
+              if (doc.getElementById('val-patients')) {
+                 document.getElementById('val-patients').textContent = doc.getElementById('val-patients').textContent.trim();
+              }
+
+              lastSeenPending = newPending;
+              lastSeenTotal = newTotal;
+
+              playTingDingTing();
+              showLiveToast(`Ada ${diff} pendaftaran Janji Temu baru masuk!`);
+          } else if (newPending !== lastSeenPending || newTotal !== lastSeenTotal) {
+              // Usually means someone confirmed/deleted an appt
+              document.getElementById('liveTableBody').innerHTML = doc.getElementById('liveTableBody').innerHTML;
+              if (!isModalOpen) {
+                  const freshModals = doc.getElementById('apptModalContainer');
+                  if (freshModals) {
+                      document.getElementById('apptModalContainer').innerHTML = freshModals.innerHTML;
+                      if (typeof moveModalsToBody === 'function') moveModalsToBody();
+                  }
+              }
+              document.getElementById('val-pending').textContent = newPending;
+              document.getElementById('val-total').textContent = newTotal;
+              if (doc.getElementById('val-patients')) {
+                 document.getElementById('val-patients').textContent = doc.getElementById('val-patients').textContent.trim();
+              }
+              lastSeenPending = newPending;
+              lastSeenTotal = newTotal;
+          }
+      }).catch(e => console.error("Realtime poll failed:", e));
+  }, 5000); // Check every 5 seconds
+</script>
 {% endblock %}

@@ -2,335 +2,257 @@
 
 {% block title %}{{ title }} · Backend Dashboard - RS Gunung Maria{% endblock %}
 
-{% block extra_css %}
-{% endblock %}
-
 {% block content %}
 
-        <div class="d-flex justify-content-between align-items-end mb-4">
-          <div>
-            <h2 class="fw-bold mb-1">{{ title }}</h2>
-            <div class="text-muted">
-              Kelola semua pesan kontak yang masuk dari website.
-            </div>
+  <div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">{{ title }}</h2>
+      <div class="text-muted">Kelola semua pesan kontak yang masuk dari website.</div>
+    </div>
+  </div>
+
+  <!-- Contacts Table -->
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+    <div class="card-header bg-white p-4 border-bottom-0">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+        <h5 class="mb-0 fw-bold">
+          <i class="bi bi-envelope me-2"></i> Daftar Pesan Kontak Masuk
+        </h5>
+        <span class="badge bg-info mt-2 mt-md-0">Menampilkan halaman {{ page }}</span>
+      </div>
+
+      <form method="GET" class="row g-2 align-items-center">
+        <div class="col-12 col-md-4">
+          <div class="input-group shadow-sm rounded-pill overflow-hidden h-100">
+            <span class="input-group-text bg-light border-0 px-3">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" name="q" value="{{ q }}" class="form-control border-0 bg-light shadow-none" placeholder="Cari nama, email, atau subjek..." />
           </div>
         </div>
 
-        {% if messages %} {% for message in messages %}
-        <div
-          class="alert alert-{{ message.tags }} alert-dismissible bg-white border-start border-{{ message.tags }} border-5 shadow-sm"
-        >
-          {{ message }}
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-          ></button>
+        <div class="col-6 col-md-3">
+          <select name="status" class="form-select border-0 bg-light shadow-sm rounded-pill text-muted" onchange="this.form.submit()">
+            <option value="">Semua Status</option>
+            <option value="unresolved" {% if status == 'unresolved' %}selected{% endif %}>Belum Ditanggapi</option>
+            <option value="resolved" {% if status == 'resolved' %}selected{% endif %}>Sudah Ditanggapi</option>
+          </select>
         </div>
-        {% endfor %} {% endif %}
 
-        <!-- Search & Filter Card -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-          <div class="card-body p-4">
-            <form method="GET" class="row g-3">
-              <div class="col-md-6">
-                <label
-                  class="form-label small text-muted text-uppercase fw-semibold"
-                  >Cari Kontak</label
+        <div class="col-12 col-md-1 d-flex gap-1 justify-content-end mt-2 mt-md-0 ms-auto">
+          <button type="submit" class="d-none" aria-hidden="true"></button>
+          {% if q or status %}
+          <a href="?" class="btn btn-light rounded-circle shadow-sm text-muted" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;" title="Reset Filter">
+            <i class="bi bi-x-lg"></i>
+          </a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light text-muted" style="font-size: 0.85rem; letter-spacing: 0.5px">
+            <tr>
+              <th class="ps-4 fw-semibold text-uppercase border-0">Nama</th>
+              <th class="fw-semibold text-uppercase border-0">Email</th>
+              <th class="fw-semibold text-uppercase border-0">Subjek</th>
+              <th class="fw-semibold text-uppercase border-0">Tanggal</th>
+              <th class="fw-semibold text-uppercase border-0">Status</th>
+              <th class="text-end pe-4 fw-semibold text-uppercase border-0">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="border-top-0">
+            {% for contact in contacts %}
+            <tr>
+              <td class="ps-4">
+                <div class="fw-semibold text-dark">{{ contact.full_name }}</div>
+              </td>
+              <td>
+                <div class="text-muted small">{{ contact.email }}</div>
+              </td>
+              <td>
+                <div class="text-truncate" style="max-width: 200px" title="{{ contact.subject }}">
+                  {{ contact.subject }}
+                </div>
+              </td>
+              <td>
+                <div class="small text-muted">{{ contact.created_at|date:"d M Y, H:i" }}</div>
+              </td>
+              <td>
+                {% if contact.is_resolved %}
+                <span class="badge bg-success px-3 py-2 rounded-pill">
+                  <i class="bi bi-check-circle me-1"></i> Ditanggapi
+                </span>
+                {% else %}
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                  <i class="bi bi-clock-history me-1"></i> Menunggu
+                </span>
+                {% endif %}
+              </td>
+              <td class="text-end pe-4">
+                <button
+                  class="btn btn-sm btn-outline-primary rounded-pill view-contact-btn"
+                  data-contact-id="{{ contact.id }}"
+                  data-contact-name="{{ contact.full_name }}"
+                  data-contact-email="{{ contact.email }}"
+                  data-contact-subject="{{ contact.subject }}"
+                  data-contact-date="{{ contact.created_at|date:'d M Y, H:i' }}"
+                  data-contact-resolved="{% if contact.is_resolved %}1{% else %}0{% endif %}"
                 >
-                <input
-                  type="text"
-                  name="q"
-                  class="form-control"
-                  placeholder="Cari nama, email, atau subjek..."
-                  value="{{ q }}"
-                />
-              </div>
-              <div class="col-md-4">
-                <label
-                  class="form-label small text-muted text-uppercase fw-semibold"
-                  >Filter Status</label
-                >
-                <select name="status" class="form-select">
-                  <option value="">Semua Status</option>
-                  <option
-                    value="unresolved"
-                    {%
-                    if
-                    status=""
-                    ="unresolved"
-                    %}selected{%
-                    endif
-                    %}
-                  >
-                    Belum Ditanggapi
-                  </option>
-                  <option
-                    value="resolved"
-                    {%
-                    if
-                    status=""
-                    ="resolved"
-                    %}selected{%
-                    endif
-                    %}
-                  >
-                    Sudah Ditanggapi
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">
-                  <i class="bi bi-search me-1"></i> Cari
+                  <i class="bi bi-eye me-1"></i> Lihat Detail
                 </button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- Contacts Table -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-          <div
-            class="card-header bg-white p-4 border-bottom-0 d-flex justify-content-between align-items-center"
-          >
-            <h5 class="mb-0 fw-bold">
-              <i class="bi bi-envelope me-2"></i> Daftar Pesan Kontak Masuk
-            </h5>
-            <span class="badge bg-info">Menampilkan halaman {{ page }}</span>
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0">
-                <thead
-                  class="bg-light text-muted"
-                  style="font-size: 0.85rem; letter-spacing: 0.5px"
-                >
-                  <tr>
-                    <th class="ps-4 fw-semibold text-uppercase border-0">
-                      Nama
-                    </th>
-                    <th class="fw-semibold text-uppercase border-0">Email</th>
-                    <th class="fw-semibold text-uppercase border-0">Subjek</th>
-                    <th class="fw-semibold text-uppercase border-0">Tanggal</th>
-                    <th class="fw-semibold text-uppercase border-0">Status</th>
-                    <th
-                      class="text-end pe-4 fw-semibold text-uppercase border-0"
-                    >
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="border-top-0">
-                  {% for contact in contacts %}
-                  <tr>
-                    <td class="ps-4">
-                      <div class="fw-semibold text-dark">
-                        {{ contact.full_name }}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="text-muted small">{{ contact.email }}</div>
-                    </td>
-                    <td>
-                      <div
-                        class="text-truncate"
-                        style="max-width: 200px"
-                        title="{{ contact.subject }}"
-                      >
-                        {{ contact.subject }}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="small text-muted">
-                        {{ contact.created_at|date:"d M Y, H:i" }}
-                      </div>
-                    </td>
-                    <td>
-                      {% if contact.is_resolved %}
-                      <span class="badge bg-success px-3 py-2 rounded-pill">
-                        <i class="bi bi-check-circle me-1"></i> Ditanggapi
-                      </span>
-                      {% else %}
-                      <span
-                        class="badge bg-warning text-dark px-3 py-2 rounded-pill"
-                      >
-                        <i class="bi bi-clock-history me-1"></i> Menunggu
-                      </span>
-                      {% endif %}
-                    </td>
-                    <td class="text-end pe-4">
-                      <button
-                        class="btn btn-sm btn-outline-primary rounded-pill view-contact-btn"
-                        data-contact-id="{{ contact.id }}"
-                        data-contact-name="{{ contact.full_name }}"
-                        data-contact-email="{{ contact.email }}"
-                        data-contact-subject="{{ contact.subject }}"
-                        data-contact-date="{{ contact.created_at|date:'d M Y, H:i' }}"
-                        data-contact-resolved="{% if contact.is_resolved %}1{% else %}0{% endif %}"
-                      >
-                        <i class="bi bi-eye me-1"></i> Lihat Detail
-                      </button>
-                    </td>
-                  </tr>
-                  {% empty %}
-                  <tr>
-                    <td colspan="6" class="text-center py-5 text-muted">
-                      <i class="bi bi-inbox" style="font-size: 2rem"></i>
-                      <p class="mt-2">
-                        Tidak ada pesan kontak yang sesuai kriteria pencarian.
-                      </p>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Simple Prev/Next pagination (avoids COUNT queries) -->
-        <nav class="mt-4">
-          <ul class="pagination justify-content-center">
-            {% if has_previous %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ previous_page }}">&laquo; Sebelumnya</a>
-            </li>
-            {% endif %}
-            <li class="page-item disabled">
-              <span class="page-link">Halaman {{ page }}</span>
-            </li>
-            {% if has_next %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ next_page }}">Selanjutnya &raquo;</a>
-            </li>
-            {% endif %}
-          </ul>
-        </nav>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center py-5 text-muted">
+                <i class="bi bi-inbox" style="font-size: 2rem"></i>
+                <p class="mt-2">Tidak ada pesan kontak yang sesuai kriteria pencarian.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-      
-      <!-- Single Reusable Modal for all contacts -->
-      <div class="modal fade" id="contactDetailModal" tabindex="-1" aria-labelledby="contactDetailModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title fw-bold" id="contactDetailModalLabel">
-                <i class="bi bi-envelope-open me-2 text-primary"></i>Detail Pesan Kontak
-              </h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <div class="mb-3">
-                <label class="form-label text-muted small fw-semibold">Nama Pengirim</label>
-                <p class="fw-semibold mb-0" id="modalContactName">-</p>
-              </div>
-              <hr class="my-2">
-              <div class="mb-3">
-                <label class="form-label text-muted small fw-semibold">Email</label>
-                <p class="mb-0">
-                  <a href="#" id="modalContactEmail" class="text-decoration-none">-</a>
-                </p>
-              </div>
-              <hr class="my-2">
-              <div class="mb-3">
-                <label class="form-label text-muted small fw-semibold">Subjek</label>
-                <p class="fw-semibold mb-0" id="modalContactSubject">-</p>
-              </div>
-              <hr class="my-2">
-              <div class="mb-3">
-                <label class="form-label text-muted small fw-semibold">Pesan</label>
-                <div id="modalContactMessage" class="bg-light p-3 rounded border" style="min-height: 100px;">
-                  <div class="text-muted">Memuat...</div>
-                </div>
-              </div>
-              <hr class="my-2">
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-semibold">Diterima pada</label>
-                  <p class="text-muted mb-0" id="modalContactDate">-</p>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-semibold">Status</label>
-                  <p class="mb-0" id="modalContactStatus">-</p>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          var modal = new bootstrap.Modal(document.getElementById('contactDetailModal'), {});
-          
-          // Use event delegation on tbody - prevents memory leak from individual event listeners
-          var tbody = document.querySelector('table tbody');
-          if (!tbody) return;
-          
-          tbody.addEventListener('click', function(event) {
-            var btn = event.target.closest('.view-contact-btn');
-            if (!btn) return;
-            
-            var contactId = btn.dataset.contactId;
-            var contactName = btn.dataset.contactName || '';
-            var contactEmail = btn.dataset.contactEmail || '';
-            var contactSubject = btn.dataset.contactSubject || '';
-            var contactDate = btn.dataset.contactDate || '';
-            var contactResolved = btn.dataset.contactResolved || '0';
+    </div>
+  </div>
 
-            // Set text content (safe - no XSS risk)
-            document.getElementById('modalContactName').textContent = contactName;
-            var emailLink = document.getElementById('modalContactEmail');
-            emailLink.textContent = contactEmail;
-            emailLink.href = 'mailto:' + contactEmail;
-            document.getElementById('modalContactSubject').textContent = contactSubject;
-            document.getElementById('modalContactDate').textContent = contactDate;
-
-            // Build and insert status badge safely
-            var statusContainer = document.getElementById('modalContactStatus');
-            statusContainer.innerHTML = '';
-            var badgeSpan = document.createElement('span');
-            badgeSpan.className = contactResolved === '1' ? 'badge bg-success px-3 py-2' : 'badge bg-warning text-dark px-3 py-2';
-            
-            var icon = document.createElement('i');
-            icon.className = contactResolved === '1' ? 'bi bi-check-circle me-1' : 'bi bi-clock-history me-1';
-            badgeSpan.appendChild(icon);
-            
-            var text = document.createTextNode(contactResolved === '1' ? ' Sudah Ditanggapi' : ' Menunggu Respon');
-            badgeSpan.appendChild(text);
-            statusContainer.appendChild(badgeSpan);
-
-            // Reset message container
-            var messageContainer = document.getElementById('modalContactMessage');
-            messageContainer.innerHTML = '<div class="text-muted">Memuat...</div>';
-
-            // Fetch full message content
-            fetch('/dashboard/contacts/' + contactId + '/detail/')
-              .then(function(resp) { return resp.json(); })
-              .then(function(data) {
-                if (data.success && data.message) {
-                  // Use textContent for safety, then convert newlines to <br>
-                  var safeDiv = document.createElement('div');
-                  safeDiv.textContent = data.message;
-                  var html = safeDiv.innerHTML.replace(/\n/g, '<br>');
-                  messageContainer.innerHTML = html;
-                } else {
-                  messageContainer.textContent = 'Gagal memuat pesan.';
-                  messageContainer.style.color = '#dc3545';
-                }
-              })
-              .catch(function(err) { 
-                messageContainer.textContent = 'Gagal memuat pesan.';
-                messageContainer.style.color = '#dc3545';
-              });
-
-            // Show modal
-            modal.show();
-          });
-        });
-      </script>
+  <!-- Prev/Next pagination -->
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ previous_page }}">&laquo; Sebelumnya</a>
+      </li>
+      {% endif %}
+      <li class="page-item disabled">
+        <span class="page-link">Halaman {{ page }}</span>
+      </li>
+      {% if has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ next_page }}">Selanjutnya &raquo;</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
 
 {% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="contactDetailModal" tabindex="-1" aria-labelledby="contactDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold" id="contactDetailModalLabel">
+          <i class="bi bi-envelope-open me-2 text-primary"></i>Detail Pesan Kontak
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body px-4 pb-2">
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-semibold">Nama Pengirim</label>
+          <p class="fw-semibold mb-0" id="modalContactName">-</p>
+        </div>
+        <hr class="my-2">
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-semibold">Email</label>
+          <p class="mb-0">
+            <a href="#" id="modalContactEmail" class="text-decoration-none">-</a>
+          </p>
+        </div>
+        <hr class="my-2">
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-semibold">Subjek</label>
+          <p class="fw-semibold mb-0" id="modalContactSubject">-</p>
+        </div>
+        <hr class="my-2">
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-semibold">Pesan</label>
+          <div id="modalContactMessage" class="bg-light p-3 rounded border" style="min-height: 100px;">
+            <div class="text-muted">Memuat...</div>
+          </div>
+        </div>
+        <hr class="my-2">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label text-muted small fw-semibold">Diterima pada</label>
+            <p class="text-muted mb-0" id="modalContactDate">-</p>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small fw-semibold">Status</label>
+            <p class="mb-0" id="modalContactStatus">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-top-0">
+        <button type="button" class="btn btn-light border px-4 rounded-pill" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock modals %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var modal = new bootstrap.Modal(document.getElementById('contactDetailModal'), {});
+
+    var tbody = document.querySelector('table tbody');
+    if (!tbody) return;
+
+    tbody.addEventListener('click', function(event) {
+      var btn = event.target.closest('.view-contact-btn');
+      if (!btn) return;
+
+      var contactId = btn.dataset.contactId;
+      var contactName = btn.dataset.contactName || '';
+      var contactEmail = btn.dataset.contactEmail || '';
+      var contactSubject = btn.dataset.contactSubject || '';
+      var contactDate = btn.dataset.contactDate || '';
+      var contactResolved = btn.dataset.contactResolved || '0';
+
+      document.getElementById('modalContactName').textContent = contactName;
+      var emailLink = document.getElementById('modalContactEmail');
+      emailLink.textContent = contactEmail;
+      emailLink.href = 'mailto:' + contactEmail;
+      document.getElementById('modalContactSubject').textContent = contactSubject;
+      document.getElementById('modalContactDate').textContent = contactDate;
+
+      var statusContainer = document.getElementById('modalContactStatus');
+      statusContainer.innerHTML = '';
+      var badgeSpan = document.createElement('span');
+      badgeSpan.className = contactResolved === '1'
+        ? 'badge bg-success px-3 py-2 rounded-pill'
+        : 'badge bg-warning text-dark px-3 py-2 rounded-pill';
+      var icon = document.createElement('i');
+      icon.className = contactResolved === '1' ? 'bi bi-check-circle me-1' : 'bi bi-clock-history me-1';
+      badgeSpan.appendChild(icon);
+      badgeSpan.appendChild(document.createTextNode(contactResolved === '1' ? ' Sudah Ditanggapi' : ' Menunggu Respon'));
+      statusContainer.appendChild(badgeSpan);
+
+      var messageContainer = document.getElementById('modalContactMessage');
+      messageContainer.innerHTML = '<div class="text-muted">Memuat...</div>';
+
+      fetch('/dashboard/contacts/' + contactId + '/detail/')
+        .then(function(resp) { return resp.json(); })
+        .then(function(data) {
+          if (data.success && data.message) {
+            var safeDiv = document.createElement('div');
+            safeDiv.textContent = data.message;
+            messageContainer.innerHTML = safeDiv.innerHTML.replace(/\n/g, '<br>');
+          } else {
+            messageContainer.textContent = 'Gagal memuat pesan.';
+            messageContainer.style.color = '#dc3545';
+          }
+        })
+        .catch(function() {
+          messageContainer.textContent = 'Gagal memuat pesan.';
+          messageContainer.style.color = '#dc3545';
+        });
+
+      modal.show();
+    });
+  });
+</script>
+{% endblock extra_js %}
