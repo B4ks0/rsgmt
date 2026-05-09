@@ -336,12 +336,9 @@
                         <form
                           action="{% url 'backend_appointment_delete' appt.id %}"
                           method="POST"
-                          class="d-inline"
-                          onsubmit="
-                            return confirm(
-                              'Yakin ingin menghapus janji temu ini?',
-                            );
-                          "
+                          class="d-inline delete-confirm-form"
+                          data-item-name="{% if appt.patient %}{{ appt.patient.full_name|escapejs }}{% else %}{{ appt.full_name|escapejs }}{% endif %}"
+                          data-model-name="Janji Temu"
                         >
                           {% csrf_token %}
                           <button

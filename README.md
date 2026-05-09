@@ -1,117 +1,423 @@
-# 🏥 RS Gunung Maria Tomohon - Appointment System with AI OCR
+# RS Gunung Maria Tomohon — Sistem Informasi Rumah Sakit
 
-Sistem Janji Temu Digital untuk **RS Gunung Maria Tomohon** yang dirancang dengan antarmuka premium, integrasi kecerdasan buatan (AI) untuk pengenalan identitas, dan manajemen jadwal dokter yang dinamis.
+Sistem informasi dan pendaftaran janji temu digital untuk **RS Gunung Maria Tomohon**. Dilengkapi dengan antarmuka publik, manajemen jadwal dokter dinamis, dan dashboard admin backend yang lengkap.
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
-[![Django](https://img.shields.io/badge/Django-4.2+-092e20.svg)](https://www.djangoproject.com/)
-[![Tesseract OCR](https://img.shields.io/badge/OCR-Tesseract-red.svg)](https://github.com/tesseract-ocr/tesseract)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-5.x-092e20.svg)](https://www.djangoproject.com/)
+[![MySQL](https://img.shields.io/badge/Database-MySQL-4479A1.svg)](https://www.mysql.com/)
+[![Bootstrap](https://img.shields.io/badge/UI-Bootstrap%205.3-7952B3.svg)](https://getbootstrap.com/)
 
-## ✨ Fitur Utama
+---
 
-### 1. 👁️ AI KTP Scanner (OCR)
-- **Auto-Fill NIK**: Sistem secara otomatis membaca 16 digit NIK dari foto KTP menggunakan **Tesseract OCR**.
-- **Multi-Pass Strategy**: Algoritma cerdas yang mencoba berbagai mode pemrosesan gambar (*Upscaling, Contrast, Sharpening*) untuk hasil akurasi maksimal.
-- **Fail-Safe Mechanism**: Notifikasi otomatis jika identitas sulit terbaca, memberikan opsi input manual yang lancar.
+## Fitur
 
-### 2. 👨‍⚕️ Sistem Dokter Cerdas
-- **Dynamic Dependent Dropdown**: Pilihan dokter otomatis terfilter berdasarkan Poli/Departemen yang dipilih (menggunakan AJAX).
-- **Auto-Random Pick**: Jika pasien tidak memiliki preferensi tertentu, sistem akan menyarankan satu dokter secara acak dari departemen tersebut.
-- **Profil Detail & Jadwal Lengkap**: Halaman profil dokter yang menampilkan biografi, pengalaman, dan tabel jadwal mingguan lengkap (Senin-Minggu).
+### Website Publik
+- Halaman beranda, tentang, layanan, dan mitra
+- Daftar dokter dengan filter poli dan hari praktik
+- Halaman profil dokter dengan jadwal mingguan
+- Formulir pendaftaran janji temu online dengan kalender interaktif
+- Pemilihan dokter otomatis berdasarkan departemen (AJAX)
+- Formulir kontak
 
-### 3. 🎨 UI/UX Premium
-- **Responsive Design**: Tampilan yang dioptimalkan untuk perangkat *Mobile* maupun *Desktop*.
-- **Modern Aesthetics**: Menggunakan palet warna yang harmonis, bayangan lembut (*Soft Shadows*), dan animasi mikro untuk pengalaman pengguna yang menyenangkan.
+### Dashboard Admin (`/dashboard/`)
+- Login & logout dengan proteksi `is_staff`
+- Statistik ringkas (total pasien, dokter, janji temu, pending)
+- Manajemen janji temu: tambah, edit, ubah status, hapus (dengan undo toast)
+- Manajemen pasien: tambah, edit
+- Manajemen dokter: tambah, edit, hapus, beserta jadwal praktik inline
+- Manajemen poli / departemen
+- Daftar pesan kontak masuk dengan modal detail
+- Sistem toast notifikasi bertumpuk (maks. 3) dengan fitur undo hapus 7 detik
 
-### 4. 📊 Dashboard Admin
-- Manajemen janji temu pasien.
-- Pengolahan data dokter dan departemen.
-- Statistik dan riwayat pembayaran.
+---
 
-## 📦 Migrasi ke Laptop Lain (Backup & Restore)
+## Tech Stack
 
-Jika Anda ingin memindah atau menjalankan proyek ini di laptop lain, ikuti langkah berikut:
+| Komponen | Teknologi |
+|---|---|
+| Backend | Python 3.11+, Django 5.x |
+| Database | MySQL 8.x |
+| Frontend | Bootstrap 5.3.3, Bootstrap Icons 1.11.3 |
+| Image processing | Pillow |
+| DB connector | mysqlclient |
+| Config | python-dotenv |
 
-### 1. Migrasi Database (MySQL)
-Saya telah menyediakan file **`hospital_data.json`** yang berisi seluruh data (Dokter, Jadwal, Departemen).
+---
 
-**Langkah Restore:**
-1. Buat database kosong bernama `rsgumato` di MySQL laptop baru.
-2. Jalankan migrasi tabel terlebih dahulu:
-   ```bash
-   python manage.py migrate
-   ```
-3. Impor data dari file backup:
-   ```bash
-   python manage.py loaddata hospital_data.json
-   ```
+## Prasyarat
 
-### 2. Konfigurasi Lingkungan (.env)
-1. Salin file `.env.example` menjadi `.env`.
-2. Sesuaikan `DB_USER` dan `DB_PASSWORD` sesuai dengan pengaturan MySQL di laptop baru tersebut.
+Pastikan hal berikut sudah terinstal sebelum setup:
 
-### 3. Menjalankan dengan Docker 🐳
-Jika Anda memiliki Docker, Anda tidak perlu menginstall Python atau Tesseract secara manual. Cukup jalankan:
+- **Python 3.11+** — [python.org/downloads](https://www.python.org/downloads/)
+- **MySQL 8.x** — via [Laragon](https://laragon.org/) (Windows, direkomendasikan), XAMPP, atau MySQL Community Server
+- **Git** — [git-scm.com](https://git-scm.com/)
+- **pip** — sudah termasuk dalam instalasi Python modern
+
+> **Catatan Windows:** Gunakan Laragon untuk MySQL. Pastikan service MySQL sudah berjalan sebelum menjalankan server Django.
+
+---
+
+## Setup & Instalasi
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/B4ks0/rsgmt.git
+cd rsgmt
+```
+
+### 2. Buat Virtual Environment
+
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Pastikan prompt terminal berubah menjadi `(venv)` sebelum melanjutkan.
+
+### 3. Install Dependensi Python
+
+```bash
+pip install -r requirements.txt
+```
+
+Paket yang akan terinstal:
+- `Django>=4.2,<6.1`
+- `Pillow>=10.0.0`
+- `mysqlclient>=2.2.0`
+- `python-dotenv>=1.0.0`
+
+> **Windows:** Jika `mysqlclient` gagal build, install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) terlebih dahulu, atau pastikan MySQL sudah terinstal via Laragon.
+
+### 4. Konfigurasi Environment (.env)
+
+Salin file contoh:
+
+```bash
+# Windows
+copy .env.example .env
+
+# macOS / Linux
+cp .env.example .env
+```
+
+Buka `.env` dan isi sesuai lingkungan lokal:
+
+```env
+# Database
+DB_NAME=rsgumato
+DB_USER=root
+DB_PASSWORD=           # kosongkan jika MySQL tidak pakai password (default Laragon)
+DB_HOST=127.0.0.1
+DB_PORT=3306
+
+# Django
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+```
+
+**Generate SECRET_KEY baru (wajib di production):**
+
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+### 5. Buat Database MySQL
+
+Buka MySQL client (Laragon → HeidiSQL, phpMyAdmin, atau command line):
+
+```sql
+CREATE DATABASE rsgumato CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### 6. Jalankan Migrasi
+
+```bash
+python manage.py migrate
+```
+
+Output yang diharapkan:
+```
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, hospital, sessions
+Running migrations:
+  Applying hospital.0001_initial... OK
+  ...
+  Applying hospital.0008_appointment_is_new_patient... OK
+```
+
+### 7. Import Data Awal (Opsional)
+
+Jika tersedia file `hospital_data.json` (data dokter, jadwal, departemen):
+
+```bash
+python manage.py loaddata hospital_data.json
+```
+
+Atau gunakan seed script bawaan:
+
+```bash
+python seed.py
+```
+
+### 8. Buat Akun Admin
+
+```bash
+python manage.py createsuperuser
+```
+
+Masukkan username, email (opsional), dan password. Akun ini digunakan untuk login ke `/dashboard/login/`.
+
+> Akun harus memiliki `is_staff = True` untuk dapat mengakses backend dashboard. Superuser otomatis memiliki akses penuh.
+
+Untuk menambah akun staff biasa (bukan superuser):
+
+```bash
+python manage.py shell -c "
+from django.contrib.auth import get_user_model
+User = get_user_model()
+u = User.objects.create_user('namauser', password='passwordkuat')
+u.is_staff = True
+u.save()
+print('Akun staff berhasil dibuat.')
+"
+```
+
+### 9. Kumpulkan Static Files (Production)
+
+```bash
+python manage.py collectstatic
+```
+
+### 10. Jalankan Server Development
+
+```bash
+python manage.py runserver
+```
+
+Akses aplikasi di:
+
+| URL | Keterangan |
+|---|---|
+| `http://127.0.0.1:8000/` | Halaman publik |
+| `http://127.0.0.1:8000/dashboard/login/` | Login admin |
+| `http://127.0.0.1:8000/dashboard/` | Dashboard admin (perlu login) |
+
+---
+
+## Struktur Direktori
+
+```
+rsgmt/
+├── config/                        # Konfigurasi Django
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── hospital/                      # Aplikasi utama
+│   ├── migrations/                # Migrasi database (0001–0008)
+│   ├── models.py                  # Model: Doctor, Patient, Appointment, dll.
+│   ├── views.py                   # Semua view (publik + backend admin)
+│   ├── forms.py                   # Form: AppointmentForm, BackendDoctorForm, dll.
+│   └── urls.py                    # URL routing lengkap
+├── templates/
+│   └── hospital/
+│       ├── home.html              # Beranda
+│       ├── appointment_form.html  # Formulir janji temu publik
+│       ├── doctors.html           # Daftar dokter
+│       ├── doctor_detail.html     # Profil dokter
+│       ├── about.html
+│       ├── services.html
+│       ├── mitra_list.html
+│       └── backend/               # Template dashboard admin
+│           ├── base_backend.html  # Base template + sidebar + toast system
+│           ├── dashboard.html     # Dashboard utama dengan live poll
+│           ├── doctor_form.html   # Form dokter + jadwal inline + crop foto
+│           ├── patient_form.html
+│           ├── department_form.html
+│           ├── appointment_form.html
+│           ├── generic_list.html  # Tabel generik (dokter, pasien, poli)
+│           ├── contact_list.html  # Pesan kontak + modal detail
+│           ├── login.html
+│           └── includes/
+│               └── _sidebar.html
+├── static/
+│   └── hospital/
+│       ├── css/site.css           # CSS kustom frontend
+│       ├── img/                   # Gambar statis
+│       └── img/kerjasama/        # Logo mitra
+├── media/                         # Upload runtime (foto dokter, KTP)
+├── slideshow/                     # Gambar slideshow beranda (1.png – N.png)
+├── .env.example                   # Template environment
+├── requirements.txt               # Dependensi Python
+├── Dockerfile
+├── docker-compose.yml
+├── manage.py
+└── seed.py                        # Script seed data
+```
+
+---
+
+## URL Endpoints
+
+### Publik
+
+| URL | Keterangan |
+|---|---|
+| `GET /` | Beranda |
+| `GET /about/` | Tentang RS |
+| `GET /services/` | Layanan |
+| `GET /mitra/` | Mitra kerja sama |
+| `GET /doctors/` | Daftar dokter (filter poli & hari) |
+| `GET /doctors/<uuid>/` | Profil & jadwal dokter |
+| `GET/POST /appointments/` | Pendaftaran janji temu |
+
+### API (AJAX)
+
+| URL | Method | Keterangan |
+|---|---|---|
+| `/api/submit-contact/` | `POST` | Kirim pesan kontak |
+| `/api/get-doctors-by-dept/?department_id=` | `GET` | Dokter berdasarkan poli |
+| `/api/get-doctor-available-dates/?doctor_id=` | `GET` | Tanggal praktik 60 hari ke depan |
+
+### Backend Admin
+
+| URL | Keterangan |
+|---|---|
+| `/dashboard/login/` | Login |
+| `/dashboard/logout/` | Logout |
+| `/dashboard/` | Dashboard utama |
+| `/dashboard/patients/` | Kelola pasien |
+| `/dashboard/patients/add/` | Tambah pasien |
+| `/dashboard/patients/<uuid>/edit/` | Edit pasien |
+| `/dashboard/doctors/` | Kelola dokter |
+| `/dashboard/doctors/add/` | Tambah dokter + jadwal |
+| `/dashboard/doctors/<uuid>/edit/` | Edit dokter + jadwal |
+| `/dashboard/doctors/<uuid>/delete/` | Hapus dokter |
+| `/dashboard/departments/` | Kelola poli |
+| `/dashboard/departments/add/` | Tambah poli |
+| `/dashboard/departments/<id>/edit/` | Edit poli + daftar dokter |
+| `/dashboard/appointments/add/` | Tambah janji temu |
+| `/dashboard/appointments/<uuid>/edit/` | Edit janji temu |
+| `/dashboard/appointments/<uuid>/delete/` | Hapus janji temu |
+| `/dashboard/contacts/` | Pesan kontak masuk |
+| `/dashboard/contacts/<id>/detail/` | Detail pesan (JSON, untuk modal) |
+| `/dashboard/payments/` | Info pembayaran |
+
+---
+
+## Skema Database
+
+```
+Specialization ──< Doctor >── Department
+                      │
+                 DoctorSchedule
+                 ScheduleException
+
+Patient ──< Appointment >── Doctor
+                │               └── Department
+                ├── Payment
+                ├── Notification
+                └── Review
+
+ContactMessage  (independen)
+```
+
+### Model Utama
+
+| Model | PK | Keterangan |
+|---|---|---|
+| `Department` | Auto int | Poli / departemen |
+| `Specialization` | Auto int | Spesialisasi dokter |
+| `Doctor` | UUID | Profil dokter, foto, aktif/tidak |
+| `DoctorSchedule` | UUID | Jadwal praktik per hari (0=Senin … 6=Minggu) |
+| `ScheduleException` | UUID | Override tanggal (libur / jadwal khusus) |
+| `Patient` | UUID | Data pasien |
+| `Appointment` | UUID | Janji temu, status: `requested/confirmed/completed/cancelled` |
+| `Payment` | UUID | Catatan pembayaran per janji temu |
+| `ContactMessage` | Auto int | Pesan dari formulir kontak publik |
+
+---
+
+## Deployment dengan Docker
+
 ```bash
 docker-compose up --build
 ```
-Sistem akan otomatis:
-- Membuat kontainer MySQL.
-- Menginstall Tesseract OCR versi Linux.
-- Menjalankan migrasi database.
-- Mengimpor data dari `hospital_data.json`.
-- Aplikasi bisa diakses di `http://localhost:8000`.
+
+Docker Compose akan otomatis:
+1. Membangun container Python + Django
+2. Menjalankan container MySQL
+3. Menjalankan migrasi database
+4. Mengimpor `hospital_data.json` jika tersedia
+5. Menjalankan server di port `8000`
+
+Akses di `http://localhost:8000`.
 
 ---
 
-## 🚀 Instalasi & Persiapan
+## Troubleshooting
 
-### Prasyarat
-- Python 3.10+
-- Django 4.2+
-- **Tesseract OCR Engine** terinstall di sistem (khusus Windows: pastikan path mengarah ke `C:\Program Files\Tesseract-OCR\tesseract.exe`).
+### `OperationalError: (2002, "Can't connect to server on '127.0.0.1'")`
+MySQL belum berjalan. Buka Laragon / XAMPP → klik **Start All** atau start MySQL secara manual.
 
-### Langkah Instalasi
+### `ModuleNotFoundError: No module named 'MySQLdb'`
+```bash
+pip install mysqlclient
+```
+Jika gagal build di Windows, install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
 
-1. **Clone Repository**
-   ```bash
-   git clone https://github.com/B4ks0/rsgmt.git
-   cd rsgmt
-   ```
+### `ImproperlyConfigured: The SECRET_KEY setting must not be empty`
+File `.env` belum dibuat atau `SECRET_KEY` masih placeholder. Ikuti kembali langkah 4.
 
-2. **Setup Virtual Environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/scripts/activate  # atau venv\Scripts\activate untuk Windows
-   ```
+### Static files tidak muncul di browser
+Pastikan `DEBUG=True` di `.env`. Django melayani static files secara otomatis saat mode development.
 
-3. **Install Dependensi**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Upload foto dokter tidak tersimpan
+Pastikan direktori `media/` ada dan bisa ditulis:
+```bash
+mkdir media
+```
 
-4. **Migrasi Database**
-   ```bash
-   python manage.py migrate
-   ```
+### Migrasi gagal: `Table already exists`
+```bash
+python manage.py migrate --fake-initial
+```
 
-5. **Jalankan Server**
-   ```bash
-   python manage.py runserver
-   ```
+### Akses dashboard ditolak meski sudah login
+Pastikan akun yang digunakan memiliki `is_staff = True`:
+```bash
+python manage.py shell -c "
+from django.contrib.auth import get_user_model
+User = get_user_model()
+u = User.objects.get(username='namauser')
+u.is_staff = True
+u.save()
+print('is_staff diaktifkan.')
+"
+```
 
-## 📸 Demo Fitur OCR
-Sistem ini menggunakan teknik pengolahan gambar berbasis `Pillow` sebelum dikirim ke mesin OCR:
-- **Upscaling 2x**: Menambah detail pada KTP resolusi rendah.
-- **Grayscale & Thresholding**: Memisahkan teks dari latar belakang secara tajam.
-- **Sharpening**: Memperjelas sudut-sudut font agar mudah terbaca oleh mesin.
+---
+
+## Kontribusi
+
+1. Fork repository
+2. Buat branch fitur: `git checkout -b feature/nama-fitur`
+3. Commit perubahan: `git commit -m "feat: deskripsi singkat"`
+4. Push ke branch: `git push origin feature/nama-fitur`
+5. Buat Pull Request
 
 ---
 
-## 🛡️ Lisensi
-Aplikasi ini dikembangkan khusus untuk **RS Gunung Maria Tomohon**.
+## Lisensi
 
-## 📞 Kontak
-Jika ada kendala dalam penggunaan sistem, silakan hubungi tim IT RS Gunung Maria atau buka *issue* di repository ini.
+Sistem ini dikembangkan khusus untuk operasional **RS Gunung Maria Tomohon**, Sulawesi Utara, Indonesia.
 
 ---
-*Created with ❤️ for RS Gunung Maria Tomohon*
+
+*Developed for RS Gunung Maria Tomohon · Tomohon, Sulawesi Utara*

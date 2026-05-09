@@ -1,11 +1,26 @@
 from pathlib import Path
+from datetime import timedelta
 
 from django.contrib import messages
+from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.forms import AuthenticationForm
+from django.core.paginator import Paginator
+from django.db import transaction
+from django.db.models import Count, Q
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect, render
+from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 
-from .forms import AppointmentForm
-from .models import Doctor, Department
+from .forms import (
+    AppointmentForm, BackendAppointmentForm, BackendDepartmentForm,
+    BackendDoctorForm, BackendPatientForm, DoctorScheduleFormSet,
+)
+from .models import (
+    Appointment, ContactMessage, Department, Doctor, DoctorSchedule,
+    Patient, Payment, ScheduleException,
+)
 
 
 def logo_png(request):
@@ -73,7 +88,6 @@ def doctors(request):
 
     items = items.distinct()
 
-    from .models import Department
     departments = Department.objects.all().order_by("name")
     
     days_choices = [
@@ -83,8 +97,7 @@ def doctors(request):
 
     total_count = items.count()
 
-    from django.core.paginator import Paginator
-    paginator = Paginator(items, 3) 
+    paginator = Paginator(items, 3)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -138,7 +151,6 @@ def appointment_create(request):
 
         if doctor_id:
             try:
-                from .models import Doctor
                 doctor = Doctor.objects.get(id=doctor_id)
                 initial_data['doctor'] = doctor
                 initial_data['department'] = doctor.department
@@ -151,7 +163,6 @@ def appointment_create(request):
 def contact(request):
     """API endpoint for submitting contact form via AJAX"""
     if request.method == "POST":
-        from django.http import JsonResponse
         try:
             full_name = request.POST.get('full_name', '').strip()
             email = request.POST.get('email', '').strip()
@@ -163,7 +174,6 @@ def contact(request):
                 return JsonResponse({'success': False, 'error': 'All fields are required'}, status=400)
             
             # Create and save contact message
-            from .models import ContactMessage
             ContactMessage.objects.create(
                 full_name=full_name,
                 email=email,
@@ -179,10 +189,6 @@ def contact(request):
 
 
 
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth import login as auth_login, logout as auth_logout
-from .models import Appointment, Patient, Doctor
 
 def is_staff_check(user): return user.is_active and user.is_staff
 staff_member_required = user_passes_test(is_staff_check, login_url='backend_login')
@@ -196,7 +202,6 @@ def backend_login(request):
             user = form.get_user()
             if user.is_staff:
                 auth_login(request, user)
-                from django.utils.http import url_has_allowed_host_and_scheme
                 next_url = request.GET.get("next", "")
                 if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
                     return redirect(next_url)
@@ -217,9 +222,7 @@ def backend_logout(request):
 @staff_member_required
 def backend_dashboard(request):
     """ Custom Backend Dashboard tailored for Hospital tracking """
-    from django.core.paginator import Paginator
-    from django.db.models import Q
-    
+
     # Get counts without pagination to avoid multiple queries
     total_patients = Patient.objects.count()
     total_doctors = Doctor.objects.count()
@@ -303,8 +306,6 @@ def backend_update_status(request, appt_id):
             messages.error(request, "Janji temu tidak ditemukan.")
     return redirect("backend_dashboard")
 
-from .forms import BackendAppointmentForm
-
 @staff_member_required
 def backend_appointment_add(request):
     if request.method == "POST":
@@ -346,11 +347,8 @@ def backend_appointment_delete(request, appt_id):
             messages.error(request, "Janji temu tidak ditemukan.")
     return redirect("backend_dashboard")
 
-from .models import Payment, Department
-
 @staff_member_required
 def backend_patient_list(request):
-    from django.db.models import Q
     q = request.GET.get('q', '')
     gender = request.GET.get('gender', '')
     
@@ -362,20 +360,17 @@ def backend_patient_list(request):
         
     items = items.order_by("-created_at")
     
-    from django.core.paginator import Paginator
     paginator = Paginator(items, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     return render(request, "hospital/backend/generic_list.html", {
-        "items": page_obj, 
+        "items": page_obj,
         "title": "Kelola Pasien", 
         "model_name": "Pasien",
         "q": q,
         "filter_gender": gender
     })
-
-from .forms import BackendPatientForm
 
 @staff_member_required
 def backend_patient_create(request):
@@ -417,11 +412,8 @@ def backend_patient_edit(request, patient_id):
         "title": f"Edit Pasien: {patient.full_name}"
     })
 
-from .forms import BackendDoctorForm, DoctorScheduleFormSet
-
 @staff_member_required
 def backend_doctor_list(request):
-    from django.db.models import Q
     q = request.GET.get('q', '')
     dept_id = request.GET.get('dept', '')
     
@@ -434,21 +426,18 @@ def backend_doctor_list(request):
     items = items.order_by("full_name")
     departments = Department.objects.all().order_by("name")
     
-    from django.core.paginator import Paginator
     paginator = Paginator(items, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     return render(request, "hospital/backend/generic_list.html", {
-        "items": page_obj, 
+        "items": page_obj,
         "title": "Kelola Dokter", 
         "model_name": "Dokter",
         "q": q,
         "filter_dept": dept_id,
         "departments": departments,
     })
-from django.db import transaction
-
 @staff_member_required
 def backend_doctor_create(request):
     if request.method == "POST":
@@ -464,9 +453,10 @@ def backend_doctor_create(request):
                         messages.success(request, f"Data dokter baru {doctor.full_name} dan jadwalnya berhasil disimpan.")
                         return redirect("backend_doctor_list")
                     else:
-                        raise ValueError("Formset invalid") # triggers rollback to not save partial
+                        messages.error(request, "Jadwal tidak valid. Periksa kembali isian jadwal praktik.")
+                        raise ValueError("rollback")
             except ValueError:
-                pass 
+                pass
     else:
         form = BackendDoctorForm()
         formset = DoctorScheduleFormSet()
@@ -522,20 +512,15 @@ def backend_payment_list(request):
     items = Payment.objects.select_related("appointment").all().order_by("-created_at")
     return render(request, "hospital/backend/generic_list.html", {"items": items, "title": "Pembayaran", "model_name": "Pembayaran"})
 
-from django.db.models import Count
-
 @staff_member_required
 def backend_department_list(request):
     items = Department.objects.annotate(total_doctors=Count('doctors')).order_by("name")
     
-    from django.core.paginator import Paginator
     paginator = Paginator(items, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
-    return render(request, "hospital/backend/generic_list.html", {"items": page_obj, "title": "Departemen / Poli", "model_name": "Departemen"})
 
-from .forms import BackendDepartmentForm
+    return render(request, "hospital/backend/generic_list.html", {"items": page_obj, "title": "Departemen / Poli", "model_name": "Departemen"})
 
 @staff_member_required
 def backend_department_create(request):
@@ -592,9 +577,6 @@ def get_doctors_by_department(request):
 
 def get_doctor_available_dates(request):
     """Get available dates for a doctor in the next 60 days"""
-    from datetime import timedelta
-    from django.utils import timezone
-    from .models import ScheduleException
     
     doctor_id = request.GET.get('doctor_id')
     
@@ -644,9 +626,7 @@ def get_doctor_available_dates(request):
 
 @staff_member_required
 def backend_contact_list(request):
-    from django.db.models import Q
-    from .models import ContactMessage
-    
+
     q = request.GET.get('q', '').strip()[:100]  # Limit to 100 chars to prevent DoS
     status = request.GET.get('status', '').strip()
     
@@ -699,7 +679,6 @@ def backend_contact_list(request):
 @staff_member_required
 def backend_contact_detail(request, contact_id):
     """Return contact message details as JSON for modal loading to avoid fetching large text in list queries."""
-    from .models import ContactMessage
     try:
         cm = ContactMessage.objects.get(id=contact_id)
         return JsonResponse({
