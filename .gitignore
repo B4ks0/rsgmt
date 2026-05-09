@@ -7,5 +7,13 @@ media/
 *.log
 venv/
 env/
+.venv/
 .vscode/
 .idea/
+
+# Raw asset source folders (contents already in static/hospital/img/kerjasama/)
+kerjasama/
+hospital-notif.mp3
+
+# Personal / unrelated documents
+*.docx
