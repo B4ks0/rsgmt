@@ -110,14 +110,26 @@ class Appointment(models.Model):
     is_new_patient = models.BooleanField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    QUEUE_STATUS_CHOICES = [
+        ('waiting',  'Menunggu'),
+        ('called',   'Dipanggil'),
+        ('serving',  'Dilayani'),
+        ('done',     'Selesai'),
+        ('absent',   'Tidak Hadir'),
+    ]
+    queue_status = models.CharField(
+        max_length=20, choices=QUEUE_STATUS_CHOICES,
+        default='waiting', blank=True, db_index=True
+    )
+
     class Meta:
         ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=['status']),  # For filtering by status
-            models.Index(fields=['-booked_at']),  # For ordering and listing
-            models.Index(fields=['doctor', 'appointment_date']),  # For doctor schedules
-            models.Index(fields=['patient']),  # For patient appointments
-            models.Index(fields=['status', '-booked_at']),  # For dashboard filtering + ordering
+            models.Index(fields=['status']),
+            models.Index(fields=['-booked_at']),
+            models.Index(fields=['doctor', 'appointment_date']),
+            models.Index(fields=['patient']),
+            models.Index(fields=['status', '-booked_at']),
         ]
 
     def __str__(self):
@@ -165,6 +177,59 @@ class Appointment(models.Model):
         encoded_text = urllib.parse.quote(text)
         return f"https://wa.me/{phone_num}?text={encoded_text}"
 
+    @property
+    def get_queue_whatsapp_url(self):
+        import urllib.parse
+        phone_num = self.patient.phone if self.patient else self.phone
+        if not phone_num:
+            return "#"
+        phone_num = ''.join(filter(str.isdigit, phone_num))
+        if phone_num.startswith("08"):
+            phone_num = "628" + phone_num[2:]
+        elif phone_num.startswith("8"):
+            phone_num = "628" + phone_num[1:]
+        elif phone_num.startswith("0"):
+            phone_num = "62" + phone_num[1:]
+
+        name       = self.patient.full_name if self.patient else self.full_name
+        phone_disp = self.patient.phone if self.patient else self.phone
+        doctor_name = self.doctor.full_name if self.doctor else "Dokter"
+        dept       = self.doctor.department.name if self.doctor else "-"
+        queue      = self.queue_number or "-"
+
+        appointment_dt = self.appointment_date or self.preferred_date
+        if appointment_dt:
+            months = ["","Januari","Februari","Maret","April","Mei","Juni",
+                      "Juli","Agustus","September","Oktober","November","Desember"]
+            date_str = f"{appointment_dt.day} {months[appointment_dt.month]} {appointment_dt.year}"
+        else:
+            date_str = "sesuai jadwal yang disepakati"
+
+        text = (
+            f"Halo Bapak/Ibu *{name}*,\n\n"
+            f"Pendaftaran janji temu Anda di *RS Gunung Maria Tomohon* telah *DIKONFIRMASI* ✅\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"📋 *INFORMASI KUNJUNGAN*\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"🔢 Nomor Antrian : *{queue}*\n"
+            f"👨‍⚕️ Dokter          : {doctor_name}\n"
+            f"🏥 Poliklinik     : {dept}\n"
+            f"📅 Tanggal         : {date_str}\n"
+            f"🕗 Jam Layanan   : 08.00 – 14.00 WITA\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📌 *PETUNJUK KEDATANGAN:*\n"
+            f"• Hadir *15 menit* sebelum jadwal\n"
+            f"• Bawa *KTP / SIM* asli\n"
+            f"• Bawa *kartu BPJS / Asuransi* (jika ada)\n"
+            f"• Tunjukkan pesan ini kepada petugas\n\n"
+            f"Informasi & pertanyaan:\n"
+            f"📞 (0431) 351008\n"
+            f"💬 WA Admin: wa.me/62811351008\n\n"
+            f"_RS Gunung Maria Tomohon_\n"
+            f"_Melayani dengan Kasih_ 🙏"
+        )
+        return f"https://wa.me/{phone_num}?text={urllib.parse.quote(text)}"
+
 class AppointmentHistory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='history')
@@ -204,6 +269,54 @@ class Review(models.Model):
     comment = models.TextField(blank=True)
     is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class News(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, max_length=220)
+    excerpt = models.TextField(max_length=300, blank=True)
+    content = models.TextField()
+    thumbnail = models.ImageField(upload_to='news/', blank=True, null=True)
+    thumbnail_url = models.URLField(blank=True, max_length=500)
+    content_image = models.ImageField(upload_to='news/content/', blank=True, null=True)
+    content_image_url = models.URLField(blank=True, max_length=500)
+    is_published = models.BooleanField(default=False, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name_plural = 'News'
+
+    def __str__(self):
+        return self.title
+
+    def get_excerpt(self, length=160):
+        if self.excerpt:
+            return self.excerpt[:length] + ('…' if len(self.excerpt) > length else '')
+        import re
+        text = re.sub(r'<[^>]+>', '', self.content).strip()
+        return text[:length] + '…' if len(text) > length else text
+
+class Article(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, max_length=220)
+    content = models.TextField()
+    thumbnail = models.ImageField(upload_to='articles/', blank=True, null=True)
+    thumbnail_url = models.URLField(blank=True, max_length=500)
+    is_published = models.BooleanField(default=False, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+    def get_excerpt(self, length=160):
+        import re
+        text = re.sub(r'<[^>]+>', '', self.content).strip()
+        return text[:length] + '…' if len(text) > length else text
 
 class ContactMessage(models.Model):
     full_name = models.CharField(max_length=160, db_index=True)

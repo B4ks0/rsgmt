@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Artikel Kesehatan · RS Gunung Maria Tomohon{% endblock %}
+
+{% block content %}
+<div class="articles-page-wrap pb-4">
+
+  <div class="articles-page-header mb-4">
+    <p class="institusi-label mb-1">Edukasi &amp; Kesehatan</p>
+    <h1 class="h3 fw-bold text-dark mb-0">Artikel Kesehatan</h1>
+  </div>
+
+  {% if featured %}
+
+  <!-- Hero + Sidebar -->
+  <div class="row g-4 mb-5 align-items-stretch">
+
+    <!-- Hero artikel utama -->
+    <div class="col-12 col-md-7 d-flex flex-column">
+      <a href="{% url 'article_detail' featured.slug %}" class="art-hero text-decoration-none flex-grow-1">
+        <div class="art-hero-thumb">
+          {% if featured.thumbnail %}
+            <img src="{{ featured.thumbnail.url }}" alt="{{ featured.title }}" class="art-hero-img" loading="lazy">
+          {% elif featured.thumbnail_url %}
+            <img src="{{ featured.thumbnail_url }}" alt="{{ featured.title }}" class="art-hero-img" loading="lazy">
+          {% else %}
+            <div class="art-hero-placeholder"><i class="bi bi-journal-medical"></i></div>
+          {% endif %}
+        </div>
+        <div class="art-hero-body">
+          <h2 class="art-hero-title">{{ featured.title }}</h2>
+          <p class="art-hero-excerpt">{{ featured.get_excerpt }}</p>
+          <span class="art-hero-meta">
+            Tim Medis RS Gunung Maria &nbsp;·&nbsp; {{ featured.created_at|date:"j/n/y" }}
+          </span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Sidebar featured posts -->
+    <div class="col-12 col-md-5 d-flex flex-column">
+      <div class="art-sidebar flex-grow-1">
+        <h3 class="art-sidebar-heading">Featured Posts</h3>
+        {% for article in sidebar_articles %}
+        <a href="{% url 'article_detail' article.slug %}"
+           class="art-sidebar-item text-decoration-none{% if forloop.last %} art-sidebar-item--last{% endif %}">
+          <div class="art-sidebar-title">{{ article.title }}</div>
+          <div class="art-sidebar-meta">
+            <span>Tim Medis RS Gunung Maria</span>
+            <span>{{ article.created_at|date:"j/n/y" }}</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Grid artikel bawah -->
+  {% if grid_articles %}
+  <div class="art-grid-section">
+    <div class="row g-3">
+      {% for article in grid_articles %}
+      <div class="col-12 col-sm-6 col-md-3 d-flex flex-column">
+        <a href="{% url 'article_detail' article.slug %}" class="art-grid-card text-decoration-none flex-grow-1">
+          <div class="art-grid-thumb">
+            {% if article.thumbnail %}
+              <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}" class="art-grid-img" loading="lazy">
+            {% elif article.thumbnail_url %}
+              <img src="{{ article.thumbnail_url }}" alt="{{ article.title }}" class="art-grid-img" loading="lazy">
+            {% else %}
+              <div class="art-grid-placeholder"><i class="bi bi-journal-medical"></i></div>
+            {% endif %}
+          </div>
+          <div class="art-grid-body">
+            <h3 class="art-grid-title">{{ article.title }}</h3>
+            <p class="art-grid-excerpt">{{ article.get_excerpt }}</p>
+            <span class="art-grid-meta">Tim Medis &nbsp;·&nbsp; {{ article.created_at|date:"j/n/y" }}</span>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-journal-medical text-muted" style="font-size:3rem;opacity:0.3;"></i>
+    <p class="text-muted mt-3">Belum ada artikel yang dipublikasikan.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "hospital/backend/base_backend.html" %}
+{% block title %}{{ title }} - RSGM Backend{% endblock %}
+
+{% block extra_css %}
+<style>
+  .form-label { font-weight: 600; font-size: 0.85rem; color: #495057; }
+  #id_content { font-family: inherit; resize: vertical; }
+  .thumb-preview { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; display: block; }
+  .thumb-placeholder { width: 100%; height: 180px; background: #f8f9fa; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; border: 2px dashed #dee2e6; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 pb-3 border-bottom">
+  <div>
+    <h3 class="fw-bold mb-1"><i class="bi bi-newspaper me-2 text-primary"></i>{{ title }}</h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0 small text-muted">
+        <li class="breadcrumb-item"><a href="{% url 'backend_dashboard' %}" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'backend_article_list' %}" class="text-decoration-none">Artikel Kesehatan</a></li>
+        <li class="breadcrumb-item active">{{ title }}</li>
+      </ol>
+    </nav>
+  </div>
+  <a href="{% url 'backend_article_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 flex-shrink-0">
+    <i class="bi bi-arrow-left me-1"></i> Kembali
+  </a>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  <div class="row g-4">
+
+    <!-- Kolom kiri: konten utama -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+          <h5 class="fw-bold mb-0">Konten Artikel</h5>
+        </div>
+        <div class="card-body p-4">
+
+          <!-- Judul -->
+          <div class="mb-3">
+            <label class="form-label mb-1">{{ form.title.label }}</label>
+            {{ form.title }}
+            {% for e in form.title.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+          </div>
+
+          <!-- Slug -->
+          <div class="mb-4">
+            <label class="form-label mb-1">{{ form.slug.label }}
+              <span class="text-muted fw-normal">(URL: /artikel/<span id="slugPreview">…</span>/)</span>
+            </label>
+            {{ form.slug }}
+            {% for e in form.slug.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+            <div class="form-text">Huruf kecil, angka, dan tanda hubung saja. Otomatis dibuat dari judul.</div>
+          </div>
+
+          <!-- Konten -->
+          <div class="mb-0">
+            <label class="form-label mb-1">{{ form.content.label }}</label>
+            {{ form.content }}
+            {% for e in form.content.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+            <div class="form-text">Tulis paragraf baru dengan baris kosong di antara paragraf.</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Kolom kanan: meta & publish -->
+    <div class="col-lg-4">
+
+      <!-- Publikasi -->
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+          <h5 class="fw-bold mb-0">Publikasi</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="form-check form-switch mb-3">
+            {{ form.is_published }}
+            <label class="form-check-label fw-semibold ms-2" for="{{ form.is_published.id_for_label }}">
+              Publikasikan artikel ini
+            </label>
+          </div>
+          <div class="form-text">Artikel hanya tampil di frontend jika diaktifkan.</div>
+
+          {% if article %}
+          <div class="mt-3 pt-3 border-top d-flex gap-2">
+            <a href="{% url 'article_detail' article.slug %}" target="_blank"
+               class="btn btn-sm btn-outline-secondary rounded-pill flex-grow-1">
+              <i class="bi bi-box-arrow-up-right me-1"></i> Lihat Artikel
+            </a>
+          </div>
+          {% endif %}
+        </div>
+        <div class="card-footer bg-white border-top p-4 pt-0">
+          <button type="submit" class="btn btn-primary w-100 fw-semibold py-2 rounded-3">
+            <i class="bi bi-save me-1"></i> Simpan Artikel
+          </button>
+        </div>
+      </div>
+
+      <!-- Thumbnail -->
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+          <h5 class="fw-bold mb-0">Thumbnail</h5>
+        </div>
+        <div class="card-body p-4">
+
+          <!-- Preview -->
+          <div class="mb-3" id="thumbPreviewWrap">
+            {% if article and article.thumbnail %}
+              <img src="{{ article.thumbnail.url }}" class="thumb-preview" id="thumbImg" alt="">
+            {% elif article and article.thumbnail_url %}
+              <img src="{{ article.thumbnail_url }}" class="thumb-preview" id="thumbImg" alt="">
+            {% else %}
+              <div class="thumb-placeholder" id="thumbPlaceholder">
+                <i class="bi bi-image text-muted" style="font-size:2rem;opacity:0.4;"></i>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- URL eksternal -->
+          <div class="mb-3">
+            <label class="form-label mb-1">{{ form.thumbnail_url.label }}</label>
+            {{ form.thumbnail_url }}
+            {% for e in form.thumbnail_url.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+            <div class="form-text">Tempel URL gambar dari Unsplash atau sumber lain.</div>
+          </div>
+
+          <!-- Upload lokal -->
+          <div class="mb-0">
+            <label class="form-label mb-1">{{ form.thumbnail.label }}</label>
+            {{ form.thumbnail }}
+            {% for e in form.thumbnail.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+            <div class="form-text">JPG/PNG, maks. 5MB. Prioritas lebih tinggi dari URL.</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  var titleEl = document.getElementById('{{ form.title.id_for_label }}');
+  var slugEl  = document.getElementById('{{ form.slug.id_for_label }}');
+  var slugPrev = document.getElementById('slugPreview');
+  var thumbUrlEl = document.getElementById('{{ form.thumbnail_url.id_for_label }}');
+  var thumbImg = document.getElementById('thumbImg');
+  var thumbPlaceholder = document.getElementById('thumbPlaceholder');
+
+  function toSlug(str) {
+    return str.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+  }
+
+  function updateSlugPreview() {
+    slugPrev.textContent = slugEl.value || '…';
+  }
+
+  // Auto-slug dari judul hanya jika slug masih kosong atau baru dibuat
+  var slugManual = slugEl.value !== '';
+  titleEl.addEventListener('input', function () {
+    if (!slugManual) {
+      slugEl.value = toSlug(this.value);
+      updateSlugPreview();
+    }
+  });
+  slugEl.addEventListener('input', function () {
+    slugManual = true;
+    updateSlugPreview();
+  });
+  updateSlugPreview();
+
+  // Preview thumbnail dari URL
+  function showThumb(src) {
+    if (thumbImg) {
+      thumbImg.src = src;
+    } else {
+      var img = document.createElement('img');
+      img.className = 'thumb-preview';
+      img.id = 'thumbImg';
+      img.alt = '';
+      img.src = src;
+      if (thumbPlaceholder) thumbPlaceholder.replaceWith(img);
+      thumbImg = img;
+    }
+    if (thumbPlaceholder) thumbPlaceholder.style.display = 'none';
+  }
+
+  if (thumbUrlEl) {
+    thumbUrlEl.addEventListener('blur', function () {
+      if (this.value) showThumb(this.value);
+    });
+  }
+})();
+</script>
+{% endblock %}

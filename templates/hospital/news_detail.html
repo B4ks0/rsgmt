@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ news.title }} · RS Gunung Maria Tomohon{% endblock %}
+
+{% block content %}
+<div class="article-detail-wrap mx-auto">
+
+  <div class="mb-3">
+    <a href="{% url 'news_list' %}" class="text-decoration-none text-muted small">
+      <i class="bi bi-arrow-left me-1"></i>Kembali ke Berita
+    </a>
+  </div>
+
+  <div class="article-detail-meta mb-2">
+    <span class="article-card-date">
+      <i class="bi bi-megaphone me-1"></i>Berita RS &nbsp;·&nbsp;
+      <i class="bi bi-calendar3 ms-2 me-1"></i>{{ news.created_at|date:"d F Y" }}
+    </span>
+  </div>
+
+  <h1 class="article-detail-title mb-4">{{ news.title }}</h1>
+
+  {% if news.thumbnail %}
+  <div class="article-detail-thumb mb-4">
+    <img src="{{ news.thumbnail.url }}" alt="{{ news.title }}" class="article-detail-img">
+  </div>
+  {% elif news.thumbnail_url %}
+  <div class="article-detail-thumb mb-4">
+    <img src="{{ news.thumbnail_url }}" alt="{{ news.title }}" class="article-detail-img">
+  </div>
+  {% endif %}
+
+  <div class="article-detail-body">
+    {% if news.excerpt %}
+    <p class="fw-semibold text-dark fs-6 mb-4" style="border-left:3px solid var(--brand);padding-left:1rem;">{{ news.excerpt }}</p>
+    {% endif %}
+
+    {% for para in news.content|linebreaksbr|safe %}{{ para }}{% endfor %}
+    {{ news.content|linebreaks }}
+
+    {% if news.content_image or news.content_image_url %}
+    <figure class="my-4">
+      {% if news.content_image %}
+      <img src="{{ news.content_image.url }}" alt="{{ news.title }}" class="article-detail-img">
+      {% elif news.content_image_url %}
+      <img src="{{ news.content_image_url }}" alt="{{ news.title }}" class="article-detail-img">
+      {% endif %}
+    </figure>
+    {% endif %}
+  </div>
+
+  <div class="mt-5 pt-3 border-top d-flex gap-2">
+    <a href="{% url 'news_list' %}" class="btn btn-outline-primary btn-sm rounded-pill">
+      <i class="bi bi-arrow-left me-1"></i>Semua Berita
+    </a>
+    <a href="{% url 'home' %}" class="btn btn-light btn-sm rounded-pill border">
+      <i class="bi bi-house me-1"></i>Beranda
+    </a>
+  </div>
+
+</div>
+{% endblock %}

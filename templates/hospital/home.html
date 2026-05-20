@@ -1,5 +1,72 @@
 {% extends "base.html" %} {% load static %} {% block title %}Beranda · RS Gunung
-Maria Tomohon{% endblock %} {% block hero %}
+Maria Tomohon{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  /* expand klinik */
+  window.expandClinics = function () {
+    var btn = document.getElementById('clinicExpandBtn');
+    var chevron = btn.querySelector('.clinic-expand-chevron');
+    var countEl = btn.querySelector('.clinic-expand-count');
+    var isExpanded = btn.dataset.expanded === '1';
+    var items = document.querySelectorAll('#clinicGrid .col-12.col-md-4');
+
+    items.forEach(function (el, i) {
+      if (i >= 9) {
+        if (isExpanded) {
+          el.classList.add('clinic-hidden');
+        } else {
+          el.classList.remove('clinic-hidden');
+        }
+      }
+    });
+
+    btn.dataset.expanded = isExpanded ? '0' : '1';
+    countEl.style.display = isExpanded ? '' : 'none';
+    chevron.classList.toggle('rotated', !isExpanded);
+  };
+
+  var track = document.getElementById('facTrack');
+  var btnPrev = document.getElementById('facPrev');
+  var btnNext = document.getElementById('facNext');
+  if (!track) return;
+
+  var STEP = 300;
+
+  function updateButtons() {
+    btnPrev.disabled = track.scrollLeft <= 0;
+    btnNext.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
+  }
+
+  btnPrev.addEventListener('click', function () {
+    track.scrollBy({ left: -STEP, behavior: 'smooth' });
+  });
+  btnNext.addEventListener('click', function () {
+    track.scrollBy({ left: STEP, behavior: 'smooth' });
+  });
+  track.addEventListener('scroll', updateButtons);
+  updateButtons();
+
+  /* drag to scroll */
+  var isDown = false, startX, scrollLeft;
+  track.addEventListener('mousedown', function (e) {
+    isDown = true;
+    startX = e.pageX - track.offsetLeft;
+    scrollLeft = track.scrollLeft;
+  });
+  document.addEventListener('mouseup', function () { isDown = false; });
+  track.addEventListener('mouseleave', function () { isDown = false; });
+  track.addEventListener('mousemove', function (e) {
+    if (!isDown) return;
+    e.preventDefault();
+    track.scrollLeft = scrollLeft - (e.pageX - track.offsetLeft - startX);
+  });
+})();
+</script>
+{% endblock %}
+
+{% block hero %}
 <section class="hero-banner">
   <div
     id="heroCarousel"
@@ -200,257 +267,166 @@ Maria Tomohon{% endblock %} {% block hero %}
   </div>
 </div>
 {% endblock %} {% block content %}
-<section class="home-mitra-section home-primary-column mx-auto w-100 mb-5">
-  <p class="institusi-label mb-2 text-center">Kerja Sama</p>
-  <h2 class="h4 fw-semibold text-dark mb-3 text-center">
-    Mitra Penjamin
-  </h2>
+<section class="home-clinics-section home-primary-column mx-auto w-100 mb-2">
+  <p class="institusi-label mb-1 text-center">Layanan Unggulan</p>
+  <h2 class="h4 fw-semibold text-dark mb-1 text-center">Daftar Klinik &amp; Poliklinik</h2>
+  <p class="text-muted text-center mb-4" style="font-size:0.83rem;">Temukan layanan spesialisasi medis kami yang tersedia untuk Anda.</p>
 
-  <div class="home-mitra-logo-marquee" aria-label="Logo mitra kerja sama">
-    <div class="home-mitra-logo-overlay">
-      <a href="{% url 'mitra_list' %}" class="home-mitra-overlay-btn">
-        Lihat Semua Mitra
-        <i class="bi bi-arrow-right"></i>
+  <div class="row g-3" id="clinicGrid">
+    {% for clinic in clinics %}
+    <div class="col-12 col-md-4{% if forloop.counter > 9 %} clinic-hidden{% endif %}">
+      <a href="{% url 'doctors' %}?dept={{ clinic.id }}" class="clinic-excellence-card text-decoration-none">
+        <div class="clinic-excel-icon">
+          <i class="bi {{ clinic.icon }}"></i>
+        </div>
+        <div class="clinic-excel-body">
+          <div class="d-flex align-items-start justify-content-between gap-2">
+            <span class="clinic-excel-name">{{ clinic.name }}</span>
+            <i class="bi bi-arrow-up-right clinic-excel-arrow flex-shrink-0 mt-1"></i>
+          </div>
+          <p class="clinic-excel-desc">{{ clinic.desc }}</p>
+          <span class="clinic-excel-badge">
+            <i class="bi bi-person-fill me-1"></i>{{ clinic.doc_count }} dokter tersedia
+          </span>
+        </div>
       </a>
     </div>
-    <div class="home-mitra-logo-track">
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/bpjs-kes-removebg-preview.png' %}"
-          alt="Logo BPJS Kesehatan"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/35_logo_aia.png' %}"
-          alt="Logo AIA Financial"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/admedika-logo.png' %}"
-          alt="Logo AdMedika"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/detail-logo-taspen-png-hd_237-design.png' %}"
-          alt="Logo PT Taspen"
-          class="home-mitra-logo-taspen"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/Logo Jasa Raharja.png' %}"
-          alt="Logo Jasa Raharja"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/logo lippo insurance.png' %}"
-          alt="Logo Lippo Insurance"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/logo-fullerton-health.webp' %}"
-          alt="Logo Fullerton Health"
-          class="home-mitra-logo-fullerton"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
+    {% endfor %}
+  </div>
 
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/PRIMARY LOGO Mandiri Inhealth-01 PNG.png' %}"
-          alt="Logo Mandiri Inhealth"
-          class="home-mitra-logo-mandiri"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-      <div class="home-mitra-logo-item" style="min-width: auto; padding: 0; margin: 0 -15px;">
-        <img src="{% static 'hospital/img/kerjasama/Allianz.svg.png' %}" style="width: 130px; height: auto;" alt="Logo Allianz" loading="lazy" decoding="async" />
-      </div>
+  {% if clinics|length > 9 %}
+  <div class="text-center mt-4">
+    <button class="btn-clinic-expand" id="clinicExpandBtn" onclick="expandClinics()">
+      <i class="bi bi-grid me-2"></i>Lihat Semua Klinik
+      <span class="clinic-expand-count">({{ clinics|length|add:"-9" }} lainnya)</span>
+      <i class="bi bi-chevron-down ms-2 clinic-expand-chevron"></i>
+    </button>
+  </div>
+  {% endif %}
+</section>
 
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/bpjs-kes-removebg-preview.png' %}"
-          alt=""
-          loading="lazy"
-          decoding="async"
-          aria-hidden="true"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/35_logo_aia.png' %}"
-          alt="AIA"
-          loading="lazy"
-          decoding="async"
-          aria-hidden="true"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/admedika-logo.png' %}"
-          alt="AdMedika"
-          loading="lazy"
-          decoding="async"
-          aria-hidden="true"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/detail-logo-taspen-png-hd_237-design.png' %}"
-          alt="Taspen"
-          class="home-mitra-logo-taspen"
-          loading="lazy"
-          decoding="async"
-          aria-hidden="true"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/Logo Jasa Raharja.png' %}"
-          alt="Jasa Raharja"
-          loading="lazy"
-          decoding="async"
-          aria-hidden="true"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/logo lippo insurance.png' %}"
-          alt="Lippo Insurance"
-          loading="lazy"
-          decoding="async"
-          aria-hidden="true"
-        />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/logo-fullerton-health.webp' %}"
-          alt="Fullerton Health"
-          class="home-mitra-logo-fullerton"
-          loading="lazy"
-          decoding="async"
-          aria-hidden="true"
-        />
-      </div>
+<hr class="home-section-divider my-5">
 
-      <div class="home-mitra-logo-item">
-        <img
-          src="{% static 'hospital/img/kerjasama/PRIMARY LOGO Mandiri Inhealth-01 PNG.png' %}"
-          alt="Mandiri Inhealth"
-          class="home-mitra-logo-mandiri"
-          loading="lazy"
-          decoding="async"
-          aria-hidden="true"
-        />
-      </div>
-      <div class="home-mitra-logo-item" style="min-width: auto; padding: 0; margin: 0 -15px;">
-        <img src="{% static 'hospital/img/kerjasama/Allianz.svg.png' %}" style="width: 130px; height: auto;" alt="" loading="lazy" decoding="async" aria-hidden="true" />
+<section class="home-facilities-section home-primary-column mx-auto w-100 mb-4">
+  <p class="institusi-label mb-1 text-center">Infrastruktur</p>
+  <h2 class="h4 fw-semibold text-dark mb-1 text-center">Fasilitas Rumah Sakit</h2>
+  <p class="text-muted text-center mb-4" style="font-size:0.83rem;">Didukung infrastruktur medis modern untuk memberikan pelayanan terbaik bagi pasien.</p>
+
+  <div class="facilities-scroll-outer">
+    <button class="fac-scroll-btn fac-scroll-prev" id="facPrev" aria-label="Sebelumnya">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+    <div class="facilities-scroll-wrapper">
+      <div class="facilities-scroll-track" id="facTrack">
+        {% for fac in facilities %}
+        <div class="facility-scroll-card">
+          <img src="{{ fac.img }}" alt="{{ fac.name }}" class="facility-scroll-img" loading="lazy" decoding="async">
+          <div class="facility-scroll-content">
+            <div class="facility-scroll-icon">
+              <i class="bi {{ fac.icon }}"></i>
+            </div>
+            <h3 class="facility-scroll-name">{{ fac.name }}</h3>
+            <p class="facility-scroll-desc">{{ fac.desc }}</p>
+          </div>
+        </div>
+        {% endfor %}
       </div>
     </div>
+    <button class="fac-scroll-btn fac-scroll-next" id="facNext" aria-label="Berikutnya">
+      <i class="bi bi-chevron-right"></i>
+    </button>
   </div>
 </section>
 
-<section class="home-mitra-section home-primary-column mx-auto w-100 mb-5">
-  <h2 class="h4 fw-semibold text-dark mb-3 text-center">
-    Mitra Institusi & Pendidikan
-  </h2>
+<hr class="home-section-divider my-5">
 
-  <div class="home-mitra-logo-marquee" aria-label="Logo mitra institusi pendidikan">
-    <div class="home-mitra-logo-overlay">
-      <a href="{% url 'mitra_list' %}" class="home-mitra-overlay-btn">
-        Lihat Semua Mitra
-        <i class="bi bi-arrow-right"></i>
+<section class="home-primary-column mx-auto w-100 mb-4" id="artikel">
+  <p class="institusi-label mb-1 text-center">Edukasi</p>
+  <h2 class="h4 fw-semibold text-dark mb-1 text-center">Artikel Kesehatan</h2>
+  <p class="text-muted text-center mb-4" style="font-size:0.83rem;">Informasi dan tips kesehatan terpercaya dari tim medis kami.</p>
+
+  {% if articles %}
+  <div class="row g-4 mb-4">
+    {% for article in articles %}
+    <div class="col-12 col-md-4">
+      <a href="{% url 'article_detail' article.slug %}" class="article-card text-decoration-none">
+        <div class="article-card-thumb">
+          {% if article.thumbnail %}
+          <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}" class="article-card-img" loading="lazy" decoding="async">
+          {% elif article.thumbnail_url %}
+          <img src="{{ article.thumbnail_url }}" alt="{{ article.title }}" class="article-card-img" loading="lazy" decoding="async">
+          {% else %}
+          <div class="article-card-img-placeholder">
+            <i class="bi bi-journal-medical"></i>
+          </div>
+          {% endif %}
+        </div>
+        <div class="article-card-body">
+          <span class="article-card-date"><i class="bi bi-calendar3 me-1"></i>{{ article.created_at|date:"d M Y" }}</span>
+          <h3 class="article-card-title">{{ article.title }}</h3>
+          <p class="article-card-excerpt">{{ article.get_excerpt }}</p>
+          <span class="article-card-cta">Baca selengkapnya <i class="bi bi-arrow-right ms-1"></i></span>
+        </div>
       </a>
     </div>
-    <div class="home-mitra-logo-track" style="animation-direction: reverse;">
-      <!-- Set 1 -->
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/fmipa ukit.png' %}" alt="Logo FMIPA UKIT" loading="lazy" decoding="async" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/Logo-Unima-2023.png' %}" alt="Logo Unima" loading="lazy" decoding="async" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/pln-2016-1280x-q95.png' %}" alt="Logo PT PLN Persero" loading="lazy" decoding="async" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/Stikes gunung maria.png' %}" alt="Logo STIKES Gunung Maria" loading="lazy" decoding="async" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/unika de la salle manado.png' %}" alt="Logo Unika De La Salle" loading="lazy" decoding="async" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/palang merah - indonesia.png' %}" style="transform: scale(0.7); margin: 0 -20px;" alt="Logo PMI" loading="lazy" decoding="async" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/Telkom_Indonesia_logo.png' %}" alt="Logo Telkom Indonesia" loading="lazy" decoding="async" />
-      </div>
-
-      <!-- Set 2 -->
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/fmipa ukit.png' %}" alt="Fakultas Matematika dan Ilmu Pengetahuan Alam Universitas Kristen Indonesia Tomohon" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/Logo-Unima-2023.png' %}" alt="Universitas Negeri Manado" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/pln-2016-1280x-q95.png' %}" alt="PT PLN Persero" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/Stikes gunung maria.png' %}" alt="Sekolah Tinggi Ilmu Kesehatan Gunung Maria Tomohon" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/unika de la salle manado.png' %}" alt="Universitas Katolik De La Salle Manado" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/palang merah - indonesia.png' %}" style="transform: scale(0.7); margin: 0 -20px;" alt="Palang Merah Indonesia" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/Telkom_Indonesia_logo.png' %}" alt="PT Telkom Indonesia" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-
-      <!-- Set 3 -->
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/fmipa ukit.png' %}" alt="Fakultas Matematika dan Ilmu Pengetahuan Alam Universitas Kristen Indonesia Tomohon" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/Logo-Unima-2023.png' %}" alt="Universitas Negeri Manado" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/pln-2016-1280x-q95.png' %}" alt="PT PLN Persero" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/Stikes gunung maria.png' %}" alt="Sekolah Tinggi Ilmu Kesehatan Gunung Maria Tomohon" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/unika de la salle manado.png' %}" alt="Universitas Katolik De La Salle Manado" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/palang merah - indonesia.png' %}" style="transform: scale(0.7); margin: 0 -20px;" alt="Palang Merah Indonesia" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-      <div class="home-mitra-logo-item">
-        <img src="{% static 'hospital/img/kerjasama/Telkom_Indonesia_logo.png' %}" alt="PT Telkom Indonesia" loading="lazy" decoding="async" aria-hidden="true" />
-      </div>
-    </div>
+    {% endfor %}
   </div>
+  <div class="text-center">
+    <a href="{% url 'articles_list' %}" class="btn-articles-all">
+      <i class="bi bi-journal-richtext me-2"></i>Lihat Semua Artikel Kesehatan
+      <i class="bi bi-arrow-right ms-2"></i>
+    </a>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-journal-medical text-muted" style="font-size:2.5rem;opacity:0.35;"></i>
+    <p class="text-muted mt-3 mb-0" style="font-size:0.85rem;">Belum ada artikel yang dipublikasikan.</p>
+  </div>
+  {% endif %}
+</section>
+
+<hr class="home-section-divider my-5">
+
+<section class="home-primary-column mx-auto w-100 mb-4" id="berita">
+  <p class="institusi-label mb-1 text-center">Informasi</p>
+  <h2 class="h4 fw-semibold text-dark mb-1 text-center">Berita Terbaru</h2>
+  <p class="text-muted text-center mb-4" style="font-size:0.83rem;">Update terkini seputar kegiatan dan informasi RS Gunung Maria Tomohon.</p>
+
+  {% if news %}
+  <div class="row g-4 mb-4">
+    {% for item in news %}
+    <div class="col-12 col-md-4">
+      <a href="{% url 'news_detail' item.slug %}" class="article-card text-decoration-none">
+        <div class="article-card-thumb">
+          {% if item.thumbnail %}
+          <img src="{{ item.thumbnail.url }}" alt="{{ item.title }}" class="article-card-img" loading="lazy" decoding="async">
+          {% elif item.thumbnail_url %}
+          <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}" class="article-card-img" loading="lazy" decoding="async">
+          {% else %}
+          <div class="article-card-img-placeholder"><i class="bi bi-megaphone"></i></div>
+          {% endif %}
+        </div>
+        <div class="article-card-body">
+          <span class="article-card-date"><i class="bi bi-megaphone me-1"></i>{{ item.created_at|date:"d M Y" }}</span>
+          <h3 class="article-card-title">{{ item.title }}</h3>
+          <p class="article-card-excerpt">{{ item.get_excerpt }}</p>
+          <span class="article-card-cta">Baca selengkapnya <i class="bi bi-arrow-right ms-1"></i></span>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="text-center">
+    <a href="{% url 'news_list' %}" class="btn-articles-all" style="background:var(--brand-600);">
+      <i class="bi bi-megaphone me-2"></i>Lihat Semua Berita
+      <i class="bi bi-arrow-right ms-2"></i>
+    </a>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-megaphone text-muted" style="font-size:2.5rem;opacity:0.35;"></i>
+    <p class="text-muted mt-3 mb-0" style="font-size:0.85rem;">Belum ada berita yang dipublikasikan.</p>
+  </div>
+  {% endif %}
 </section>
 {% endblock %}

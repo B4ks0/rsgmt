@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Berita Terbaru · RS Gunung Maria Tomohon{% endblock %}
+
+{% block content %}
+<div class="articles-page-wrap pb-4">
+
+  <div class="articles-page-header mb-4">
+    <p class="institusi-label mb-1">Informasi &amp; Berita</p>
+    <h1 class="h3 fw-bold text-dark mb-0">Berita Terbaru Rumah Sakit</h1>
+  </div>
+
+  {% if featured %}
+  <div class="row g-4 mb-5 align-items-stretch">
+    <div class="col-12 col-md-7 d-flex flex-column">
+      <a href="{% url 'news_detail' featured.slug %}" class="art-hero text-decoration-none flex-grow-1">
+        <div class="art-hero-thumb">
+          {% if featured.thumbnail %}<img src="{{ featured.thumbnail.url }}" alt="{{ featured.title }}" class="art-hero-img" loading="lazy">
+          {% elif featured.thumbnail_url %}<img src="{{ featured.thumbnail_url }}" alt="{{ featured.title }}" class="art-hero-img" loading="lazy">
+          {% else %}<div class="art-hero-placeholder"><i class="bi bi-megaphone"></i></div>{% endif %}
+        </div>
+        <div class="art-hero-body">
+          <h2 class="art-hero-title">{{ featured.title }}</h2>
+          <p class="art-hero-excerpt">{{ featured.get_excerpt }}</p>
+          <span class="art-hero-meta">RS Gunung Maria Tomohon &nbsp;·&nbsp; {{ featured.created_at|date:"j/n/y" }}</span>
+        </div>
+      </a>
+    </div>
+    <div class="col-12 col-md-5 d-flex flex-column">
+      <div class="art-sidebar flex-grow-1">
+        <h3 class="art-sidebar-heading">Berita Lainnya</h3>
+        {% for item in sidebar_articles %}
+        <a href="{% url 'news_detail' item.slug %}"
+           class="art-sidebar-item text-decoration-none{% if forloop.last %} art-sidebar-item--last{% endif %}">
+          <div class="art-sidebar-title">{{ item.title }}</div>
+          <div class="art-sidebar-meta">
+            <span>RS Gunung Maria</span>
+            <span>{{ item.created_at|date:"j/n/y" }}</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% if grid_articles %}
+  <div class="art-grid-section">
+    <div class="row g-3">
+      {% for item in grid_articles %}
+      <div class="col-12 col-sm-6 col-md-3 d-flex flex-column">
+        <a href="{% url 'news_detail' item.slug %}" class="art-grid-card text-decoration-none flex-grow-1">
+          <div class="art-grid-thumb">
+            {% if item.thumbnail %}<img src="{{ item.thumbnail.url }}" alt="{{ item.title }}" class="art-grid-img" loading="lazy">
+            {% elif item.thumbnail_url %}<img src="{{ item.thumbnail_url }}" alt="{{ item.title }}" class="art-grid-img" loading="lazy">
+            {% else %}<div class="art-grid-placeholder"><i class="bi bi-megaphone"></i></div>{% endif %}
+          </div>
+          <div class="art-grid-body">
+            <h3 class="art-grid-title">{{ item.title }}</h3>
+            <p class="art-grid-excerpt">{{ item.get_excerpt }}</p>
+            <span class="art-grid-meta">RS Gunung Maria &nbsp;·&nbsp; {{ item.created_at|date:"j/n/y" }}</span>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-megaphone text-muted" style="font-size:3rem;opacity:0.3;"></i>
+    <p class="text-muted mt-3">Belum ada berita yang dipublikasikan.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -6,7 +6,6 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 """
 
 import os
-import subprocess
 from pathlib import Path
 
 try:
@@ -20,17 +19,6 @@ if load_dotenv is not None:
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Cache-busting: auto-read git commit hash so browsers always fetch fresh
-# static files after a deploy. Falls back to '1' if git is unavailable.
-try:
-    _git_hash = subprocess.check_output(
-        ['git', 'rev-parse', '--short', 'HEAD'],
-        cwd=BASE_DIR, stderr=subprocess.DEVNULL
-    ).decode().strip()
-except Exception:
-    _git_hash = '1'
-STATIC_VERSION = _git_hash
 
 # ============================================================================
 # SECURITY SETTINGS - Load from environment variables ONLY
@@ -143,7 +131,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'  # Required for production deployment
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = Path(os.environ.get('MEDIA_ROOT', str(BASE_DIR / "media")))
 
 # ============================================================================
 # PRODUCTION SECURITY SETTINGS (Applied when DEBUG=False)

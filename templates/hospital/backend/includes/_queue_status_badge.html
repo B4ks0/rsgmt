@@ -1,0 +1,13 @@
+{% if status == 'waiting' %}
+<span class="queue-badge queue-waiting"><span class="status-dot dot-waiting"></span>Menunggu</span>
+{% elif status == 'called' %}
+<span class="queue-badge queue-called"><span class="status-dot dot-called"></span>Dipanggil</span>
+{% elif status == 'serving' %}
+<span class="queue-badge queue-serving"><span class="status-dot dot-serving"></span>Dilayani</span>
+{% elif status == 'done' %}
+<span class="queue-badge queue-done"><span class="status-dot dot-done"></span>Selesai</span>
+{% elif status == 'absent' %}
+<span class="queue-badge queue-absent"><span class="status-dot dot-absent"></span>Tidak Hadir</span>
+{% else %}
+<span class="queue-badge queue-waiting"><span class="status-dot dot-waiting"></span>Menunggu</span>
+{% endif %}

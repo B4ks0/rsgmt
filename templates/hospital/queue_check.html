@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Cek Status Antrian · RS Gunung Maria Tomohon{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Queue Check Page ── */
+.qpage-wrap { max-width: 680px; margin: 0 auto; }
+
+/* Search bar */
+.qsearch-bar .input-group { border: 2px solid #e2e8f0; border-radius: 14px; overflow: hidden; background: #fff; }
+.qsearch-bar .input-group:focus-within { border-color: var(--brand); }
+.qsearch-bar .form-control { border: none; font-size: 1rem; padding: .75rem .5rem; box-shadow: none; }
+.qsearch-bar .btn { border-radius: 0; padding: .75rem 1.5rem; font-weight: 700; }
+
+/* Card antrian */
+.qresult-card { border-radius: 20px; overflow: hidden; background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,.09); }
+.qresult-card.urgent { box-shadow: 0 0 0 3px #dc3545, 0 4px 24px rgba(220,53,69,.2); animation: urgentPulse 1.8s infinite; }
+@keyframes urgentPulse { 0%,100%{box-shadow:0 0 0 3px #dc3545,0 4px 24px rgba(220,53,69,.2);} 50%{box-shadow:0 0 0 7px rgba(220,53,69,.1),0 4px 24px rgba(220,53,69,.15);} }
+
+/* Header card */
+.qcard-top { background: #003144; color: #fff; padding: 1.5rem 1.75rem; }
+.qnum-label { font-size: .65rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; opacity: .65; margin-bottom: .15rem; }
+.qnum-display { font-size: 3.5rem; font-weight: 900; line-height: 1; letter-spacing: -2px; }
+.qnum-display.empty { font-size: 2rem; opacity: .5; }
+
+.qstatus-badge { display: inline-flex; align-items: center; gap: 5px; font-size: .78rem; font-weight: 700; padding: .4rem 1rem; border-radius: 999px; }
+.qs-pending { background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.3); }
+.qs-waiting { background: rgba(255,193,7,.3); border: 1.5px solid rgba(255,255,255,.25); }
+.qs-called  { background: #dc3545; border: none; animation: urgentPulse2 .9s infinite; }
+@keyframes urgentPulse2 { 0%,100%{opacity:1;} 50%{opacity:.7;} }
+.qs-serving { background: rgba(25,135,84,.35); border: 1.5px solid rgba(255,255,255,.25); }
+.qs-done    { background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.25); }
+.qs-absent  { background: rgba(220,53,69,.3); border: 1.5px solid rgba(255,255,255,.25); }
+
+/* Alert dipanggil */
+.qurgent-alert { background: #dc3545; color: #fff; padding: 1rem 1.75rem; display: flex; align-items: center; gap: .75rem; font-weight: 600; font-size: .9rem; }
+
+/* Info rows */
+.qinfo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+@media (max-width: 480px) { .qinfo-grid { grid-template-columns: 1fr; } }
+.qinfo-item { padding: .75rem 1.75rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: .6rem; font-size: .88rem; color: #1e293b; }
+.qinfo-item:nth-child(odd) { border-right: 1px solid #f1f5f9; }
+@media (max-width: 480px) { .qinfo-item:nth-child(odd) { border-right: none; } }
+.qinfo-item i { color: #003144; font-size: .95rem; flex-shrink: 0; width: 18px; }
+.qinfo-item .label { font-size: .68rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 1px; }
+.qinfo-item .value { font-weight: 600; }
+
+/* Timeline */
+.qtl-wrap { padding: 1.25rem 1.75rem .25rem; }
+.qtl { display: flex; align-items: flex-start; }
+.qtl-step { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.qtl-dot { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .9rem; border: 2.5px solid #e2e8f0; background: #f8fafc; color: #cbd5e1; transition: all .3s; flex-shrink: 0; }
+.qtl-lbl { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #cbd5e1; margin-top: .35rem; text-align: center; white-space: nowrap; }
+.qtl-line { flex: 1; height: 2.5px; background: #e2e8f0; margin-top: 15px; min-width: 8px; transition: background .3s; }
+
+.step-done .qtl-dot  { background: #003144; border-color: #003144; color: #fff; }
+.step-done .qtl-lbl  { color: #003144; }
+.step-done + .qtl-line { background: #003144; }
+
+.step-active .qtl-dot { background: #fff; border-color: #2563eb; color: #2563eb; border-width: 3px; box-shadow: 0 0 0 4px rgba(37,99,235,.12); }
+.step-active .qtl-lbl { color: #2563eb; }
+
+.step-urgent .qtl-dot { background: #dc3545; border-color: #dc3545; color: #fff; animation: urgentPulse2 .9s infinite; }
+.step-urgent .qtl-lbl { color: #dc3545; }
+
+.step-absent .qtl-dot { background: #dc3545; border-color: #dc3545; color: #fff; }
+.step-absent .qtl-lbl { color: #dc3545; }
+
+/* Footer message */
+.qmsg { padding: 1rem 1.75rem 1.4rem; font-size: .83rem; color: #64748b; line-height: 1.6; border-top: 1px solid #f1f5f9; margin-top: .25rem; }
+.qmsg.msg-urgent { background: #fff5f5; color: #b91c1c; font-weight: 600; }
+.qmsg.msg-called  { background: #fffbeb; color: #92400e; }
+.qmsg.msg-done    { background: #f0fdf4; color: #166534; }
+
+/* How-to */
+.qhowto { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1.25rem 1.5rem; }
+.qhowto-step { display: flex; align-items: flex-start; gap: .75rem; font-size: .84rem; color: #334155; padding: .4rem 0; }
+.qhowto-num { width: 22px; height: 22px; border-radius: 50%; background: #003144; color: #fff; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+/* Refresh notice */
+.qrefresh-note { text-align: center; font-size: .74rem; color: #94a3b8; margin-top: 1rem; }
+.qrefresh-note a { color: #003144; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="qpage-wrap">
+
+  <!-- Header -->
+  <div class="text-center mb-4 pt-2">
+    <div style="width:60px;height:60px;border-radius:50%;background:rgba(0,49,68,.09);display:flex;align-items:center;justify-content:center;font-size:1.7rem;color:#003144;margin:0 auto .75rem;">
+      <i class="bi bi-ticket-perforated-fill"></i>
+    </div>
+    <p class="institusi-label mb-1">Layanan Digital</p>
+    <h1 class="h3 fw-bold text-dark mb-1">Cek Status Antrian</h1>
+    <p class="text-muted mb-0" style="font-size:.84rem;">Masukkan nomor HP yang digunakan saat mendaftar janji temu.</p>
+  </div>
+
+  <!-- Search -->
+  <div class="qsearch-bar mb-4">
+    <form method="get">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-0 text-primary px-3 fs-5">
+          <i class="bi bi-telephone-fill"></i>
+        </span>
+        <input type="tel" name="phone"
+               class="form-control"
+               placeholder="Contoh: 08123456789"
+               value="{{ phone_query }}"
+               required>
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-search me-1"></i>Cek
+        </button>
+      </div>
+    </form>
+  </div>
+
+  {% if result is not None %}
+    {% if result %}
+
+      {% if result|length > 1 %}
+      <p class="text-center text-muted mb-3" style="font-size:.8rem;">
+        <i class="bi bi-layers me-1"></i>Ditemukan <strong>{{ result|length }}</strong> pendaftaran — menampilkan terbaru
+      </p>
+      {% endif %}
+
+      {% for appt in result %}
+      {% with qs=appt.queue_status qn=appt.queue_number %}
+
+      <div class="qresult-card mb-4 {% if qs == 'called' %}urgent{% endif %}">
+
+        <!-- Header: nomor + status -->
+        <div class="qcard-top d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div>
+            <div class="qnum-label">Nomor Antrian</div>
+            <div class="qnum-display {% if not qn %}empty{% endif %}">
+              {% if qn %}{{ qn }}{% else %}–{% endif %}
+            </div>
+          </div>
+          <div>
+            {% if not qn %}
+              <span class="qstatus-badge qs-pending"><i class="bi bi-hourglass"></i> Menunggu Konfirmasi</span>
+            {% elif qs == 'waiting' %}
+              <span class="qstatus-badge qs-waiting"><i class="bi bi-hourglass-split"></i> Menunggu Dipanggil</span>
+            {% elif qs == 'called' %}
+              <span class="qstatus-badge qs-called"><i class="bi bi-megaphone-fill"></i> DIPANGGIL!</span>
+            {% elif qs == 'serving' %}
+              <span class="qstatus-badge qs-serving"><i class="bi bi-person-check"></i> Sedang Dilayani</span>
+            {% elif qs == 'done' or appt.status == 'completed' %}
+              <span class="qstatus-badge qs-done"><i class="bi bi-check-circle"></i> Selesai</span>
+            {% elif qs == 'absent' %}
+              <span class="qstatus-badge qs-absent"><i class="bi bi-x-circle"></i> Tidak Hadir</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Alert urgent -->
+        {% if qs == 'called' %}
+        <div class="qurgent-alert">
+          <i class="bi bi-megaphone-fill fs-4"></i>
+          <div>
+            <div>Nomor antrian Anda sedang dipanggil!</div>
+            <div style="font-weight:400;font-size:.82rem;opacity:.9;">Segera menuju ruang tunggu poliklinik sekarang.</div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Info grid -->
+        <div class="qinfo-grid">
+          <div class="qinfo-item">
+            <i class="bi bi-person-circle"></i>
+            <div><span class="label">Pasien</span><span class="value">{{ appt.patient.full_name|default:appt.full_name }}</span></div>
+          </div>
+          <div class="qinfo-item">
+            <i class="bi bi-calendar3"></i>
+            <div>
+              <span class="label">Tanggal</span>
+              <span class="value">
+                {% if appt.appointment_date %}{{ appt.appointment_date|date:"d M Y" }}
+                {% elif appt.preferred_date %}{{ appt.preferred_date|date:"d M Y" }}
+                {% else %}–{% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="qinfo-item">
+            <i class="bi bi-person-badge"></i>
+            <div><span class="label">Dokter</span><span class="value">{{ appt.doctor.full_name|default:"–" }}</span></div>
+          </div>
+          <div class="qinfo-item">
+            <i class="bi bi-building"></i>
+            <div><span class="label">Poliklinik</span><span class="value">{{ appt.doctor.department.name|default:"–" }}</span></div>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="qtl-wrap">
+          <div class="qtl">
+
+            <div class="qtl-step step-done">
+              <div class="qtl-dot"><i class="bi bi-check-lg"></i></div>
+              <div class="qtl-lbl">Terdaftar</div>
+            </div>
+            <div class="qtl-line {% if qn %}step-done{% endif %}"></div>
+
+            <div class="qtl-step {% if qn %}step-done{% else %}step-pending{% endif %}">
+              <div class="qtl-dot">{% if qn %}<i class="bi bi-check-lg"></i>{% else %}<i class="bi bi-ticket-perforated"></i>{% endif %}</div>
+              <div class="qtl-lbl">No. Antrian</div>
+            </div>
+            {% with waiting_done=qs|slice:":4" %}
+            <div class="qtl-line {% if qs == 'called' or qs == 'serving' or qs == 'done' or appt.status == 'completed' %}step-done{% endif %}"></div>
+
+            <div class="qtl-step
+              {% if qs == 'called' or qs == 'serving' or qs == 'done' or appt.status == 'completed' %}step-done
+              {% elif qn and qs == 'waiting' %}step-active
+              {% endif %}">
+              <div class="qtl-dot">
+                {% if qs == 'called' or qs == 'serving' or qs == 'done' or appt.status == 'completed' %}<i class="bi bi-check-lg"></i>
+                {% elif qn and qs == 'waiting' %}<i class="bi bi-hourglass-split"></i>
+                {% else %}<i class="bi bi-hourglass"></i>{% endif %}
+              </div>
+              <div class="qtl-lbl">Menunggu</div>
+            </div>
+            <div class="qtl-line {% if qs == 'serving' or qs == 'done' or appt.status == 'completed' %}step-done{% endif %}"></div>
+
+            <div class="qtl-step
+              {% if qs == 'done' or qs == 'absent' or appt.status == 'completed' %}step-done
+              {% elif qs == 'serving' %}step-active
+              {% elif qs == 'called' %}step-urgent
+              {% endif %}">
+              <div class="qtl-dot">
+                {% if qs == 'done' or appt.status == 'completed' %}<i class="bi bi-check-lg"></i>
+                {% elif qs == 'called' %}<i class="bi bi-megaphone-fill"></i>
+                {% elif qs == 'serving' %}<i class="bi bi-person-check"></i>
+                {% else %}<i class="bi bi-person"></i>{% endif %}
+              </div>
+              <div class="qtl-lbl">Dilayani</div>
+            </div>
+            <div class="qtl-line {% if qs == 'done' or appt.status == 'completed' %}step-done{% endif %}"></div>
+
+            <div class="qtl-step
+              {% if qs == 'done' or appt.status == 'completed' %}step-done
+              {% elif qs == 'absent' %}step-absent
+              {% endif %}">
+              <div class="qtl-dot">
+                {% if qs == 'done' or appt.status == 'completed' %}<i class="bi bi-check-lg"></i>
+                {% elif qs == 'absent' %}<i class="bi bi-x-lg"></i>
+                {% else %}<i class="bi bi-flag"></i>{% endif %}
+              </div>
+              <div class="qtl-lbl">Selesai</div>
+            </div>
+            {% endwith %}
+          </div>
+        </div>
+
+        <!-- Pesan -->
+        <div class="qmsg {% if qs == 'called' %}msg-urgent{% elif qs == 'done' or appt.status == 'completed' %}msg-done{% endif %}">
+          {% if not qn %}
+            <i class="bi bi-info-circle me-1"></i> Nomor antrian belum ditetapkan. Admin akan menghubungi Anda via <strong>WhatsApp</strong> setelah konfirmasi.
+          {% elif qs == 'waiting' %}
+            <i class="bi bi-clock me-1"></i> Nomor antrian sudah terdaftar. Hadir <strong>15 menit sebelum jadwal</strong> dan bawa <strong>KTP / BPJS</strong>.
+          {% elif qs == 'called' %}
+            <i class="bi bi-megaphone-fill me-1"></i> <strong>Segera hadir!</strong> Nomor antrian Anda sedang dipanggil. Menuju ruang tunggu poliklinik sekarang.
+          {% elif qs == 'serving' %}
+            <i class="bi bi-person-check me-1"></i> Anda sedang dalam proses pelayanan. Terima kasih sudah menunggu.
+          {% elif qs == 'done' or appt.status == 'completed' %}
+            <i class="bi bi-check-circle-fill me-1"></i> Kunjungan selesai. Terima kasih telah mempercayakan kesehatan Anda kepada kami. 🙏
+          {% elif qs == 'absent' %}
+            <i class="bi bi-exclamation-circle me-1"></i> Anda tercatat <strong>tidak hadir</strong>. Hubungi RS untuk penjadwalan ulang.
+          {% endif %}
+        </div>
+
+      </div><!-- /qresult-card -->
+      {% endwith %}
+      {% endfor %}
+
+      <p class="qrefresh-note">
+        <i class="bi bi-arrow-clockwise me-1"></i>
+        Halaman diperbarui otomatis dalam <strong id="countdown">30</strong> detik &nbsp;·&nbsp;
+        <a href="javascript:location.reload()">Perbarui sekarang</a>
+      </p>
+
+    {% else %}
+      <div class="text-center py-5">
+        <i class="bi bi-search" style="font-size:2.8rem;color:#cbd5e1;display:block;margin-bottom:1rem;"></i>
+        <p class="fw-semibold text-dark mb-1">Data tidak ditemukan</p>
+        <p class="text-muted small mb-4">Nomor <strong>{{ phone_query }}</strong> tidak ditemukan.<br>Pastikan nomor sama persis dengan yang didaftarkan.</p>
+        <a href="{% url 'appointment_create' %}" class="btn btn-primary rounded-pill px-4 fw-semibold">
+          <i class="bi bi-calendar2-check me-1"></i>Daftar Janji Temu
+        </a>
+      </div>
+    {% endif %}
+
+  {% else %}
+  <!-- Belum search: tampilkan panduan -->
+  <div class="qhowto mb-4">
+    <h6 class="fw-bold mb-3"><i class="bi bi-info-circle-fill text-primary me-2"></i>Cara Mendapatkan Nomor Antrian</h6>
+    <div class="qhowto-step"><span class="qhowto-num">1</span><span>Daftar janji temu via tombol <strong>Janji Temu</strong> di website</span></div>
+    <div class="qhowto-step"><span class="qhowto-num">2</span><span>Admin memproses dan menetapkan nomor antrian</span></div>
+    <div class="qhowto-step"><span class="qhowto-num">3</span><span>Nomor antrian dikirim ke <strong>WhatsApp</strong> Anda</span></div>
+    <div class="qhowto-step"><span class="qhowto-num">4</span><span>Cek status di halaman ini kapan saja</span></div>
+    <div class="qhowto-step"><span class="qhowto-num">5</span><span>Hadir sesuai tanggal, bawa <strong>KTP / BPJS</strong></span></div>
+  </div>
+  <div class="text-center">
+    <a href="{% url 'appointment_create' %}" class="btn btn-primary rounded-pill px-5 fw-semibold py-2">
+      <i class="bi bi-calendar2-check me-1"></i>Daftar Janji Temu
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+{% if result %}
+<script>
+let s = 30;
+const el = document.getElementById('countdown');
+setInterval(() => { s--; if(el) el.textContent = s; if(s <= 0) location.reload(); }, 1000);
+</script>
+{% endif %}
+{% endblock %}

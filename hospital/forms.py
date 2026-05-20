@@ -155,6 +155,61 @@ class BackendDepartmentForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"rows": 3}),
         }
 
+from .models import Article, News
+
+class BackendNewsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.setdefault("class", "form-check-input")
+            else:
+                field.widget.attrs.setdefault("class", "form-control")
+
+    class Meta:
+        model = News
+        fields = ["title", "slug", "excerpt", "content", "thumbnail", "thumbnail_url", "content_image", "content_image_url", "is_published"]
+        widgets = {
+            "excerpt": forms.Textarea(attrs={"rows": 3}),
+            "content": forms.Textarea(attrs={"rows": 14}),
+            "slug": forms.TextInput(attrs={"placeholder": "otomatis-dari-judul"}),
+            "thumbnail_url": forms.URLInput(attrs={"placeholder": "https://images.unsplash.com/..."}),
+            "content_image_url": forms.URLInput(attrs={"placeholder": "https://..."}),
+        }
+        labels = {
+            "title": "Judul Berita", "slug": "Slug URL",
+            "excerpt": "Ringkasan (opsional)", "content": "Isi Konten",
+            "thumbnail": "Thumbnail (Upload File)", "thumbnail_url": "Thumbnail URL",
+            "content_image": "Gambar dalam Konten (Upload)", "content_image_url": "Gambar dalam Konten (URL)",
+            "is_published": "Publikasikan",
+        }
+
+class BackendArticleForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.setdefault("class", "form-check-input")
+            else:
+                field.widget.attrs.setdefault("class", "form-control")
+
+    class Meta:
+        model = Article
+        fields = ["title", "slug", "content", "thumbnail", "thumbnail_url", "is_published"]
+        widgets = {
+            "content": forms.Textarea(attrs={"rows": 12}),
+            "slug": forms.TextInput(attrs={"placeholder": "otomatis-dari-judul"}),
+            "thumbnail_url": forms.URLInput(attrs={"placeholder": "https://images.unsplash.com/..."}),
+        }
+        labels = {
+            "title": "Judul Artikel",
+            "slug": "Slug URL",
+            "content": "Isi Konten",
+            "thumbnail": "Thumbnail (Upload File)",
+            "thumbnail_url": "Thumbnail URL (Eksternal)",
+            "is_published": "Publikasikan",
+        }
+
 from .models import Patient
 
 class BackendPatientForm(forms.ModelForm):

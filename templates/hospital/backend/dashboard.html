@@ -154,24 +154,14 @@
                   style="font-size: 0.85rem; letter-spacing: 0.5px"
                 >
                   <tr>
-                    <th class="ps-4 fw-semibold text-uppercase border-0">
-                      Waktu
-                    </th>
-                    <th class="fw-semibold text-uppercase border-0">
-                      Data Pasien
-                    </th>
-                    <th class="fw-semibold text-uppercase border-0">
-                      Dokter / Poli
-                    </th>
+                    <th class="ps-4 fw-semibold text-uppercase border-0">Waktu</th>
+                    <th class="fw-semibold text-uppercase border-0">Data Pasien</th>
+                    <th class="fw-semibold text-uppercase border-0">Dokter / Poli</th>
                     <th class="fw-semibold text-uppercase border-0">Status</th>
-                    <th class="fw-semibold text-uppercase border-0">
-                      Keluhan Singkat
+                    <th class="fw-semibold text-uppercase border-0 text-center" style="min-width:150px;">
+                      <i class="bi bi-ticket-perforated me-1"></i>No. Antrian
                     </th>
-                    <th
-                      class="text-end pe-4 fw-semibold text-uppercase border-0"
-                    >
-                      Aksi Interaktif
-                    </th>
+                    <th class="text-end pe-4 fw-semibold text-uppercase border-0">Aksi</th>
                   </tr>
                 </thead>
                 <tbody class="border-top-0" id="liveTableBody">
@@ -239,114 +229,65 @@
                       >
                       {% endif %}
                     </td>
-                    <td>
-                      <div
-                        class="text-truncate text-secondary"
-                        style="max-width: 180px; font-size: 0.9rem"
-                        title="{{ appt.chief_complaint|default:appt.message }}"
-                      >
-                        {{ appt.chief_complaint|default:appt.message|default:"-" }}
-                      </div>
+                    <!-- Kolom No. Antrian -->
+                    <td class="text-center" id="dash-qcell-{{ appt.id }}">
+                      {% if appt.queue_number %}
+                        <div class="d-flex flex-column align-items-center gap-1">
+                          <span class="fw-bold fs-5 text-success" id="dash-qbadge-{{ appt.id }}">{{ appt.queue_number }}</span>
+                          <button class="dash-edit-btn"
+                                  onclick="openQueueModal('{{ appt.id }}','{{ appt.patient.full_name|default:appt.full_name|escapejs }}','{{ appt.doctor.full_name|default:""|escapejs }}','{{ appt.queue_number }}')"
+                                  title="Edit nomor antrian">
+                            <i class="bi bi-pencil-square me-1"></i>Edit
+                          </button>
+                        </div>
+                      {% else %}
+                        <button class="dash-assign-btn"
+                                onclick="openQueueModal('{{ appt.id }}','{{ appt.patient.full_name|default:appt.full_name|escapejs }}','{{ appt.doctor.full_name|default:""|escapejs }}','')"
+                                title="Input nomor antrian">
+                          <i class="bi bi-ticket-perforated me-1"></i>Input Antrian
+                        </button>
+                      {% endif %}
                     </td>
+
                     <td class="text-end pe-4">
                       <div class="d-flex justify-content-end gap-2">
-                        <!-- Confirm Quick Action -->
                         {% if appt.status == 'requested' %}
-                        <form
-                          action="{% url 'backend_update_status' appt.id %}"
-                          method="POST"
-                          class="d-inline"
-                        >
+                        <form action="{% url 'backend_update_status' appt.id %}" method="POST" class="d-inline">
                           {% csrf_token %}
-                          <input
-                            type="hidden"
-                            name="status"
-                            value="confirmed"
-                          />
-                          <button
-                            type="submit"
-                            class="btn btn-sm btn-success rounded-circle shadow-sm"
-                            style="width: 32px; height: 32px"
-                            title="Setujui/Konfirmasi"
-                          >
+                          <input type="hidden" name="status" value="confirmed"/>
+                          <button type="submit" class="btn btn-sm btn-success rounded-circle shadow-sm"
+                                  style="width:32px;height:32px;" title="Konfirmasi Kedatangan">
                             <i class="bi bi-check-lg"></i>
                           </button>
                         </form>
-                        {% endif %} {% if appt.status == 'confirmed' %}
-                        <form
-                          action="{% url 'backend_update_status' appt.id %}"
-                          method="POST"
-                          class="d-inline"
-                        >
+                        {% endif %}
+                        {% if appt.status == 'confirmed' %}
+                        <form action="{% url 'backend_update_status' appt.id %}" method="POST" class="d-inline">
                           {% csrf_token %}
-                          <input
-                            type="hidden"
-                            name="status"
-                            value="completed"
-                          />
-                          <button
-                            type="submit"
-                            class="btn btn-sm btn-primary rounded-circle shadow-sm"
-                            style="
-                              width: 32px;
-                              height: 32px;
-                              background: #6f42c1;
-                              border-color: #6f42c1;
-                            "
-                            title="Tandai Selesai"
-                          >
+                          <input type="hidden" name="status" value="completed"/>
+                          <button type="submit" class="btn btn-sm btn-primary rounded-circle shadow-sm"
+                                  style="width:32px;height:32px;background:#6f42c1;border-color:#6f42c1;" title="Tandai Selesai">
                             <i class="bi bi-flag-fill"></i>
                           </button>
                         </form>
                         {% endif %}
-
-                        <!-- View Popup -->
-                        <button
-                          type="button"
-                          class="btn btn-sm btn-light border rounded-circle shadow-sm"
-                          style="width: 32px; height: 32px"
-                          title="Lihat Detail Janji Temu"
-                          data-bs-toggle="modal"
-                          data-bs-target="#viewModal{{ appt.id }}"
-                        >
+                        <button type="button" class="btn btn-sm btn-light border rounded-circle shadow-sm"
+                                style="width:32px;height:32px;" title="Lihat Detail"
+                                data-bs-toggle="modal" data-bs-target="#viewModal{{ appt.id }}">
                           <i class="bi bi-eye text-info"></i>
                         </button>
-
-                        <!-- WhatsApp Direct -->
-                        <a
-                          href="{{ appt.get_whatsapp_url }}"
-                          target="_blank"
-                          class="btn btn-sm btn-light border rounded-circle shadow-sm"
-                          style="width: 32px; height: 32px"
-                          title="Hubungi Pasien via WA"
-                        >
-                          <i class="bi bi-whatsapp text-success"></i>
-                        </a>
-
-                        <!-- Seamless Custom Edit & Delete -->
-                        <a
-                          href="{% url 'backend_appointment_edit' appt.id %}"
-                          class="btn btn-sm btn-light border rounded-circle shadow-sm"
-                          style="width: 32px; height: 32px"
-                          title="Edit Data Lengkap"
-                        >
+                        <a href="{% url 'backend_appointment_edit' appt.id %}"
+                           class="btn btn-sm btn-light border rounded-circle shadow-sm"
+                           style="width:32px;height:32px;" title="Edit Data">
                           <i class="bi bi-pencil-square text-primary"></i>
                         </a>
-
-                        <form
-                          action="{% url 'backend_appointment_delete' appt.id %}"
-                          method="POST"
-                          class="d-inline delete-confirm-form"
-                          data-item-name="{% if appt.patient %}{{ appt.patient.full_name|escapejs }}{% else %}{{ appt.full_name|escapejs }}{% endif %}"
-                          data-model-name="Janji Temu"
-                        >
+                        <form action="{% url 'backend_appointment_delete' appt.id %}" method="POST"
+                              class="d-inline delete-confirm-form"
+                              data-item-name="{% if appt.patient %}{{ appt.patient.full_name|escapejs }}{% else %}{{ appt.full_name|escapejs }}{% endif %}"
+                              data-model-name="Janji Temu">
                           {% csrf_token %}
-                          <button
-                            type="submit"
-                            class="btn btn-sm btn-light border rounded-circle shadow-sm text-danger"
-                            style="width: 32px; height: 32px"
-                            title="Hapus Data"
-                          >
+                          <button type="submit" class="btn btn-sm btn-light border rounded-circle shadow-sm text-danger"
+                                  style="width:32px;height:32px;" title="Hapus">
                             <i class="bi bi-trash"></i>
                           </button>
                         </form>
@@ -372,6 +313,56 @@
 
 <!-- Modal container lives OUTSIDE the polled table so open modals survive refresh -->
 {% block modals %}
+
+<!-- Modal Input Nomor Antrian -->
+<div class="modal fade" id="queueModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:380px;">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header px-4 py-3">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-ticket-perforated me-2"></i>Input Nomor Antrian
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body px-4 py-4">
+        <!-- Info pasien -->
+        <div class="qmodal-patient mb-4">
+          <div class="fw-semibold text-dark" id="qmodal-name">–</div>
+          <div class="text-muted small" id="qmodal-doctor">–</div>
+        </div>
+
+        <!-- Input besar -->
+        <label class="form-label fw-semibold small text-uppercase text-muted mb-2">
+          Nomor Antrian
+        </label>
+        <input type="text" id="qmodalInput"
+               class="qnum-big-input mb-1"
+               placeholder="001"
+               maxlength="10"
+               autocomplete="off">
+        <div class="text-muted text-center mb-4" style="font-size:.72rem;">
+          Ketik nomor lalu klik Simpan atau tekan Enter
+        </div>
+
+        <!-- Tombol simpan -->
+        <button class="btn btn-primary w-100 fw-bold py-2 rounded-3 mb-3"
+                id="qmodalSaveBtn" onclick="qmodalSave()">
+          <i class="bi bi-save me-2"></i>Simpan &amp; Konfirmasi
+        </button>
+
+        <!-- Tombol WA (aktif setelah simpan) -->
+        <a href="#" target="_blank" id="qmodalWaBtn" class="wa-send-btn disabled">
+          <i class="bi bi-whatsapp fs-5"></i>
+          Kirim Nomor Antrian via WhatsApp
+        </a>
+        <div class="text-center text-muted mt-2" style="font-size:.72rem;" id="qmodalWaHint">
+          Simpan dulu agar tombol WA aktif
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="apptModalContainer">
   {% for appt in appointments %}
   <div class="modal fade text-start" id="viewModal{{ appt.id }}" tabindex="-1" aria-labelledby="viewModalLabel{{ appt.id }}" aria-hidden="true">
@@ -456,7 +447,133 @@
 </div>
 {% endblock modals %}
 
+{% block extra_css %}
+<style>
+.dash-assign-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #fff3cd; color: #856404; border: 1.5px solid #ffc107;
+  border-radius: 8px; padding: 4px 10px; font-size: .75rem; font-weight: 600;
+  cursor: pointer; transition: background .15s, transform .1s; white-space: nowrap;
+}
+.dash-assign-btn:hover { background: #ffc107; color: #000; transform: scale(1.04); }
+
+.dash-edit-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: transparent; color: #198754; border: 1px solid #198754;
+  border-radius: 6px; padding: 2px 7px; font-size: .7rem; font-weight: 600;
+  cursor: pointer; transition: background .15s;
+}
+.dash-edit-btn:hover { background: #d1e7dd; }
+
+/* Modal antrian */
+#queueModal .modal-header { background: #003144; color: #fff; border-radius: 16px 16px 0 0; }
+#queueModal .modal-header .btn-close { filter: invert(1); }
+.qmodal-patient { background: rgba(0,49,68,.06); border-radius: 10px; padding: .75rem 1rem; font-size: .85rem; }
+.qnum-big-input {
+  font-size: 2.2rem; font-weight: 800; text-align: center; letter-spacing: 4px;
+  border: 3px dashed #dee2e6; border-radius: 14px; padding: .5rem;
+  width: 100%; transition: border-color .2s, background .2s;
+}
+.qnum-big-input:focus { border-color: #0d6efd; border-style: solid; outline: none; background: #f0f8ff; }
+.qnum-big-input.filled { border-color: #198754; border-style: solid; background: #d1e7dd; color: #0a3622; }
+.wa-send-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: #25d366; color: #fff; border: none; border-radius: 10px;
+  padding: .7rem; font-size: .9rem; font-weight: 700; width: 100%;
+  text-decoration: none; transition: background .15s;
+}
+.wa-send-btn:hover { background: #1ebe5d; color: #fff; }
+.wa-send-btn.disabled { background: #adb5bd; pointer-events: none; }
+</style>
+{% endblock %}
+
 {% block extra_js %}
+<!-- Modal Antrian JS -->
+<script>
+const DASH_CSRF = '{{ csrf_token }}';
+let qmodalApptId = null;
+
+function openQueueModal(apptId, patientName, doctorName, currentQnum) {
+  qmodalApptId = apptId;
+  document.getElementById('qmodal-name').textContent = patientName || '–';
+  document.getElementById('qmodal-doctor').textContent = doctorName || '–';
+
+  const inp = document.getElementById('qmodalInput');
+  inp.value = currentQnum || '';
+  inp.className = 'qnum-big-input' + (currentQnum ? ' filled' : '');
+
+  const waBtn = document.getElementById('qmodalWaBtn');
+  const waHint = document.getElementById('qmodalWaHint');
+  if (currentQnum) {
+    const row = document.getElementById('row-' + apptId) || document;
+    waBtn.classList.remove('disabled');
+    waHint.textContent = 'Klik untuk kirim ulang notifikasi WA';
+  } else {
+    waBtn.href = '#';
+    waBtn.classList.add('disabled');
+    waHint.textContent = 'Simpan dulu agar tombol WA aktif';
+  }
+
+  new bootstrap.Modal(document.getElementById('queueModal')).show();
+  setTimeout(() => inp.focus(), 400);
+}
+
+async function qmodalSave() {
+  const qnum = document.getElementById('qmodalInput').value.trim();
+  if (!qnum || !qmodalApptId) return;
+
+  const saveBtn = document.getElementById('qmodalSaveBtn');
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
+
+  const res = await fetch('/dashboard/antrian/' + qmodalApptId + '/assign/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': DASH_CSRF, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'queue_number=' + encodeURIComponent(qnum) + '&queue_status=waiting'
+  });
+  const data = await res.json();
+
+  saveBtn.disabled = false;
+  saveBtn.innerHTML = '<i class="bi bi-save me-2"></i>Simpan & Konfirmasi';
+
+  if (data.success) {
+    document.getElementById('qmodalInput').classList.add('filled');
+
+    // Aktifkan WA button
+    const waBtn = document.getElementById('qmodalWaBtn');
+    waBtn.href = data.wa_url;
+    waBtn.classList.remove('disabled');
+    document.getElementById('qmodalWaHint').textContent = 'Klik untuk kirim notifikasi WA ke pasien';
+
+    // Update tampilan di tabel
+    const cell = document.getElementById('dash-qcell-' + qmodalApptId);
+    if (cell) {
+      cell.innerHTML =
+        '<div class="d-flex flex-column align-items-center gap-1">' +
+        '<span class="fw-bold fs-5 text-success" id="dash-qbadge-' + qmodalApptId + '">' + data.queue_number + '</span>' +
+        '<button class="dash-edit-btn" onclick="openQueueModal(\'' + qmodalApptId + '\',\'' +
+          (document.getElementById('qmodal-name').textContent.replace(/'/g,"\\'" ) ) + '\',\'' +
+          (document.getElementById('qmodal-doctor').textContent.replace(/'/g,"\\'" ) ) + '\',\'' +
+          data.queue_number + '\')">' +
+        '<i class="bi bi-pencil-square me-1"></i>Edit</button></div>';
+    }
+
+    // Toast sukses
+    const t = document.createElement('div');
+    t.className = 'alert alert-success shadow position-fixed bottom-0 end-0 m-4 rounded-4';
+    t.style.cssText = 'z-index:9999;min-width:280px;font-size:.85rem;';
+    t.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>No. Antrian <strong>' + data.queue_number + '</strong> berhasil disimpan! Sekarang klik <strong>Kirim WA</strong>.';
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(()=>t.remove(),400); }, 4000);
+  }
+}
+
+// Enter key di dalam modal
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && e.target.id === 'qmodalInput') qmodalSave();
+});
+</script>
+
 <!-- Hidden Audio element -->
 <audio id="notifAudioPlayer" style="display:none;" preload="auto" onerror="console.warn('Audio notifikasi tidak dapat dimuat:', this.src);">
     <source src="{% static 'audio/hospital-notif.mp3' %}?v=1" type="audio/mpeg">

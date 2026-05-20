@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ article.title }} · RS Gunung Maria Tomohon{% endblock %}
+
+{% block content %}
+<div class="article-detail-wrap mx-auto">
+
+  {% if article.thumbnail %}
+  <div class="article-detail-thumb mb-4">
+    <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}" class="article-detail-img">
+  </div>
+  {% elif article.thumbnail_url %}
+  <div class="article-detail-thumb mb-4">
+    <img src="{{ article.thumbnail_url }}" alt="{{ article.title }}" class="article-detail-img">
+  </div>
+  {% endif %}
+
+  <div class="article-detail-meta mb-2">
+    <span class="article-card-date">
+      <i class="bi bi-calendar3 me-1"></i>{{ article.created_at|date:"d F Y" }}
+    </span>
+  </div>
+
+  <h1 class="article-detail-title mb-4">{{ article.title }}</h1>
+
+  <div class="article-detail-body">
+    {{ article.content|linebreaks }}
+  </div>
+
+  <div class="mt-5">
+    <a href="{% url 'home' %}#artikel" class="btn btn-outline-primary btn-sm rounded-pill">
+      <i class="bi bi-arrow-left me-1"></i>Kembali ke Beranda
+    </a>
+  </div>
+
+</div>
+{% endblock %}

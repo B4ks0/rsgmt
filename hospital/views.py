@@ -14,12 +14,13 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .forms import (
-    AppointmentForm, BackendAppointmentForm, BackendDepartmentForm,
-    BackendDoctorForm, BackendPatientForm, DoctorScheduleFormSet,
+    AppointmentForm, BackendAppointmentForm, BackendArticleForm,
+    BackendDepartmentForm, BackendDoctorForm, BackendNewsForm,
+    BackendPatientForm, DoctorScheduleFormSet,
 )
 from .models import (
-    Appointment, ContactMessage, Department, Doctor, DoctorSchedule,
-    Patient, Payment, ScheduleException,
+    Appointment, Article, ContactMessage, Department, Doctor, DoctorSchedule,
+    News, Patient, Payment, ScheduleException,
 )
 
 
@@ -55,10 +56,138 @@ def slideshow_image(request, filename):
     return FileResponse(img_path.open("rb"), content_type="image/png")
 
 
+_DEPT_INFO = {
+    'Anak': {
+        'icon': 'bi-balloon-heart',
+        'desc': 'Penanganan kesehatan bayi, anak, dan remaja oleh dokter spesialis anak berpengalaman.',
+    },
+    'Bedah': {
+        'icon': 'bi-bandaid',
+        'desc': 'Tindakan operasi untuk berbagai kondisi bedah umum secara aman dan terencana.',
+    },
+    'Bedah Saraf': {
+        'icon': 'bi-lightning-charge',
+        'desc': 'Operasi pada otak, tulang belakang, dan sistem saraf pusat maupun perifer.',
+    },
+    'Bedah Urologi': {
+        'icon': 'bi-droplet',
+        'desc': 'Penanganan gangguan saluran kemih, ginjal, dan organ reproduksi pria.',
+    },
+    'Forensik & Medikolegal': {
+        'icon': 'bi-shield-check',
+        'desc': 'Pemeriksaan medis untuk keperluan hukum, visum et repertum, dan medikolegal.',
+    },
+    'Gigi & Mulut': {
+        'icon': 'bi-emoji-smile',
+        'desc': 'Perawatan gigi, gusi, rahang, dan kesehatan rongga mulut secara menyeluruh.',
+    },
+    'Jantung & Pembuluh Darah': {
+        'icon': 'bi-heart-pulse',
+        'desc': 'Diagnosis dan terapi komprehensif untuk penyakit jantung serta gangguan pembuluh darah.',
+    },
+    'Kebidanan & Kandungan': {
+        'icon': 'bi-person-heart',
+        'desc': 'Perawatan kehamilan, persalinan, dan kesehatan sistem reproduksi wanita.',
+    },
+    'Kulit & Kelamin': {
+        'icon': 'bi-brightness-high',
+        'desc': 'Diagnosis dan pengobatan penyakit kulit, rambut, kuku, serta infeksi menular seksual.',
+    },
+    'Mata': {
+        'icon': 'bi-eye',
+        'desc': 'Pemeriksaan dan pengobatan gangguan penglihatan serta berbagai penyakit mata.',
+    },
+    'Penyakit Dalam': {
+        'icon': 'bi-activity',
+        'desc': 'Diagnosis dan penanganan penyakit organ dalam seperti diabetes, hipertensi, dan infeksi.',
+    },
+    'Rehabilitasi Medik': {
+        'icon': 'bi-person-check',
+        'desc': 'Program pemulihan fungsi gerak dan kemampuan tubuh pasca cedera atau operasi.',
+    },
+    'Saraf': {
+        'icon': 'bi-lightning',
+        'desc': 'Penanganan gangguan sistem saraf seperti stroke, epilepsi, migrain, dan neuropati.',
+    },
+    'THT': {
+        'icon': 'bi-ear',
+        'desc': 'Perawatan telinga, hidung, tenggorokan, serta kondisi kepala dan leher terkait.',
+    },
+    'Umum': {
+        'icon': 'bi-hospital',
+        'desc': 'Pelayanan medis dasar untuk berbagai keluhan umum dan pemeriksaan kesehatan rutin.',
+    },
+}
+
+_UNSPLASH = 'https://images.unsplash.com/'
+_FACILITIES = [
+    {'icon': 'bi-alarm',          'name': 'IGD 24 Jam',       'img': _UNSPLASH + 'photo-1516574187841-cb9cc2ca948b?w=600&h=360&fit=crop&q=80', 'desc': 'Instalasi Gawat Darurat siap melayani kondisi darurat kapan saja, tanpa henti sepanjang hari.'},
+    {'icon': 'bi-building',       'name': 'Rawat Inap',        'img': _UNSPLASH + 'photo-1538108149393-fbbd81895907?w=600&h=360&fit=crop&q=80', 'desc': 'Ruang perawatan kelas I, II, dan III yang nyaman dengan tenaga medis siaga penuh.'},
+    {'icon': 'bi-calendar-check', 'name': 'Rawat Jalan',       'img': _UNSPLASH + 'photo-1576091160399-112ba8d25d1d?w=600&h=360&fit=crop&q=80', 'desc': 'Layanan poliklinik spesialis untuk konsultasi dan pemeriksaan tanpa perlu menginap.'},
+    {'icon': 'bi-graph-up',       'name': 'ICU / ICCU',        'img': 'https://plus.unsplash.com/premium_photo-1661895714925-2c7a6be6be32?q=80&w=387&auto=format&fit=crop', 'desc': 'Unit perawatan intensif dengan monitoring vital sign dan alat bantu hidup 24 jam.'},
+    {'icon': 'bi-scissors',       'name': 'Kamar Operasi',     'img': _UNSPLASH + 'photo-1551076805-e1869033e561?w=600&h=360&fit=crop&q=80', 'desc': 'Ruang operasi steril berperalatan modern dengan tim bedah dan anestesi berpengalaman.'},
+    {'icon': 'bi-droplet',        'name': 'Laboratorium',      'img': 'https://images.unsplash.com/photo-1602052577122-f73b9710adba?q=80&w=870&auto=format&fit=crop', 'desc': 'Pemeriksaan laboratorium klinik lengkap untuk mendukung diagnosis yang akurat dan cepat.'},
+    {'icon': 'bi-camera',         'name': 'Radiologi & USG',   'img': 'https://images.unsplash.com/photo-1666214280352-db292c05fd80?q=80&w=870&auto=format&fit=crop', 'desc': 'Layanan rontgen, ultrasonografi, dan pencitraan diagnostik untuk deteksi yang tepat.'},
+    {'icon': 'bi-capsule',        'name': 'Apotek / Farmasi',  'img': 'https://images.unsplash.com/photo-1642055514517-7b52288890ec?q=80&w=774&auto=format&fit=crop', 'desc': 'Apotek rumah sakit dengan ketersediaan obat-obatan lengkap, terjangkau, dan terjamin.'},
+    {'icon': 'bi-heart-pulse',    'name': 'Medical Check Up',  'img': 'https://images.unsplash.com/photo-1603807008857-ad66b70431aa?q=80&w=873&auto=format&fit=crop', 'desc': 'Paket pemeriksaan kesehatan menyeluruh untuk deteksi dini penyakit sebelum menjadi serius.'},
+    {'icon': 'bi-person-check',   'name': 'Fisioterapi',       'img': _UNSPLASH + 'photo-1571019613454-1cb2f99b2d8b?w=600&h=360&fit=crop&q=80', 'desc': 'Program rehabilitasi gerak dan pemulihan fungsi fisik pasca cedera, operasi, atau stroke.'},
+    {'icon': 'bi-truck',          'name': 'Ambulans 24 Jam',   'img': _UNSPLASH + 'photo-1587745416684-47953f16f02f?w=600&h=360&fit=crop&q=80', 'desc': 'Layanan transportasi medis darurat siap menjemput dan mengantar pasien kapan pun.'},
+    {'icon': 'bi-shield-check',   'name': 'BPJS & Asuransi',  'img': _UNSPLASH + 'photo-1450101499163-c8848c66ca85?w=600&h=360&fit=crop&q=80', 'desc': 'Melayani pasien BPJS Kesehatan dan berbagai mitra asuransi kesehatan swasta rekanan.'},
+]
+
 def home(request):
     departments = Department.objects.all().order_by("name")
-    return render(request, "hospital/home.html", {"departments": departments})
+    dept_with_doctors = Department.objects.annotate(doc_count=Count('doctors')).filter(doc_count__gt=0).order_by('name')
+    clinics = [
+        {
+            'id': d.id,
+            'name': d.name,
+            'doc_count': d.doc_count,
+            'icon': _DEPT_INFO.get(d.name, {}).get('icon', 'bi-hospital'),
+            'desc': _DEPT_INFO.get(d.name, {}).get('desc', 'Layanan medis spesialis untuk penanganan optimal pasien.'),
+        }
+        for d in dept_with_doctors
+    ]
+    articles = Article.objects.filter(is_published=True).only('title', 'slug', 'thumbnail', 'thumbnail_url', 'created_at', 'content')[:3]
+    news = News.objects.filter(is_published=True).only('title', 'slug', 'thumbnail', 'thumbnail_url', 'created_at', 'excerpt', 'content')[:3]
+    return render(request, "hospital/home.html", {"departments": departments, "clinics": clinics, "facilities": _FACILITIES, "articles": articles, "news": news})
 
+
+def news_list(request):
+    all_news = list(News.objects.filter(is_published=True))
+    featured  = all_news[0] if all_news else None
+    sidebar   = all_news[1:6]
+    grid      = all_news[6:]
+    return render(request, "hospital/news_list.html", {
+        "featured": featured, "sidebar_articles": sidebar, "grid_articles": grid,
+    })
+
+def news_detail(request, slug):
+    try:
+        item = News.objects.get(slug=slug, is_published=True)
+    except News.DoesNotExist:
+        from django.http import Http404
+        raise Http404
+    return render(request, "hospital/news_detail.html", {"news": item})
+
+def articles_list(request):
+    all_articles = list(Article.objects.filter(is_published=True))
+    featured   = all_articles[0] if all_articles else None
+    sidebar    = all_articles[1:6]
+    grid       = all_articles[6:]
+    return render(request, "hospital/articles.html", {
+        "featured": featured,
+        "sidebar_articles": sidebar,
+        "grid_articles": grid,
+    })
+
+def article_detail(request, slug):
+    try:
+        article = Article.objects.get(slug=slug, is_published=True)
+    except Article.DoesNotExist:
+        from django.http import Http404
+        raise Http404
+    return render(request, "hospital/article_detail.html", {"article": article})
 
 def about(request):
     return render(request, "hospital/about.html")
@@ -623,6 +752,213 @@ def get_doctor_available_dates(request):
     }
     
     return JsonResponse({'success': True, 'available_dates': available_dates, 'doctor_info': doctor_info})
+
+@staff_member_required
+def backend_queue_list(request):
+    from django.utils import timezone as tz
+    from datetime import date as date_type
+
+    date_str = request.GET.get('date', tz.localdate().isoformat())
+    doctor_id = request.GET.get('doctor', '')
+    try:
+        filter_date = date_type.fromisoformat(date_str)
+    except ValueError:
+        filter_date = tz.localdate()
+
+    base_qs = (
+        Appointment.objects
+        .filter(status__in=['requested', 'confirmed'])
+        .filter(Q(appointment_date=filter_date) | Q(preferred_date=filter_date))
+        .select_related('patient', 'doctor', 'doctor__department')
+    )
+    if doctor_id:
+        base_qs = base_qs.filter(doctor_id=doctor_id)
+
+    all_appts = list(base_qs.order_by('queue_number', 'booked_at'))
+
+    # Pisahkan: belum bernomor vs sudah bernomor
+    unassigned = [a for a in all_appts if not a.queue_number]
+    assigned   = [a for a in all_appts if a.queue_number]
+
+    stats = {
+        'total':      len(all_appts),
+        'unassigned': len(unassigned),
+        'active':     len([a for a in assigned if a.queue_status not in ('done', 'absent')]),
+        'done':       len([a for a in assigned if a.queue_status in ('done', 'absent')]),
+    }
+
+    doctors_list = Doctor.objects.filter(is_active=True).order_by('full_name')
+    return render(request, "hospital/backend/queue_management.html", {
+        "appointments": all_appts,
+        "unassigned": unassigned,
+        "assigned": assigned,
+        "stats": stats,
+        "filter_date": filter_date,
+        "filter_doctor": doctor_id,
+        "doctors_list": doctors_list,
+    })
+
+@staff_member_required
+def backend_queue_assign(request, appt_id):
+    """Assign queue number + update status via AJAX POST."""
+    if request.method == "POST":
+        try:
+            appt = Appointment.objects.get(id=appt_id)
+            queue_number = request.POST.get('queue_number', '').strip()
+            queue_status = request.POST.get('queue_status', 'waiting')
+            if queue_number:
+                appt.queue_number = queue_number
+            if queue_status in dict(Appointment.QUEUE_STATUS_CHOICES):
+                appt.queue_status = queue_status
+            if appt.status == 'requested' and queue_number:
+                appt.status = 'confirmed'
+            appt.save(update_fields=['queue_number', 'queue_status', 'status'])
+            return JsonResponse({
+                'success': True,
+                'queue_number': appt.queue_number,
+                'queue_status': appt.queue_status,
+                'queue_status_label': dict(Appointment.QUEUE_STATUS_CHOICES).get(appt.queue_status, ''),
+                'wa_url': appt.get_queue_whatsapp_url,
+            })
+        except Appointment.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Tidak ditemukan'}, status=404)
+    return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+
+def queue_check(request):
+    result = None
+    phone_query = ''
+    if request.GET.get('phone'):
+        phone_query = request.GET.get('phone', '').strip()
+        clean = ''.join(filter(str.isdigit, phone_query))
+        appts = Appointment.objects.filter(
+            status__in=['requested', 'confirmed', 'completed']
+        ).filter(
+            Q(patient__phone__icontains=clean) |
+            Q(phone__icontains=clean) |
+            Q(patient__phone__icontains=phone_query) |
+            Q(phone__icontains=phone_query)
+        ).select_related('patient', 'doctor', 'doctor__department').order_by('-booked_at')[:5]
+        result = list(appts)
+    return render(request, "hospital/queue_check.html", {
+        "result": result,
+        "phone_query": phone_query,
+    })
+
+@staff_member_required
+def backend_news_list(request):
+    q = request.GET.get('q', '').strip()
+    status = request.GET.get('status', '')
+    items = News.objects.all()
+    if q:
+        items = items.filter(title__icontains=q)
+    if status == 'published':
+        items = items.filter(is_published=True)
+    elif status == 'draft':
+        items = items.filter(is_published=False)
+    paginator = Paginator(items.order_by('-created_at'), 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    return render(request, "hospital/backend/news_list.html", {
+        "news_list": page_obj, "q": q, "status": status,
+    })
+
+@staff_member_required
+def backend_news_create(request):
+    if request.method == "POST":
+        form = BackendNewsForm(request.POST, request.FILES)
+        if form.is_valid():
+            item = form.save()
+            messages.success(request, f"Berita \"{item.title}\" berhasil ditambahkan.")
+            return redirect("backend_news_list")
+    else:
+        form = BackendNewsForm()
+    return render(request, "hospital/backend/news_form.html", {"form": form, "news": None, "title": "Tambah Berita Baru"})
+
+@staff_member_required
+def backend_news_edit(request, news_id):
+    try:
+        item = News.objects.get(id=news_id)
+    except News.DoesNotExist:
+        messages.error(request, "Berita tidak ditemukan.")
+        return redirect("backend_news_list")
+    if request.method == "POST":
+        form = BackendNewsForm(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Berita \"{item.title}\" berhasil diperbarui.")
+            return redirect("backend_news_list")
+    else:
+        form = BackendNewsForm(instance=item)
+    return render(request, "hospital/backend/news_form.html", {"form": form, "news": item, "title": f"Edit: {item.title}"})
+
+@staff_member_required
+def backend_news_delete(request, news_id):
+    if request.method == "POST":
+        try:
+            item = News.objects.get(id=news_id)
+            title = item.title
+            item.delete()
+            messages.success(request, f"Berita \"{title}\" berhasil dihapus.")
+        except News.DoesNotExist:
+            messages.error(request, "Berita tidak ditemukan.")
+    return redirect("backend_news_list")
+
+@staff_member_required
+def backend_article_list(request):
+    q = request.GET.get('q', '').strip()
+    status = request.GET.get('status', '')
+    items = Article.objects.all()
+    if q:
+        items = items.filter(title__icontains=q)
+    if status == 'published':
+        items = items.filter(is_published=True)
+    elif status == 'draft':
+        items = items.filter(is_published=False)
+    paginator = Paginator(items.order_by('-created_at'), 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    return render(request, "hospital/backend/article_list.html", {
+        "articles": page_obj, "q": q, "status": status,
+    })
+
+@staff_member_required
+def backend_article_create(request):
+    if request.method == "POST":
+        form = BackendArticleForm(request.POST, request.FILES)
+        if form.is_valid():
+            article = form.save()
+            messages.success(request, f"Artikel \"{article.title}\" berhasil ditambahkan.")
+            return redirect("backend_article_list")
+    else:
+        form = BackendArticleForm()
+    return render(request, "hospital/backend/article_form.html", {"form": form, "article": None, "title": "Tambah Artikel Baru"})
+
+@staff_member_required
+def backend_article_edit(request, article_id):
+    try:
+        article = Article.objects.get(id=article_id)
+    except Article.DoesNotExist:
+        messages.error(request, "Artikel tidak ditemukan.")
+        return redirect("backend_article_list")
+    if request.method == "POST":
+        form = BackendArticleForm(request.POST, request.FILES, instance=article)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Artikel \"{article.title}\" berhasil diperbarui.")
+            return redirect("backend_article_list")
+    else:
+        form = BackendArticleForm(instance=article)
+    return render(request, "hospital/backend/article_form.html", {"form": form, "article": article, "title": f"Edit: {article.title}"})
+
+@staff_member_required
+def backend_article_delete(request, article_id):
+    if request.method == "POST":
+        try:
+            article = Article.objects.get(id=article_id)
+            title = article.title
+            article.delete()
+            messages.success(request, f"Artikel \"{title}\" berhasil dihapus.")
+        except Article.DoesNotExist:
+            messages.error(request, "Artikel tidak ditemukan.")
+    return redirect("backend_article_list")
 
 @staff_member_required
 def backend_contact_list(request):
