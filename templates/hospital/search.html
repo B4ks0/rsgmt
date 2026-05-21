@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Pencarian{% if q %}: {{ q }}{% endif %} · RS Gunung Maria Tomohon{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+
+    <!-- Search bar -->
+    <form method="get" action="{% url 'search' %}" class="mb-5">
+      <div class="input-group input-group-lg shadow-sm rounded-4 overflow-hidden">
+        <span class="input-group-text bg-white border-0 ps-4 text-muted">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="text" name="q" value="{{ q }}" autofocus
+               class="form-control border-0 shadow-none ps-2"
+               placeholder="Cari dokter, klinik, artikel, berita…">
+        {% if q %}
+        <a href="{% url 'search' %}" class="input-group-text bg-white border-0 text-muted pe-3" title="Hapus">
+          <i class="bi bi-x-lg"></i>
+        </a>
+        {% endif %}
+        <button type="submit" class="btn btn-primary px-4 fw-semibold">Cari</button>
+      </div>
+    </form>
+
+    {% if not q %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-search d-block mb-3" style="font-size:3rem;opacity:0.15;"></i>
+      <p class="mb-0">Ketik kata kunci untuk mulai mencari</p>
+    </div>
+
+    {% elif not doctors and not departments and not articles and not news %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-emoji-frown d-block mb-3" style="font-size:3rem;opacity:0.15;"></i>
+      <p class="fw-semibold mb-1">Tidak ada hasil untuk <em>"{{ q }}"</em></p>
+      <p class="small">Coba kata kunci lain atau periksa ejaan.</p>
+    </div>
+
+    {% else %}
+
+    {% if doctors %}
+    <div class="mb-5">
+      <p class="text-uppercase fw-bold small text-muted letter-spacing-wide mb-3">
+        <i class="bi bi-person-badge me-1"></i>Dokter
+      </p>
+      <div class="row g-3">
+        {% for doc in doctors %}
+        <div class="col-12 col-sm-6">
+          <a href="{% url 'doctor_detail' doc.id %}" class="d-flex align-items-center gap-3 p-3 rounded-3 border text-decoration-none text-dark bg-white search-result-card">
+            <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px;height:44px;">
+              <i class="bi bi-person-badge text-primary"></i>
+            </div>
+            <div class="min-width-0">
+              <div class="fw-semibold text-truncate">{{ doc.full_name }}</div>
+              <div class="small text-muted">{{ doc.department.name|default:"-" }}</div>
+            </div>
+            <i class="bi bi-arrow-right ms-auto text-muted flex-shrink-0"></i>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if departments %}
+    <div class="mb-5">
+      <p class="text-uppercase fw-bold small text-muted mb-3">
+        <i class="bi bi-hospital me-1"></i>Klinik &amp; Poliklinik
+      </p>
+      <div class="row g-3">
+        {% for dept in departments %}
+        <div class="col-12 col-sm-6">
+          <a href="{% url 'doctors' %}?dept={{ dept.id }}" class="d-flex align-items-center gap-3 p-3 rounded-3 border text-decoration-none text-dark bg-white search-result-card">
+            <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px;height:44px;">
+              <i class="bi {{ dept.icon|default:'bi-hospital' }} text-success"></i>
+            </div>
+            <div class="min-width-0">
+              <div class="fw-semibold text-truncate">{{ dept.name }}</div>
+              <div class="small text-muted">{{ dept.dc }} dokter tersedia</div>
+            </div>
+            <i class="bi bi-arrow-right ms-auto text-muted flex-shrink-0"></i>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if articles %}
+    <div class="mb-5">
+      <p class="text-uppercase fw-bold small text-muted mb-3">
+        <i class="bi bi-journal-medical me-1"></i>Artikel Kesehatan
+      </p>
+      <div class="d-flex flex-column gap-2">
+        {% for a in articles %}
+        <a href="{% url 'article_detail' a.slug %}" class="d-flex align-items-center gap-3 p-3 rounded-3 border text-decoration-none text-dark bg-white search-result-card">
+          <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px;height:44px;">
+            <i class="bi bi-journal-medical text-warning"></i>
+          </div>
+          <div class="min-width-0">
+            <div class="fw-semibold text-truncate">{{ a.title }}</div>
+            <div class="small text-muted">{{ a.created_at|date:"d M Y" }}</div>
+          </div>
+          <i class="bi bi-arrow-right ms-auto text-muted flex-shrink-0"></i>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if news %}
+    <div class="mb-5">
+      <p class="text-uppercase fw-bold small text-muted mb-3">
+        <i class="bi bi-megaphone me-1"></i>Berita
+      </p>
+      <div class="d-flex flex-column gap-2">
+        {% for n in news %}
+        <a href="{% url 'news_detail' n.slug %}" class="d-flex align-items-center gap-3 p-3 rounded-3 border text-decoration-none text-dark bg-white search-result-card">
+          <div class="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px;height:44px;">
+            <i class="bi bi-megaphone text-danger"></i>
+          </div>
+          <div class="min-width-0">
+            <div class="fw-semibold text-truncate">{{ n.title }}</div>
+            <div class="small text-muted">{{ n.created_at|date:"d M Y" }}</div>
+          </div>
+          <i class="bi bi-arrow-right ms-auto text-muted flex-shrink-0"></i>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .search-result-card { transition: box-shadow .15s, border-color .15s; }
+  .search-result-card:hover { border-color: #74c0fc !important; box-shadow: 0 2px 12px rgba(0,100,255,0.08); }
+</style>
+{% endblock %}

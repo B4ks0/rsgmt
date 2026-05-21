@@ -722,6 +722,23 @@ def backend_department_delete(request, dept_id):
     return redirect("backend_department_list")
 
 
+def search_page(request):
+    q = request.GET.get('q', '').strip()
+    ctx = {'q': q, 'doctors': [], 'departments': [], 'articles': [], 'news': []}
+    if len(q) >= 2:
+        ctx['doctors'] = Doctor.objects.filter(
+            Q(full_name__icontains=q) | Q(department__name__icontains=q), is_active=True
+        ).select_related('department')[:8]
+        ctx['departments'] = Department.objects.filter(name__icontains=q).annotate(dc=Count('doctors')).filter(dc__gt=0)[:6]
+        ctx['articles'] = Article.objects.filter(
+            Q(title__icontains=q) | Q(content__icontains=q), is_published=True
+        )[:6]
+        ctx['news'] = News.objects.filter(
+            Q(title__icontains=q) | Q(excerpt__icontains=q), is_published=True
+        )[:6]
+    return render(request, 'hospital/search.html', ctx)
+
+
 def api_search(request):
     q = request.GET.get('q', '').strip()
     if len(q) < 2:

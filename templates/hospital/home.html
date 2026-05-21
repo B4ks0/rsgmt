@@ -10,21 +10,17 @@ Maria Tomohon{% endblock %}
     var chevron = btn.querySelector('.clinic-expand-chevron');
     var countEl = btn.querySelector('.clinic-expand-count');
     var isExpanded = btn.dataset.expanded === '1';
-    var items = document.querySelectorAll('#clinicGrid .col-12.col-md-4');
+    var items = document.querySelectorAll('#clinicGrid > div');
 
     items.forEach(function (el, i) {
-      if (i >= 9) {
-        if (isExpanded) {
-          el.classList.add('clinic-hidden');
-        } else {
-          el.classList.remove('clinic-hidden');
-        }
+      if (i >= 6) {
+        el.classList.toggle('clinic-hidden', isExpanded);
       }
     });
 
     btn.dataset.expanded = isExpanded ? '0' : '1';
-    countEl.style.display = isExpanded ? '' : 'none';
-    chevron.classList.toggle('rotated', !isExpanded);
+    if (countEl) countEl.style.display = isExpanded ? '' : 'none';
+    if (chevron) chevron.classList.toggle('rotated', !isExpanded);
   };
 
   var track = document.getElementById('facTrack');

@@ -1788,6 +1788,27 @@ textarea:focus {
   margin-bottom: 1.1rem;
 }
 
+/* ── Nav search icon button ─────────────────────────────────────────────── */
+.btn-nav-search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.88);
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background .15s, border-color .15s;
+}
+.btn-nav-search:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.35);
+  color: #fff;
+}
+
 /* ── Hot Search ─────────────────────────────────────────────────────────── */
 .hotsearch-trigger {
   display: flex;
@@ -1866,6 +1887,7 @@ textarea:focus {
 .section-side-header {
   position: sticky;
   top: 88px;
+  background: transparent;
 }
 
 .section-side-title {
