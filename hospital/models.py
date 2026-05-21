@@ -318,6 +318,27 @@ class Article(models.Model):
         text = re.sub(r'<[^>]+>', '', self.content).strip()
         return text[:length] + '…' if len(text) > length else text
 
+class Slide(models.Model):
+    image = models.ImageField(upload_to='slides/', blank=True, null=True)
+    image_url = models.URLField(blank=True, max_length=500)
+    caption = models.CharField(max_length=200, blank=True)
+    link_url = models.URLField(blank=True, max_length=500)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+
+    def __str__(self):
+        return self.caption or f"Slide #{self.pk}"
+
+    def get_image_src(self):
+        if self.image:
+            return self.image.url
+        return self.image_url or ''
+
+
 class ContactMessage(models.Model):
     full_name = models.CharField(max_length=160, db_index=True)
     email = models.EmailField(db_index=True)

@@ -16,11 +16,11 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import (
     AppointmentForm, BackendAppointmentForm, BackendArticleForm,
     BackendDepartmentForm, BackendDoctorForm, BackendNewsForm,
-    BackendPatientForm, DoctorScheduleFormSet,
+    BackendPatientForm, BackendSlideForm, DoctorScheduleFormSet,
 )
 from .models import (
     Appointment, Article, ContactMessage, Department, Doctor, DoctorSchedule,
-    News, Patient, Payment, ScheduleException,
+    News, Patient, Payment, ScheduleException, Slide,
 )
 
 
@@ -150,7 +150,11 @@ def home(request):
     ]
     articles = Article.objects.filter(is_published=True).only('title', 'slug', 'thumbnail', 'thumbnail_url', 'created_at', 'content')[:3]
     news = News.objects.filter(is_published=True).only('title', 'slug', 'thumbnail', 'thumbnail_url', 'created_at', 'excerpt', 'content')[:3]
-    return render(request, "hospital/home.html", {"departments": departments, "clinics": clinics, "facilities": _FACILITIES, "articles": articles, "news": news})
+    slides = list(Slide.objects.filter(is_active=True))
+    return render(request, "hospital/home.html", {
+        "departments": departments, "clinics": clinics, "facilities": _FACILITIES,
+        "articles": articles, "news": news, "slides": slides,
+    })
 
 
 def news_list(request):
@@ -752,6 +756,58 @@ def get_doctor_available_dates(request):
     }
     
     return JsonResponse({'success': True, 'available_dates': available_dates, 'doctor_info': doctor_info})
+
+
+# ── Slide (Slideshow) CRUD ─────────────────────────────────────────────────
+
+@user_passes_test(lambda u: u.is_staff, login_url='/dashboard/login/')
+def backend_slide_list(request):
+    slides = Slide.objects.all()
+    return render(request, "hospital/backend/slide_list.html", {"slides": slides})
+
+
+@user_passes_test(lambda u: u.is_staff, login_url='/dashboard/login/')
+def backend_slide_create(request):
+    if request.method == "POST":
+        form = BackendSlideForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Slide berhasil ditambahkan.")
+            return redirect("backend_slide_list")
+    else:
+        form = BackendSlideForm()
+    return render(request, "hospital/backend/slide_form.html", {"form": form, "title": "Tambah Slide"})
+
+
+@user_passes_test(lambda u: u.is_staff, login_url='/dashboard/login/')
+def backend_slide_edit(request, slide_id):
+    try:
+        slide = Slide.objects.get(pk=slide_id)
+    except Slide.DoesNotExist:
+        messages.error(request, "Slide tidak ditemukan.")
+        return redirect("backend_slide_list")
+    if request.method == "POST":
+        form = BackendSlideForm(request.POST, request.FILES, instance=slide)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Slide berhasil diperbarui.")
+            return redirect("backend_slide_list")
+    else:
+        form = BackendSlideForm(instance=slide)
+    return render(request, "hospital/backend/slide_form.html", {"form": form, "slide": slide, "title": "Edit Slide"})
+
+
+@user_passes_test(lambda u: u.is_staff, login_url='/dashboard/login/')
+def backend_slide_delete(request, slide_id):
+    try:
+        slide = Slide.objects.get(pk=slide_id)
+    except Slide.DoesNotExist:
+        messages.error(request, "Slide tidak ditemukan.")
+        return redirect("backend_slide_list")
+    if request.method == "POST":
+        slide.delete()
+        messages.success(request, "Slide berhasil dihapus.")
+    return redirect("backend_slide_list")
 
 @staff_member_required
 def backend_queue_list(request):

@@ -51,6 +51,9 @@
 
     <!-- Konten -->
     <div class="sidebar-heading mt-3">Konten</div>
+    <a href="{% url 'backend_slide_list' %}" class="{% if 'slide' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-images me-2"></i> Slideshow
+    </a>
     <a href="{% url 'backend_news_list' %}" class="{% if 'news' in request.resolver_match.url_name %}active{% endif %}">
       <i class="bi bi-megaphone me-2"></i> Berita Terbaru
     </a>

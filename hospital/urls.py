@@ -61,5 +61,11 @@ urlpatterns = [
     path("dashboard/departments/", views.backend_department_list, name="backend_department_list"),
     path("dashboard/departments/add/", views.backend_department_create, name="backend_department_create"),
     path("dashboard/departments/<int:dept_id>/edit/", views.backend_department_edit, name="backend_department_edit"),
+
+    # Slideshow
+    path("dashboard/slides/", views.backend_slide_list, name="backend_slide_list"),
+    path("dashboard/slides/add/", views.backend_slide_create, name="backend_slide_create"),
+    path("dashboard/slides/<int:slide_id>/edit/", views.backend_slide_edit, name="backend_slide_edit"),
+    path("dashboard/slides/<int:slide_id>/delete/", views.backend_slide_delete, name="backend_slide_delete"),
 ]
 

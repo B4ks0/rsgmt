@@ -1,0 +1,168 @@
+{% extends "hospital/backend/base_backend.html" %}
+{% block title %}{{ title }} - RSGM Backend{% endblock %}
+
+{% block extra_css %}
+<style>
+  .form-label { font-weight: 600; font-size: 0.85rem; color: #495057; }
+  .slide-preview { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; display: block; }
+  .slide-placeholder { width: 100%; height: 200px; background: #f8f9fa; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; border: 2px dashed #dee2e6; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 pb-3 border-bottom">
+  <div>
+    <h3 class="fw-bold mb-1"><i class="bi bi-images me-2 text-primary"></i>{{ title }}</h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0 small text-muted">
+        <li class="breadcrumb-item"><a href="{% url 'backend_dashboard' %}" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'backend_slide_list' %}" class="text-decoration-none">Slideshow</a></li>
+        <li class="breadcrumb-item active">{{ title }}</li>
+      </ol>
+    </nav>
+  </div>
+  <a href="{% url 'backend_slide_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 flex-shrink-0">
+    <i class="bi bi-arrow-left me-1"></i> Kembali
+  </a>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  <div class="row g-4">
+
+    <!-- Kolom kiri: gambar -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+          <h5 class="fw-bold mb-0">Gambar Slide</h5>
+        </div>
+        <div class="card-body p-4">
+
+          <!-- Preview -->
+          <div class="mb-3" id="slidePreviewWrap">
+            {% if slide and slide.image %}
+              <img src="{{ slide.image.url }}" class="slide-preview" id="slideImg" alt="">
+            {% elif slide and slide.image_url %}
+              <img src="{{ slide.image_url }}" class="slide-preview" id="slideImg" alt="">
+            {% else %}
+              <div class="slide-placeholder" id="slidePlaceholder">
+                <i class="bi bi-image text-muted" style="font-size:2.5rem;opacity:0.4;"></i>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- URL eksternal -->
+          <div class="mb-3">
+            <label class="form-label mb-1">{{ form.image_url.label }}</label>
+            {{ form.image_url }}
+            {% for e in form.image_url.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+            <div class="form-text">Tempel URL gambar dari internet.</div>
+          </div>
+
+          <!-- Upload lokal -->
+          <div class="mb-0">
+            <label class="form-label mb-1">{{ form.image.label }}</label>
+            {{ form.image }}
+            {% for e in form.image.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+            <div class="form-text">JPG/PNG, maks. 5MB. Upload file prioritas lebih tinggi dari URL.</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Kolom kanan: detail & publish -->
+    <div class="col-lg-7">
+
+      <!-- Detail -->
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+          <h5 class="fw-bold mb-0">Detail Slide</h5>
+        </div>
+        <div class="card-body p-4">
+
+          <div class="mb-3">
+            <label class="form-label mb-1">{{ form.caption.label }}
+              <span class="text-muted fw-normal">(opsional)</span>
+            </label>
+            {{ form.caption }}
+            {% for e in form.caption.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+            <div class="form-text">Teks yang ditampilkan di atas slide. Kosongkan jika tidak perlu.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label mb-1">{{ form.link_url.label }}
+              <span class="text-muted fw-normal">(opsional)</span>
+            </label>
+            {{ form.link_url }}
+            {% for e in form.link_url.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+            <div class="form-text">Jika diisi, slide bisa diklik dan membuka halaman ini.</div>
+          </div>
+
+          <div class="mb-0">
+            <label class="form-label mb-1">{{ form.order.label }}</label>
+            {{ form.order }}
+            {% for e in form.order.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+            <div class="form-text">Angka lebih kecil tampil lebih dulu. Mulai dari 0.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Publikasi -->
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+          <h5 class="fw-bold mb-0">Status</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="form-check form-switch mb-2">
+            {{ form.is_active }}
+            <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+              Aktifkan slide ini
+            </label>
+          </div>
+          <div class="form-text">Hanya slide yang aktif yang tampil di halaman utama.</div>
+        </div>
+        <div class="card-footer bg-white border-top p-4 pt-0">
+          <button type="submit" class="btn btn-primary w-100 fw-semibold py-2 rounded-3">
+            <i class="bi bi-save me-1"></i> Simpan Slide
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  var imgUrlEl = document.getElementById('{{ form.image_url.id_for_label }}');
+  var slideImg = document.getElementById('slideImg');
+  var slidePlaceholder = document.getElementById('slidePlaceholder');
+
+  function showPreview(src) {
+    if (slideImg) {
+      slideImg.src = src;
+    } else {
+      var img = document.createElement('img');
+      img.className = 'slide-preview';
+      img.id = 'slideImg';
+      img.alt = '';
+      img.src = src;
+      if (slidePlaceholder) slidePlaceholder.replaceWith(img);
+      slideImg = img;
+    }
+    if (slidePlaceholder) slidePlaceholder.style.display = 'none';
+  }
+
+  if (imgUrlEl) {
+    imgUrlEl.addEventListener('blur', function () {
+      if (this.value) showPreview(this.value);
+    });
+  }
+})();
+</script>
+{% endblock %}

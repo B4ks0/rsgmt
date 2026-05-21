@@ -74,41 +74,41 @@ Maria Tomohon{% endblock %}
     data-bs-ride="carousel"
   >
     <div class="carousel-inner">
-      <div class="carousel-item active" data-bs-interval="10000">
-        <img
-          src="{% url 'slideshow_image' '1' %}"
-          class="hero-banner-img"
-          alt="RS Gunung Maria Slideshow 1"
-        />
-      </div>
-      <div class="carousel-item" data-bs-interval="10000">
-        <img
-          src="{% url 'slideshow_image' '2' %}"
-          class="hero-banner-img"
-          alt="RS Gunung Maria Slideshow 2"
-        />
-      </div>
-      <div class="carousel-item" data-bs-interval="10000">
-        <img
-          src="{% url 'slideshow_image' '3' %}"
-          class="hero-banner-img"
-          alt="RS Gunung Maria Slideshow 3"
-        />
-      </div>
-      <div class="carousel-item" data-bs-interval="10000">
-        <img
-          src="{% url 'slideshow_image' '4' %}"
-          class="hero-banner-img"
-          alt="RS Gunung Maria Slideshow 4"
-        />
-      </div>
-      <div class="carousel-item" data-bs-interval="10000">
-        <img
-          src="{% url 'slideshow_image' '5' %}"
-          class="hero-banner-img"
-          alt="RS Gunung Maria Slideshow 5"
-        />
-      </div>
+      {% if slides %}
+        {% for slide in slides %}
+        {% if slide.get_image_src %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}" data-bs-interval="10000">
+          {% if slide.link_url %}
+          <a href="{{ slide.link_url }}" class="d-block">
+          {% endif %}
+          <img
+            src="{{ slide.get_image_src }}"
+            class="hero-banner-img"
+            alt="{% if slide.caption %}{{ slide.caption }}{% else %}RS Gunung Maria Slideshow {{ forloop.counter }}{% endif %}"
+          />
+          {% if slide.caption %}
+          <div class="carousel-caption d-none d-md-block">
+            <p class="mb-0 fw-semibold" style="text-shadow:0 1px 4px rgba(0,0,0,0.6);">{{ slide.caption }}</p>
+          </div>
+          {% endif %}
+          {% if slide.link_url %}
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+      {% else %}
+        {# Fallback ke gambar statis jika belum ada slide di database #}
+        {% for i in "12345" %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}" data-bs-interval="10000">
+          <img
+            src="{% url 'slideshow_image' i %}"
+            class="hero-banner-img"
+            alt="RS Gunung Maria Slideshow {{ forloop.counter }}"
+          />
+        </div>
+        {% endfor %}
+      {% endif %}
     </div>
     <button
       class="carousel-control-prev"
