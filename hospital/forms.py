@@ -164,7 +164,7 @@ class BackendDepartmentForm(forms.ModelForm):
             "phone": "Nomor Telepon",
         }
 
-from .models import Article, News, Slide
+from .models import Article, Facility, News, Slide
 
 class BackendNewsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -218,6 +218,35 @@ class BackendArticleForm(forms.ModelForm):
             "thumbnail_url": "Thumbnail URL (Eksternal)",
             "is_published": "Publikasikan",
         }
+
+class BackendFacilityForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.setdefault("class", "form-check-input")
+            else:
+                field.widget.attrs.setdefault("class", "form-control")
+
+    class Meta:
+        model = Facility
+        fields = ["name", "icon", "description", "image", "image_url", "order", "is_active"]
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 3}),
+            "image_url": forms.URLInput(attrs={"placeholder": "https://images.unsplash.com/..."}),
+            "icon": forms.TextInput(attrs={"placeholder": "bi-building"}),
+            "order": forms.NumberInput(attrs={"min": "0"}),
+        }
+        labels = {
+            "name": "Nama Fasilitas",
+            "icon": "Icon (Bootstrap Icons class)",
+            "description": "Deskripsi",
+            "image": "Gambar (Upload File)",
+            "image_url": "Gambar URL (Eksternal)",
+            "order": "Urutan",
+            "is_active": "Aktifkan",
+        }
+
 
 class BackendSlideForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

@@ -63,6 +63,12 @@ urlpatterns = [
     path("dashboard/departments/<int:dept_id>/edit/", views.backend_department_edit, name="backend_department_edit"),
     path("dashboard/departments/<int:dept_id>/delete/", views.backend_department_delete, name="backend_department_delete"),
 
+    # Fasilitas
+    path("dashboard/facilities/", views.backend_facility_list, name="backend_facility_list"),
+    path("dashboard/facilities/add/", views.backend_facility_create, name="backend_facility_create"),
+    path("dashboard/facilities/<int:facility_id>/edit/", views.backend_facility_edit, name="backend_facility_edit"),
+    path("dashboard/facilities/<int:facility_id>/delete/", views.backend_facility_delete, name="backend_facility_delete"),
+
     # Slideshow
     path("dashboard/slides/", views.backend_slide_list, name="backend_slide_list"),
     path("dashboard/slides/add/", views.backend_slide_create, name="backend_slide_create"),

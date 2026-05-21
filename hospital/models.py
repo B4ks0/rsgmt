@@ -319,6 +319,28 @@ class Article(models.Model):
         text = re.sub(r'<[^>]+>', '', self.content).strip()
         return text[:length] + '…' if len(text) > length else text
 
+class Facility(models.Model):
+    name = models.CharField(max_length=120)
+    icon = models.CharField(max_length=60, default='bi-building')
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='facilities/', blank=True, null=True)
+    image_url = models.URLField(blank=True, max_length=500)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name_plural = 'Facilities'
+
+    def __str__(self):
+        return self.name
+
+    def get_image_src(self):
+        if self.image:
+            return self.image.url
+        return self.image_url or ''
+
+
 class Slide(models.Model):
     image = models.ImageField(upload_to='slides/', blank=True, null=True)
     image_url = models.URLField(blank=True, max_length=500)

@@ -15,12 +15,12 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from .forms import (
     AppointmentForm, BackendAppointmentForm, BackendArticleForm,
-    BackendDepartmentForm, BackendDoctorForm, BackendNewsForm,
-    BackendPatientForm, BackendSlideForm, DoctorScheduleFormSet,
+    BackendDepartmentForm, BackendDoctorForm, BackendFacilityForm,
+    BackendNewsForm, BackendPatientForm, BackendSlideForm, DoctorScheduleFormSet,
 )
 from .models import (
     Appointment, Article, ContactMessage, Department, Doctor, DoctorSchedule,
-    News, Patient, Payment, ScheduleException, Slide,
+    Facility, News, Patient, Payment, ScheduleException, Slide,
 )
 
 
@@ -151,8 +151,10 @@ def home(request):
     articles = Article.objects.filter(is_published=True).only('title', 'slug', 'thumbnail', 'thumbnail_url', 'created_at', 'content')[:3]
     news = News.objects.filter(is_published=True).only('title', 'slug', 'thumbnail', 'thumbnail_url', 'created_at', 'excerpt', 'content')[:3]
     slides = list(Slide.objects.filter(is_active=True))
+    db_facilities = list(Facility.objects.filter(is_active=True))
+    facilities = db_facilities if db_facilities else _FACILITIES
     return render(request, "hospital/home.html", {
-        "departments": departments, "clinics": clinics, "facilities": _FACILITIES,
+        "departments": departments, "clinics": clinics, "facilities": facilities,
         "articles": articles, "news": news, "slides": slides,
     })
 
@@ -776,6 +778,62 @@ def get_doctor_available_dates(request):
     }
     
     return JsonResponse({'success': True, 'available_dates': available_dates, 'doctor_info': doctor_info})
+
+
+# ── Facility CRUD ─────────────────────────────────────────────────────────
+
+@user_passes_test(lambda u: u.is_staff, login_url='/dashboard/login/')
+def backend_facility_list(request):
+    facilities = Facility.objects.all()
+    return render(request, "hospital/backend/facility_list.html", {"facilities": facilities})
+
+
+@user_passes_test(lambda u: u.is_staff, login_url='/dashboard/login/')
+def backend_facility_create(request):
+    if request.method == "POST":
+        form = BackendFacilityForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Fasilitas berhasil ditambahkan.")
+            return redirect("backend_facility_list")
+    else:
+        form = BackendFacilityForm()
+    return render(request, "hospital/backend/facility_form.html", {
+        "form": form, "title": "Tambah Fasilitas", "icon_choices": _ICON_CHOICES,
+    })
+
+
+@user_passes_test(lambda u: u.is_staff, login_url='/dashboard/login/')
+def backend_facility_edit(request, facility_id):
+    try:
+        facility = Facility.objects.get(pk=facility_id)
+    except Facility.DoesNotExist:
+        messages.error(request, "Fasilitas tidak ditemukan.")
+        return redirect("backend_facility_list")
+    if request.method == "POST":
+        form = BackendFacilityForm(request.POST, request.FILES, instance=facility)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Fasilitas berhasil diperbarui.")
+            return redirect("backend_facility_list")
+    else:
+        form = BackendFacilityForm(instance=facility)
+    return render(request, "hospital/backend/facility_form.html", {
+        "form": form, "facility": facility, "title": "Edit Fasilitas", "icon_choices": _ICON_CHOICES,
+    })
+
+
+@user_passes_test(lambda u: u.is_staff, login_url='/dashboard/login/')
+def backend_facility_delete(request, facility_id):
+    try:
+        facility = Facility.objects.get(pk=facility_id)
+    except Facility.DoesNotExist:
+        messages.error(request, "Fasilitas tidak ditemukan.")
+        return redirect("backend_facility_list")
+    if request.method == "POST":
+        facility.delete()
+        messages.success(request, "Fasilitas berhasil dihapus.")
+    return redirect("backend_facility_list")
 
 
 # ── Slide (Slideshow) CRUD ─────────────────────────────────────────────────

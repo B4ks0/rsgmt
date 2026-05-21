@@ -320,13 +320,14 @@ Maria Tomohon{% endblock %}
       <div class="facilities-scroll-track" id="facTrack">
         {% for fac in facilities %}
         <div class="facility-scroll-card">
-          <img src="{{ fac.img }}" alt="{{ fac.name }}" class="facility-scroll-img" loading="lazy" decoding="async">
+          <img src="{% if fac.get_image_src %}{{ fac.get_image_src }}{% else %}{{ fac.img }}{% endif %}"
+               alt="{{ fac.name }}" class="facility-scroll-img" loading="lazy" decoding="async">
           <div class="facility-scroll-content">
             <div class="facility-scroll-icon">
               <i class="bi {{ fac.icon }}"></i>
             </div>
             <h3 class="facility-scroll-name">{{ fac.name }}</h3>
-            <p class="facility-scroll-desc">{{ fac.desc }}</p>
+            <p class="facility-scroll-desc">{% if fac.description %}{{ fac.description }}{% else %}{{ fac.desc }}{% endif %}</p>
           </div>
         </div>
         {% endfor %}
