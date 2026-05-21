@@ -225,26 +225,6 @@
       </nav>
     </header>
 
-    <!-- Hot Search Overlay -->
-    <div class="hotsearch-overlay" id="hotsearchOverlay" role="dialog" aria-modal="true" aria-label="Pencarian Universal">
-      <div class="hotsearch-modal">
-        <div class="hotsearch-input-wrap">
-          <i class="bi bi-search hotsearch-input-icon"></i>
-          <input type="text" id="hotsearchInput" class="hotsearch-input"
-                 placeholder="Cari dokter, klinik, artikel, berita…"
-                 autocomplete="off" spellcheck="false">
-          <button class="hotsearch-close" id="hotsearchClose" aria-label="Tutup">
-            <kbd>Esc</kbd>
-          </button>
-        </div>
-        <div class="hotsearch-body" id="hotsearchBody">
-          <div class="hotsearch-hint">
-            <i class="bi bi-lightning-charge me-1"></i>Ketik minimal 2 karakter untuk mulai mencari
-          </div>
-        </div>
-      </div>
-    </div>
-
     {% block hero %}{% endblock %}
 
     <main class="container my-4">
@@ -366,6 +346,28 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_scripts %}{% endblock %}
 
+    <!-- Hot Search Overlay — at root level to avoid stacking context issues -->
+    <div id="hotsearchOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:72px 16px 16px;overflow-y:auto;">
+      <div id="hotsearchModal" style="max-width:600px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,0.25);overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #f0f0f0;">
+          <i class="bi bi-search" style="font-size:1.05rem;color:#6c757d;flex-shrink:0;"></i>
+          <input id="hotsearchInput" type="text"
+            placeholder="Cari dokter, klinik, artikel, berita…"
+            autocomplete="off" spellcheck="false"
+            style="flex:1;border:none;outline:none;font-size:1rem;color:#212529;background:transparent;">
+          <button id="hotsearchClose"
+            style="border:1.5px solid #dee2e6;border-radius:7px;background:none;padding:2px 9px;font-size:0.72rem;color:#6c757d;cursor:pointer;font-family:inherit;flex-shrink:0;">
+            Esc
+          </button>
+        </div>
+        <div id="hotsearchBody" style="max-height:420px;overflow-y:auto;">
+          <div class="hs-hint">
+            <i class="bi bi-lightning-charge me-1"></i>Ketik minimal 2 karakter untuk mulai mencari
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Hot Search -->
     <script>
     (function () {
@@ -376,108 +378,94 @@
       var body     = document.getElementById('hotsearchBody');
       var timer    = null;
       var lastQ    = '';
+      var HINT     = '<div class="hs-hint"><i class="bi bi-lightning-charge me-1"></i>Ketik minimal 2 karakter untuk mulai mencari</div>';
 
       function open() {
-        overlay.classList.add('open');
-        setTimeout(function () { input.focus(); }, 60);
+        overlay.style.display = 'block';
         document.body.style.overflow = 'hidden';
+        setTimeout(function () { input.focus(); }, 40);
       }
       function close() {
-        overlay.classList.remove('open');
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
         input.value = '';
         lastQ = '';
-        body.innerHTML = '<div class="hotsearch-hint"><i class="bi bi-lightning-charge me-1"></i>Ketik minimal 2 karakter untuk mulai mencari</div>';
-        document.body.style.overflow = '';
+        body.innerHTML = HINT;
       }
 
-      trigger.addEventListener('click', open);
-      closeBtn.addEventListener('click', close);
+      if (trigger) trigger.addEventListener('click', open);
+      if (closeBtn) closeBtn.addEventListener('click', close);
       overlay.addEventListener('click', function (e) {
         if (e.target === overlay) close();
       });
       document.addEventListener('keydown', function (e) {
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); open(); }
-        if (e.key === 'Escape' && overlay.classList.contains('open')) close();
-        if (overlay.classList.contains('open')) {
-          var items = body.querySelectorAll('.hotsearch-item');
-          if (!items.length) return;
-          var active = body.querySelector('.hotsearch-item.hs-active');
-          var idx = Array.from(items).indexOf(active);
-          if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            var next = items[idx + 1] || items[0];
-            if (active) active.classList.remove('hs-active');
-            next.classList.add('hs-active');
-            next.scrollIntoView({ block: 'nearest' });
-          } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            var prev = items[idx - 1] || items[items.length - 1];
-            if (active) active.classList.remove('hs-active');
-            prev.classList.add('hs-active');
-            prev.scrollIntoView({ block: 'nearest' });
-          } else if (e.key === 'Enter' && active) {
-            e.preventDefault();
-            active.click();
-          }
+        if (e.key === 'Escape' && overlay.style.display !== 'none') close();
+        if (overlay.style.display === 'none') return;
+        var items = body.querySelectorAll('.hs-item');
+        if (!items.length) return;
+        var active = body.querySelector('.hs-item.active');
+        var idx = Array.from(items).indexOf(active);
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          var next = items[idx + 1] || items[0];
+          if (active) active.classList.remove('active');
+          next.classList.add('active');
+          next.scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          var prev = items[idx <= 0 ? items.length - 1 : idx - 1];
+          if (active) active.classList.remove('active');
+          prev.classList.add('active');
+          prev.scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter' && active) {
+          e.preventDefault(); active.click();
         }
       });
 
-      function typeIcon(type) {
-        var map = { doctor: 'bi-person-badge', clinic: 'bi-hospital', article: 'bi-journal-medical', news: 'bi-megaphone' };
-        return map[type] || 'bi-search';
+      var ICONS = { doctor:'bi-person-badge', clinic:'bi-hospital', article:'bi-journal-medical', news:'bi-megaphone' };
+      function esc(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
       }
-
       function render(data) {
         if (!data.results.length) {
-          body.innerHTML = '<div class="hotsearch-empty"><i class="bi bi-search d-block mb-2" style="font-size:1.8rem;opacity:0.2;"></i>Tidak ada hasil untuk <strong>&ldquo;' + escHtml(data.q) + '&rdquo;</strong></div>';
+          body.innerHTML = '<div class="hs-empty"><i class="bi bi-search d-block mb-2" style="font-size:1.8rem;opacity:0.15;"></i>Tidak ada hasil untuk <strong>&ldquo;' + esc(data.q) + '&rdquo;</strong></div>';
           return;
         }
-        var groups = {};
+        var groups = {}, order = [];
         data.results.forEach(function (r) {
-          if (!groups[r.group]) groups[r.group] = [];
+          if (!groups[r.group]) { groups[r.group] = []; order.push(r.group); }
           groups[r.group].push(r);
         });
         var html = '';
-        Object.keys(groups).forEach(function (g) {
-          html += '<div class="hotsearch-group-label">' + escHtml(g) + '</div>';
+        order.forEach(function (g) {
+          html += '<div class="hs-group">' + esc(g) + '</div>';
           groups[g].forEach(function (r) {
-            html += '<a href="' + escHtml(r.url) + '" class="hotsearch-item">'
-              + '<div class="hotsearch-item-icon type-' + r.type + '"><i class="bi ' + escHtml(typeIcon(r.type)) + ' ' + escHtml(r.icon || '') + '"></i></div>'
-              + '<div class="hotsearch-item-body">'
-              + '<div class="hotsearch-item-title">' + escHtml(r.title) + '</div>'
-              + (r.subtitle ? '<div class="hotsearch-item-sub">' + escHtml(r.subtitle) + '</div>' : '')
-              + '</div>'
-              + '<i class="bi bi-arrow-right hotsearch-item-arrow"></i>'
-              + '</a>';
+            html += '<a href="' + esc(r.url) + '" class="hs-item">'
+              + '<div class="hs-icon t-' + r.type + '"><i class="bi ' + esc(ICONS[r.type] || 'bi-circle') + '"></i></div>'
+              + '<div class="hs-body"><div class="hs-title">' + esc(r.title) + '</div>'
+              + (r.subtitle ? '<div class="hs-sub">' + esc(r.subtitle) + '</div>' : '')
+              + '</div><i class="bi bi-arrow-right hs-arr"></i></a>';
           });
         });
         body.innerHTML = html;
-        body.querySelectorAll('.hotsearch-item').forEach(function (el) {
-          el.addEventListener('click', function () { close(); });
+        body.querySelectorAll('.hs-item').forEach(function (el) {
+          el.addEventListener('click', close);
         });
-      }
-
-      function escHtml(s) {
-        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
       }
 
       input.addEventListener('input', function () {
         var q = this.value.trim();
         clearTimeout(timer);
+        if (q.length < 2) { body.innerHTML = HINT; lastQ = ''; return; }
         if (q === lastQ) return;
-        if (q.length < 2) {
-          body.innerHTML = '<div class="hotsearch-hint"><i class="bi bi-lightning-charge me-1"></i>Ketik minimal 2 karakter untuk mulai mencari</div>';
-          return;
-        }
-        body.innerHTML = '<div class="hotsearch-loading"><span class="spinner-border spinner-border-sm me-2"></span>Mencari…</div>';
+        body.innerHTML = '<div class="hs-loading"><span class="spinner-border spinner-border-sm me-2" style="width:1rem;height:1rem;border-width:2px;"></span>Mencari…</div>';
         timer = setTimeout(function () {
           lastQ = q;
           fetch('/api/search/?q=' + encodeURIComponent(q))
             .then(function (r) { return r.json(); })
             .then(render)
-            .catch(function () {
-              body.innerHTML = '<div class="hotsearch-empty">Gagal mengambil hasil. Coba lagi.</div>';
-            });
+            .catch(function () { body.innerHTML = '<div class="hs-empty">Gagal mengambil hasil.</div>'; });
         }, 220);
       });
     })();

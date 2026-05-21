@@ -1793,179 +1793,73 @@ textarea:focus {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.45rem 1rem 0.45rem 0.75rem;
-  background: rgba(255,255,255,0.08);
-  border: 1.5px solid rgba(255,255,255,0.15);
+  padding: 0.42rem 0.9rem 0.42rem 0.7rem;
+  background: rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(255,255,255,0.18);
   border-radius: 999px;
-  color: rgba(255,255,255,0.85);
-  font-size: 0.83rem;
+  color: rgba(255,255,255,0.88);
+  font-size: 0.82rem;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background .15s, border-color .15s;
   white-space: nowrap;
 }
 .hotsearch-trigger:hover {
-  background: rgba(255,255,255,0.15);
-  border-color: rgba(255,255,255,0.3);
-  color: #fff;
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.32);
 }
-.hotsearch-trigger .bi-search { font-size: 0.9rem; }
-.hotsearch-trigger-text { font-size: 0.8rem; opacity: 0.75; }
+.hotsearch-trigger-text { font-size: 0.78rem; opacity: 0.72; }
 .hotsearch-kbd {
-  font-size: 0.65rem;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.6);
-  font-family: inherit;
-  margin-left: 2px;
+  font-size: 0.64rem; padding: 1px 5px; border-radius: 4px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.55); font-family: inherit; margin-left: 2px;
 }
 
-/* Overlay backdrop */
-.hotsearch-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(4px);
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 80px;
-}
-.hotsearch-overlay.open { display: flex; }
-
-/* Modal box */
-.hotsearch-modal {
-  width: 100%;
-  max-width: 620px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.22);
-  overflow: hidden;
-  animation: hsSlideIn 0.18s ease;
-}
-@keyframes hsSlideIn {
-  from { opacity: 0; transform: translateY(-12px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0)    scale(1);    }
-}
-
-/* Input bar */
-.hotsearch-input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.9rem 1rem;
-  border-bottom: 1px solid #f0f0f0;
-}
-.hotsearch-input-icon { font-size: 1.1rem; color: #6c757d; flex-shrink: 0; }
-.hotsearch-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  font-size: 1rem;
-  color: #212529;
-  background: transparent;
-}
-.hotsearch-input::placeholder { color: #adb5bd; }
-.hotsearch-close {
-  background: none;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  padding: 2px 7px;
-  font-size: 0.7rem;
-  color: #6c757d;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.hotsearch-close:hover { background: #f8f9fa; }
-
-/* Body / results */
-.hotsearch-body { max-height: 440px; overflow-y: auto; padding: 0.5rem 0; }
-.hotsearch-hint {
+/* Result items inside #hotsearchBody */
+.hs-hint, .hs-loading, .hs-empty {
   padding: 1.5rem 1.25rem;
-  font-size: 0.82rem;
+  font-size: 0.83rem;
   color: #adb5bd;
   text-align: center;
 }
-.hotsearch-loading {
-  padding: 1.5rem;
-  text-align: center;
-  color: #adb5bd;
-  font-size: 0.85rem;
-}
-.hotsearch-empty {
-  padding: 1.5rem 1.25rem;
-  text-align: center;
-  color: #6c757d;
-  font-size: 0.85rem;
-}
-
-/* Group label */
-.hotsearch-group-label {
-  padding: 0.5rem 1.1rem 0.25rem;
-  font-size: 0.68rem;
+.hs-group {
+  padding: 0.55rem 1.1rem 0.2rem;
+  font-size: 0.67rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   color: #adb5bd;
 }
-
-/* Result item */
-.hotsearch-item {
+.hs-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 1.1rem;
+  gap: 0.7rem;
+  padding: 0.55rem 1rem;
   text-decoration: none;
-  color: inherit;
-  border-radius: 0;
-  transition: background 0.1s;
-  cursor: pointer;
-}
-.hotsearch-item:hover,
-.hotsearch-item.hs-active {
-  background: #f0f6ff;
-  color: inherit;
-}
-.hotsearch-item-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: #f1f3f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.95rem;
-  color: var(--brand-500);
-  flex-shrink: 0;
-}
-.hotsearch-item-icon.type-doctor  { background:#e7f5ff; color:#1c7ed6; }
-.hotsearch-item-icon.type-clinic  { background:#e6fcf5; color:#099268; }
-.hotsearch-item-icon.type-article { background:#fff3bf; color:#e67700; }
-.hotsearch-item-icon.type-news    { background:#fff0f6; color:#c2255c; }
-.hotsearch-item-body { flex: 1; min-width: 0; }
-.hotsearch-item-title {
-  font-size: 0.88rem;
-  font-weight: 600;
   color: #212529;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  transition: background .1s;
 }
-.hotsearch-item-sub {
-  font-size: 0.76rem;
-  color: #868e96;
-  margin-top: 1px;
+.hs-item:hover, .hs-item.active { background: #f0f6ff; color: #212529; }
+.hs-icon {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 0.95rem;
 }
-.hotsearch-item-arrow { color: #dee2e6; font-size: 0.8rem; flex-shrink: 0; }
-.hotsearch-item:hover .hotsearch-item-arrow,
-.hotsearch-item.hs-active .hotsearch-item-arrow { color: var(--brand-400); }
+.hs-icon.t-doctor  { background:#e7f5ff; color:#1971c2; }
+.hs-icon.t-clinic  { background:#e6fcf5; color:#099268; }
+.hs-icon.t-article { background:#fff9db; color:#e67700; }
+.hs-icon.t-news    { background:#fff0f6; color:#c2255c; }
+.hs-body { flex:1; min-width:0; }
+.hs-title {
+  font-size: 0.875rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hs-sub { font-size: 0.75rem; color: #868e96; margin-top: 1px; }
+.hs-arr { color: #dee2e6; font-size: 0.8rem; flex-shrink:0; }
+.hs-item:hover .hs-arr, .hs-item.active .hs-arr { color: #74c0fc; }
 
 @media (max-width: 575.98px) {
-  .hotsearch-overlay { padding-top: 12px; align-items: flex-start; }
-  .hotsearch-modal { border-radius: 0 0 16px 16px; }
   .hotsearch-trigger-text { display: none; }
+  #hotsearchOverlay { padding-top: 0 !important; }
+  #hotsearchModal { border-radius: 0 0 16px 16px !important; }
 }
 
 /* ── Section side-header layout (judul di kiri, konten di kanan) ───────── */
