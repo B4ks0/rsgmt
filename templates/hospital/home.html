@@ -274,10 +274,11 @@ Maria Tomohon{% endblock %}
         <h2 class="section-side-title">Klinik &amp; Poliklinik</h2>
         <p class="section-side-desc">Temukan layanan spesialisasi medis yang tepat untuk kebutuhan kesehatan Anda.</p>
         {% if clinics|length > 9 %}
-        <button class="section-side-cta" id="clinicExpandBtn" onclick="expandClinics()">
+        <button id="clinicExpandBtn" onclick="expandClinics()"
+          style="background:none;border:none;padding:0;margin:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:0.85rem;font-weight:600;color:var(--brand-500);">
           Lihat Semua Klinik
-          <span class="clinic-expand-count ms-1">({{ clinics|length|add:"-9" }} lainnya)</span>
-          <i class="bi bi-chevron-down ms-1 clinic-expand-chevron"></i>
+          <span class="clinic-expand-count">({{ clinics|length|add:"-6" }} lainnya)</span>
+          <i class="bi bi-chevron-down clinic-expand-chevron"></i>
         </button>
         {% else %}
         <a href="{% url 'doctors' %}" class="section-side-cta">
