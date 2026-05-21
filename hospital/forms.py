@@ -150,9 +150,18 @@ class BackendDepartmentForm(forms.ModelForm):
 
     class Meta:
         model = Department
-        fields = ["name", "location", "floor_number", "phone", "description"]
+        fields = ["name", "icon", "description", "location", "floor_number", "phone"]
         widgets = {
             "description": forms.Textarea(attrs={"rows": 3}),
+            "icon": forms.TextInput(attrs={"placeholder": "bi-hospital"}),
+        }
+        labels = {
+            "name": "Nama Poli / Departemen",
+            "icon": "Icon (Bootstrap Icons class)",
+            "description": "Deskripsi Layanan",
+            "location": "Lokasi / Gedung",
+            "floor_number": "Lantai",
+            "phone": "Nomor Telepon",
         }
 
 from .models import Article, News, Slide

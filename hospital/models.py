@@ -15,7 +15,8 @@ class Department(models.Model):
     location = models.CharField(max_length=120, blank=True)
     phone = models.CharField(max_length=40, blank=True)
     floor_number = models.IntegerField(default=1)
-    description = models.TextField(blank=True) # Kept for backwards compatibility
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=60, blank=True, default='bi-hospital')
 
     def __str__(self):
         return self.name

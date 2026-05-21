@@ -61,6 +61,7 @@ urlpatterns = [
     path("dashboard/departments/", views.backend_department_list, name="backend_department_list"),
     path("dashboard/departments/add/", views.backend_department_create, name="backend_department_create"),
     path("dashboard/departments/<int:dept_id>/edit/", views.backend_department_edit, name="backend_department_edit"),
+    path("dashboard/departments/<int:dept_id>/delete/", views.backend_department_delete, name="backend_department_delete"),
 
     # Slideshow
     path("dashboard/slides/", views.backend_slide_list, name="backend_slide_list"),

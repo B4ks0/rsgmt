@@ -121,6 +121,9 @@
                 <td class="text-end pe-4">
                   <div class="d-flex justify-content-end gap-2">
                     {% if model_name == "Departemen" %}
+                    <div class="d-flex align-items-center gap-1 me-1">
+                      <i class="bi {{ item.icon|default:'bi-hospital' }} text-primary" style="font-size:1.1rem;" title="{{ item.icon|default:'bi-hospital' }}"></i>
+                    </div>
                     <a href="{% url 'backend_department_edit' item.id %}" class="btn btn-sm btn-light border rounded-circle shadow-sm d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;" title="Edit Poli">
                       <i class="bi bi-pencil-square text-primary"></i>
                     </a>
@@ -144,6 +147,23 @@
                         <i class="bi bi-trash"></i>
                       </button>
                     </form>
+                    {% elif model_name == 'Departemen' %}
+                      {% if item.total_doctors > 0 %}
+                      <button class="btn btn-sm btn-light border rounded-circle shadow-sm text-secondary d-flex justify-content-center align-items-center"
+                              style="width: 32px; height: 32px;" disabled
+                              title="Tidak bisa dihapus — masih ada {{ item.total_doctors }} dokter di poli ini">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                      {% else %}
+                      <form method="post" action="{% url 'backend_department_delete' item.id %}" class="d-inline m-0 p-0"
+                            onsubmit="return confirm('Hapus poli &quot;{{ item.name|escapejs }}&quot;? Tindakan ini tidak bisa dibatalkan.')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-light border rounded-circle shadow-sm text-danger d-flex justify-content-center align-items-center"
+                                style="width: 32px; height: 32px;" title="Hapus Poli">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                      {% endif %}
                     {% else %}
                     <button class="btn btn-sm btn-light border rounded-circle shadow-sm text-secondary d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;" title="Hapus belum tersedia" disabled>
                       <i class="bi bi-trash"></i>

@@ -143,8 +143,8 @@ def home(request):
             'id': d.id,
             'name': d.name,
             'doc_count': d.doc_count,
-            'icon': _DEPT_INFO.get(d.name, {}).get('icon', 'bi-hospital'),
-            'desc': _DEPT_INFO.get(d.name, {}).get('desc', 'Layanan medis spesialis untuk penanganan optimal pasien.'),
+            'icon': d.icon or _DEPT_INFO.get(d.name, {}).get('icon', 'bi-hospital'),
+            'desc': d.description or _DEPT_INFO.get(d.name, {}).get('desc', 'Layanan medis spesialis untuk penanganan optimal pasien.'),
         }
         for d in dept_with_doctors
     ]
@@ -655,10 +655,19 @@ def backend_department_list(request):
 
     return render(request, "hospital/backend/generic_list.html", {"items": page_obj, "title": "Departemen / Poli", "model_name": "Departemen"})
 
+_ICON_CHOICES = [
+    'bi-hospital', 'bi-heart-pulse', 'bi-activity', 'bi-bandaid', 'bi-person-heart',
+    'bi-eye', 'bi-ear', 'bi-emoji-smile', 'bi-balloon-heart', 'bi-person-check',
+    'bi-shield-check', 'bi-lightning', 'bi-lightning-charge', 'bi-brightness-high',
+    'bi-droplet', 'bi-scissors', 'bi-person-badge', 'bi-stethoscope', 'bi-capsule',
+    'bi-thermometer-half', 'bi-lungs', 'bi-clipboard2-pulse', 'bi-gender-female',
+    'bi-gender-male', 'bi-brain', 'bi-bone', 'bi-virus', 'bi-syringe', 'bi-building',
+]
+
 @staff_member_required
 def backend_department_create(request):
     if request.method == "POST":
-        form = BackendDepartmentForm(request.POST, request.FILES)
+        form = BackendDepartmentForm(request.POST)
         if form.is_valid():
             dept = form.save()
             messages.success(request, f"Data poli baru {dept.name} berhasil ditambahkan.")
@@ -667,10 +676,8 @@ def backend_department_create(request):
         form = BackendDepartmentForm()
 
     return render(request, "hospital/backend/department_form.html", {
-        "form": form,
-        "department": None,
-        "doctors": [],
-        "title": "Tambah Poli Baru"
+        "form": form, "department": None, "doctors": [],
+        "title": "Tambah Poli Baru", "icon_choices": _ICON_CHOICES,
     })
 
 @staff_member_required
@@ -680,24 +687,37 @@ def backend_department_edit(request, dept_id):
     except Department.DoesNotExist:
         messages.error(request, "Departemen tidak ditemukan.")
         return redirect("backend_department_list")
-        
+
     if request.method == "POST":
-        form = BackendDepartmentForm(request.POST, request.FILES, instance=dept)
+        form = BackendDepartmentForm(request.POST, instance=dept)
         if form.is_valid():
             form.save()
             messages.success(request, f"Poli {dept.name} berhasil diperbarui.")
             return redirect("backend_department_list")
     else:
         form = BackendDepartmentForm(instance=dept)
-        
+
     doctors = dept.doctors.all().order_by("full_name")
-    
     return render(request, "hospital/backend/department_form.html", {
-        "form": form,
-        "department": dept,
-        "doctors": doctors,
-        "title": f"Edit Poli: {dept.name}"
+        "form": form, "department": dept, "doctors": doctors,
+        "title": f"Edit Poli: {dept.name}", "icon_choices": _ICON_CHOICES,
     })
+
+
+@staff_member_required
+def backend_department_delete(request, dept_id):
+    try:
+        dept = Department.objects.get(id=dept_id)
+    except Department.DoesNotExist:
+        messages.error(request, "Departemen tidak ditemukan.")
+        return redirect("backend_department_list")
+    if dept.doctors.exists():
+        messages.error(request, f"Poli \"{dept.name}\" tidak bisa dihapus karena masih memiliki {dept.doctors.count()} dokter. Pindahkan atau hapus dokter terlebih dahulu.")
+        return redirect("backend_department_list")
+    if request.method == "POST":
+        dept.delete()
+        messages.success(request, f"Poli \"{dept.name}\" berhasil dihapus.")
+    return redirect("backend_department_list")
 
 
 def get_doctors_by_department(request):
