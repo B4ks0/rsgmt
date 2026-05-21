@@ -809,6 +809,40 @@ def backend_slide_delete(request, slide_id):
         messages.success(request, "Slide berhasil dihapus.")
     return redirect("backend_slide_list")
 
+
+@user_passes_test(lambda u: u.is_staff, login_url='/dashboard/login/')
+def backend_slide_download(request, slide_id):
+    import urllib.request as urlreq
+    from django.http import HttpResponse
+    try:
+        slide = Slide.objects.get(pk=slide_id)
+    except Slide.DoesNotExist:
+        raise Http404
+    if slide.image:
+        file_path = slide.image.path
+        ext = Path(file_path).suffix.lower() or '.png'
+        filename = f"slide-{slide.pk}{ext}"
+        response = FileResponse(open(file_path, 'rb'), content_type='image/png', as_attachment=True)
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    elif slide.image_url:
+        try:
+            with urlreq.urlopen(slide.image_url, timeout=10) as r:
+                data = r.read()
+                content_type = r.headers.get('Content-Type', 'image/jpeg')
+        except Exception:
+            raise Http404("Gambar tidak bisa diunduh.")
+        ext = '.jpg'
+        if 'png' in content_type:
+            ext = '.png'
+        elif 'webp' in content_type:
+            ext = '.webp'
+        filename = f"slide-{slide.pk}{ext}"
+        response = HttpResponse(data, content_type=content_type)
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    raise Http404("Slide tidak memiliki gambar.")
+
 @staff_member_required
 def backend_queue_list(request):
     from django.utils import timezone as tz

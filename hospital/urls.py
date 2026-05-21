@@ -67,5 +67,6 @@ urlpatterns = [
     path("dashboard/slides/add/", views.backend_slide_create, name="backend_slide_create"),
     path("dashboard/slides/<int:slide_id>/edit/", views.backend_slide_edit, name="backend_slide_edit"),
     path("dashboard/slides/<int:slide_id>/delete/", views.backend_slide_delete, name="backend_slide_delete"),
+    path("dashboard/slides/<int:slide_id>/download/", views.backend_slide_download, name="backend_slide_download"),
 ]
 
