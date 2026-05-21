@@ -210,14 +210,13 @@
                 </ul>
               </li>
 
-              <!-- CTA Janji Temu + Cek Antrian -->
-              <li class="nav-item nav-item-cta d-flex align-items-center gap-2 ms-lg-2 mt-2 mt-lg-0">
-                <a href="{% url 'queue_check' %}" class="btn-nav-appt btn-nav-queue">
-                  <i class="bi bi-ticket-perforated me-1"></i>Cek Antrian
-                </a>
-                <a href="{% url 'appointment_create' %}" class="btn-nav-appt">
-                  <i class="bi bi-calendar2-check me-1"></i>Janji Temu
-                </a>
+              <!-- Hot Search trigger -->
+              <li class="nav-item d-flex align-items-center ms-lg-2 mt-2 mt-lg-0">
+                <button class="hotsearch-trigger" id="hotsearchTrigger" aria-label="Cari">
+                  <i class="bi bi-search"></i>
+                  <span class="hotsearch-trigger-text">Cari dokter, klinik, artikel…</span>
+                  <kbd class="hotsearch-kbd d-none d-lg-inline">⌘K</kbd>
+                </button>
               </li>
 
             </ul>
@@ -225,6 +224,26 @@
         </div>
       </nav>
     </header>
+
+    <!-- Hot Search Overlay -->
+    <div class="hotsearch-overlay" id="hotsearchOverlay" role="dialog" aria-modal="true" aria-label="Pencarian Universal">
+      <div class="hotsearch-modal">
+        <div class="hotsearch-input-wrap">
+          <i class="bi bi-search hotsearch-input-icon"></i>
+          <input type="text" id="hotsearchInput" class="hotsearch-input"
+                 placeholder="Cari dokter, klinik, artikel, berita…"
+                 autocomplete="off" spellcheck="false">
+          <button class="hotsearch-close" id="hotsearchClose" aria-label="Tutup">
+            <kbd>Esc</kbd>
+          </button>
+        </div>
+        <div class="hotsearch-body" id="hotsearchBody">
+          <div class="hotsearch-hint">
+            <i class="bi bi-lightning-charge me-1"></i>Ketik minimal 2 karakter untuk mulai mencari
+          </div>
+        </div>
+      </div>
+    </div>
 
     {% block hero %}{% endblock %}
 
@@ -346,6 +365,123 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_scripts %}{% endblock %}
+
+    <!-- Hot Search -->
+    <script>
+    (function () {
+      var overlay  = document.getElementById('hotsearchOverlay');
+      var trigger  = document.getElementById('hotsearchTrigger');
+      var closeBtn = document.getElementById('hotsearchClose');
+      var input    = document.getElementById('hotsearchInput');
+      var body     = document.getElementById('hotsearchBody');
+      var timer    = null;
+      var lastQ    = '';
+
+      function open() {
+        overlay.classList.add('open');
+        setTimeout(function () { input.focus(); }, 60);
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        overlay.classList.remove('open');
+        input.value = '';
+        lastQ = '';
+        body.innerHTML = '<div class="hotsearch-hint"><i class="bi bi-lightning-charge me-1"></i>Ketik minimal 2 karakter untuk mulai mencari</div>';
+        document.body.style.overflow = '';
+      }
+
+      trigger.addEventListener('click', open);
+      closeBtn.addEventListener('click', close);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) close();
+      });
+      document.addEventListener('keydown', function (e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); open(); }
+        if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+        if (overlay.classList.contains('open')) {
+          var items = body.querySelectorAll('.hotsearch-item');
+          if (!items.length) return;
+          var active = body.querySelector('.hotsearch-item.hs-active');
+          var idx = Array.from(items).indexOf(active);
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            var next = items[idx + 1] || items[0];
+            if (active) active.classList.remove('hs-active');
+            next.classList.add('hs-active');
+            next.scrollIntoView({ block: 'nearest' });
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            var prev = items[idx - 1] || items[items.length - 1];
+            if (active) active.classList.remove('hs-active');
+            prev.classList.add('hs-active');
+            prev.scrollIntoView({ block: 'nearest' });
+          } else if (e.key === 'Enter' && active) {
+            e.preventDefault();
+            active.click();
+          }
+        }
+      });
+
+      function typeIcon(type) {
+        var map = { doctor: 'bi-person-badge', clinic: 'bi-hospital', article: 'bi-journal-medical', news: 'bi-megaphone' };
+        return map[type] || 'bi-search';
+      }
+
+      function render(data) {
+        if (!data.results.length) {
+          body.innerHTML = '<div class="hotsearch-empty"><i class="bi bi-search d-block mb-2" style="font-size:1.8rem;opacity:0.2;"></i>Tidak ada hasil untuk <strong>&ldquo;' + escHtml(data.q) + '&rdquo;</strong></div>';
+          return;
+        }
+        var groups = {};
+        data.results.forEach(function (r) {
+          if (!groups[r.group]) groups[r.group] = [];
+          groups[r.group].push(r);
+        });
+        var html = '';
+        Object.keys(groups).forEach(function (g) {
+          html += '<div class="hotsearch-group-label">' + escHtml(g) + '</div>';
+          groups[g].forEach(function (r) {
+            html += '<a href="' + escHtml(r.url) + '" class="hotsearch-item">'
+              + '<div class="hotsearch-item-icon type-' + r.type + '"><i class="bi ' + escHtml(typeIcon(r.type)) + ' ' + escHtml(r.icon || '') + '"></i></div>'
+              + '<div class="hotsearch-item-body">'
+              + '<div class="hotsearch-item-title">' + escHtml(r.title) + '</div>'
+              + (r.subtitle ? '<div class="hotsearch-item-sub">' + escHtml(r.subtitle) + '</div>' : '')
+              + '</div>'
+              + '<i class="bi bi-arrow-right hotsearch-item-arrow"></i>'
+              + '</a>';
+          });
+        });
+        body.innerHTML = html;
+        body.querySelectorAll('.hotsearch-item').forEach(function (el) {
+          el.addEventListener('click', function () { close(); });
+        });
+      }
+
+      function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+
+      input.addEventListener('input', function () {
+        var q = this.value.trim();
+        clearTimeout(timer);
+        if (q === lastQ) return;
+        if (q.length < 2) {
+          body.innerHTML = '<div class="hotsearch-hint"><i class="bi bi-lightning-charge me-1"></i>Ketik minimal 2 karakter untuk mulai mencari</div>';
+          return;
+        }
+        body.innerHTML = '<div class="hotsearch-loading"><span class="spinner-border spinner-border-sm me-2"></span>Mencari…</div>';
+        timer = setTimeout(function () {
+          lastQ = q;
+          fetch('/api/search/?q=' + encodeURIComponent(q))
+            .then(function (r) { return r.json(); })
+            .then(render)
+            .catch(function () {
+              body.innerHTML = '<div class="hotsearch-empty">Gagal mengambil hasil. Coba lagi.</div>';
+            });
+        }, 220);
+      });
+    })();
+    </script>
     <script>
       // Handle footer contact form submission via AJAX
       document.addEventListener('DOMContentLoaded', function() {

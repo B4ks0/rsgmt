@@ -21,6 +21,7 @@ urlpatterns = [
     path("appointments/", views.appointment_create, name="appointment_create"),
     
     # API endpoints
+    path("api/search/", views.api_search, name="api_search"),
     path("api/submit-contact/", views.contact, name="api_submit_contact"),
     path("api/get-doctors-by-dept/", views.get_doctors_by_department, name="get_doctors_by_dept"),
     path("api/get-doctor-available-dates/", views.get_doctor_available_dates, name="get_doctor_available_dates"),

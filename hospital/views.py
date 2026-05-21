@@ -722,6 +722,62 @@ def backend_department_delete(request, dept_id):
     return redirect("backend_department_list")
 
 
+def api_search(request):
+    q = request.GET.get('q', '').strip()
+    if len(q) < 2:
+        return JsonResponse({'results': [], 'q': q})
+
+    results = []
+
+    # Dokter
+    for d in Doctor.objects.filter(
+        Q(full_name__icontains=q) | Q(department__name__icontains=q), is_active=True
+    ).select_related('department')[:5]:
+        results.append({
+            'type': 'doctor', 'group': 'Dokter',
+            'icon': 'bi-person-badge',
+            'title': d.full_name,
+            'subtitle': d.department.name if d.department else '',
+            'url': f'/doctors/{d.id}/',
+        })
+
+    # Klinik / Departemen
+    for dept in Department.objects.filter(name__icontains=q).annotate(dc=Count('doctors')).filter(dc__gt=0)[:4]:
+        results.append({
+            'type': 'clinic', 'group': 'Klinik & Poliklinik',
+            'icon': dept.icon or 'bi-hospital',
+            'title': dept.name,
+            'subtitle': f'{dept.dc} dokter tersedia',
+            'url': f'/doctors/?dept={dept.id}',
+        })
+
+    # Artikel
+    for a in Article.objects.filter(
+        Q(title__icontains=q) | Q(content__icontains=q), is_published=True
+    )[:4]:
+        results.append({
+            'type': 'article', 'group': 'Artikel Kesehatan',
+            'icon': 'bi-journal-medical',
+            'title': a.title,
+            'subtitle': a.created_at.strftime('%d %b %Y'),
+            'url': f'/artikel/{a.slug}/',
+        })
+
+    # Berita
+    for n in News.objects.filter(
+        Q(title__icontains=q) | Q(excerpt__icontains=q), is_published=True
+    )[:4]:
+        results.append({
+            'type': 'news', 'group': 'Berita',
+            'icon': 'bi-megaphone',
+            'title': n.title,
+            'subtitle': n.created_at.strftime('%d %b %Y'),
+            'url': f'/berita/{n.slug}/',
+        })
+
+    return JsonResponse({'results': results, 'q': q})
+
+
 def get_doctors_by_department(request):
     department_id = request.GET.get('department_id', '').strip()
     if not department_id or not department_id.isdigit():
