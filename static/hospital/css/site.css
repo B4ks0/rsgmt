@@ -1787,3 +1787,54 @@ textarea:focus {
 .article-detail-body p {
   margin-bottom: 1.1rem;
 }
+
+/* ── Section side-header layout (judul di kiri, konten di kanan) ───────── */
+.section-side-header {
+  position: sticky;
+  top: 88px;
+}
+
+.section-side-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+  margin-bottom: 0.75rem;
+}
+
+.section-side-desc {
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.section-side-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--brand-500);
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.15s, gap 0.15s;
+}
+
+.section-side-cta:hover {
+  color: var(--brand-700);
+  gap: 0.45rem;
+}
+
+@media (max-width: 991.98px) {
+  .section-side-header {
+    position: static;
+    padding-bottom: 0.25rem;
+  }
+  .section-side-title {
+    font-size: 1.4rem;
+  }
+}

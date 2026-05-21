@@ -267,167 +267,205 @@ Maria Tomohon{% endblock %}
   </div>
 </div>
 {% endblock %} {% block content %}
+
+{# ── KLINIK & POLIKLINIK ──────────────────────────────────────────────── #}
 <section class="home-clinics-section home-primary-column mx-auto w-100 mb-2">
-  <p class="institusi-label mb-1 text-center">Layanan Unggulan</p>
-  <h2 class="h4 fw-semibold text-dark mb-1 text-center">Daftar Klinik &amp; Poliklinik</h2>
-  <p class="text-muted text-center mb-4" style="font-size:0.83rem;">Temukan layanan spesialisasi medis kami yang tersedia untuk Anda.</p>
+  <div class="row g-4 g-lg-5 align-items-start">
 
-  <div class="row g-3" id="clinicGrid">
-    {% for clinic in clinics %}
-    <div class="col-12 col-md-4{% if forloop.counter > 9 %} clinic-hidden{% endif %}">
-      <a href="{% url 'doctors' %}?dept={{ clinic.id }}" class="clinic-excellence-card text-decoration-none">
-        <div class="clinic-excel-icon">
-          <i class="bi {{ clinic.icon }}"></i>
-        </div>
-        <div class="clinic-excel-body">
-          <div class="d-flex align-items-start justify-content-between gap-2">
-            <span class="clinic-excel-name">{{ clinic.name }}</span>
-            <i class="bi bi-arrow-up-right clinic-excel-arrow flex-shrink-0 mt-1"></i>
-          </div>
-          <p class="clinic-excel-desc">{{ clinic.desc }}</p>
-          <span class="clinic-excel-badge">
-            <i class="bi bi-person-fill me-1"></i>{{ clinic.doc_count }} dokter tersedia
-          </span>
-        </div>
-      </a>
+    <div class="col-12 col-lg-3">
+      <div class="section-side-header">
+        <p class="institusi-label mb-2">Layanan Unggulan</p>
+        <h2 class="section-side-title">Klinik &amp; Poliklinik</h2>
+        <p class="section-side-desc">Temukan layanan spesialisasi medis yang tepat untuk kebutuhan kesehatan Anda.</p>
+        {% if clinics|length > 9 %}
+        <button class="section-side-cta" id="clinicExpandBtn" onclick="expandClinics()">
+          Lihat Semua Klinik
+          <span class="clinic-expand-count ms-1">({{ clinics|length|add:"-9" }} lainnya)</span>
+          <i class="bi bi-chevron-down ms-1 clinic-expand-chevron"></i>
+        </button>
+        {% else %}
+        <a href="{% url 'doctors' %}" class="section-side-cta">
+          Lihat Semua Dokter <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+        {% endif %}
+      </div>
     </div>
-    {% endfor %}
-  </div>
 
-  {% if clinics|length > 9 %}
-  <div class="text-center mt-4">
-    <button class="btn-clinic-expand" id="clinicExpandBtn" onclick="expandClinics()">
-      <i class="bi bi-grid me-2"></i>Lihat Semua Klinik
-      <span class="clinic-expand-count">({{ clinics|length|add:"-9" }} lainnya)</span>
-      <i class="bi bi-chevron-down ms-2 clinic-expand-chevron"></i>
-    </button>
-  </div>
-  {% endif %}
-</section>
-
-<hr class="home-section-divider my-5">
-
-<section class="home-facilities-section home-primary-column mx-auto w-100 mb-4">
-  <p class="institusi-label mb-1 text-center">Infrastruktur</p>
-  <h2 class="h4 fw-semibold text-dark mb-1 text-center">Fasilitas Rumah Sakit</h2>
-  <p class="text-muted text-center mb-4" style="font-size:0.83rem;">Didukung infrastruktur medis modern untuk memberikan pelayanan terbaik bagi pasien.</p>
-
-  <div class="facilities-scroll-outer">
-    <button class="fac-scroll-btn fac-scroll-prev" id="facPrev" aria-label="Sebelumnya">
-      <i class="bi bi-chevron-left"></i>
-    </button>
-    <div class="facilities-scroll-wrapper">
-      <div class="facilities-scroll-track" id="facTrack">
-        {% for fac in facilities %}
-        <div class="facility-scroll-card">
-          <img src="{% if fac.get_image_src %}{{ fac.get_image_src }}{% else %}{{ fac.img }}{% endif %}"
-               alt="{{ fac.name }}" class="facility-scroll-img" loading="lazy" decoding="async">
-          <div class="facility-scroll-content">
-            <div class="facility-scroll-icon">
-              <i class="bi {{ fac.icon }}"></i>
+    <div class="col-12 col-lg-9">
+      <div class="row g-3" id="clinicGrid">
+        {% for clinic in clinics %}
+        <div class="col-12 col-sm-6 col-xl-4{% if forloop.counter > 6 %} clinic-hidden{% endif %}">
+          <a href="{% url 'doctors' %}?dept={{ clinic.id }}" class="clinic-excellence-card text-decoration-none">
+            <div class="clinic-excel-icon">
+              <i class="bi {{ clinic.icon }}"></i>
             </div>
-            <h3 class="facility-scroll-name">{{ fac.name }}</h3>
-            <p class="facility-scroll-desc">{% if fac.description %}{{ fac.description }}{% else %}{{ fac.desc }}{% endif %}</p>
-          </div>
+            <div class="clinic-excel-body">
+              <div class="d-flex align-items-start justify-content-between gap-2">
+                <span class="clinic-excel-name">{{ clinic.name }}</span>
+                <i class="bi bi-arrow-up-right clinic-excel-arrow flex-shrink-0 mt-1"></i>
+              </div>
+              <p class="clinic-excel-desc">{{ clinic.desc }}</p>
+              <span class="clinic-excel-badge">
+                <i class="bi bi-person-fill me-1"></i>{{ clinic.doc_count }} dokter tersedia
+              </span>
+            </div>
+          </a>
         </div>
         {% endfor %}
       </div>
     </div>
-    <button class="fac-scroll-btn fac-scroll-next" id="facNext" aria-label="Berikutnya">
-      <i class="bi bi-chevron-right"></i>
-    </button>
+
   </div>
 </section>
 
 <hr class="home-section-divider my-5">
 
-<section class="home-primary-column mx-auto w-100 mb-4" id="artikel">
-  <p class="institusi-label mb-1 text-center">Edukasi</p>
-  <h2 class="h4 fw-semibold text-dark mb-1 text-center">Artikel Kesehatan</h2>
-  <p class="text-muted text-center mb-4" style="font-size:0.83rem;">Informasi dan tips kesehatan terpercaya dari tim medis kami.</p>
+{# ── FASILITAS ────────────────────────────────────────────────────────── #}
+<section class="home-facilities-section home-primary-column mx-auto w-100 mb-4">
+  <div class="row g-4 g-lg-5 align-items-start">
 
-  {% if articles %}
-  <div class="row g-4 mb-4">
-    {% for article in articles %}
-    <div class="col-12 col-md-4">
-      <a href="{% url 'article_detail' article.slug %}" class="article-card text-decoration-none">
-        <div class="article-card-thumb">
-          {% if article.thumbnail %}
-          <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}" class="article-card-img" loading="lazy" decoding="async">
-          {% elif article.thumbnail_url %}
-          <img src="{{ article.thumbnail_url }}" alt="{{ article.title }}" class="article-card-img" loading="lazy" decoding="async">
-          {% else %}
-          <div class="article-card-img-placeholder">
-            <i class="bi bi-journal-medical"></i>
+    <div class="col-12 col-lg-3">
+      <div class="section-side-header">
+        <p class="institusi-label mb-2">Infrastruktur</p>
+        <h2 class="section-side-title">Fasilitas Rumah Sakit</h2>
+        <p class="section-side-desc">Didukung infrastruktur medis modern untuk memberikan pelayanan terbaik bagi setiap pasien.</p>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-9">
+      <div class="facilities-scroll-outer">
+        <button class="fac-scroll-btn fac-scroll-prev" id="facPrev" aria-label="Sebelumnya">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="facilities-scroll-wrapper">
+          <div class="facilities-scroll-track" id="facTrack">
+            {% for fac in facilities %}
+            <div class="facility-scroll-card">
+              <img src="{% if fac.get_image_src %}{{ fac.get_image_src }}{% else %}{{ fac.img }}{% endif %}"
+                   alt="{{ fac.name }}" class="facility-scroll-img" loading="lazy" decoding="async">
+              <div class="facility-scroll-content">
+                <div class="facility-scroll-icon">
+                  <i class="bi {{ fac.icon }}"></i>
+                </div>
+                <h3 class="facility-scroll-name">{{ fac.name }}</h3>
+                <p class="facility-scroll-desc">{% if fac.description %}{{ fac.description }}{% else %}{{ fac.desc }}{% endif %}</p>
+              </div>
+            </div>
+            {% endfor %}
           </div>
-          {% endif %}
         </div>
-        <div class="article-card-body">
-          <span class="article-card-date"><i class="bi bi-calendar3 me-1"></i>{{ article.created_at|date:"d M Y" }}</span>
-          <h3 class="article-card-title">{{ article.title }}</h3>
-          <p class="article-card-excerpt">{{ article.get_excerpt }}</p>
-          <span class="article-card-cta">Baca selengkapnya <i class="bi bi-arrow-right ms-1"></i></span>
-        </div>
-      </a>
+        <button class="fac-scroll-btn fac-scroll-next" id="facNext" aria-label="Berikutnya">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
     </div>
-    {% endfor %}
+
   </div>
-  <div class="text-center">
-    <a href="{% url 'articles_list' %}" class="btn-articles-all">
-      <i class="bi bi-journal-richtext me-2"></i>Lihat Semua Artikel Kesehatan
-      <i class="bi bi-arrow-right ms-2"></i>
-    </a>
-  </div>
-  {% else %}
-  <div class="text-center py-5">
-    <i class="bi bi-journal-medical text-muted" style="font-size:2.5rem;opacity:0.35;"></i>
-    <p class="text-muted mt-3 mb-0" style="font-size:0.85rem;">Belum ada artikel yang dipublikasikan.</p>
-  </div>
-  {% endif %}
 </section>
 
 <hr class="home-section-divider my-5">
 
-<section class="home-primary-column mx-auto w-100 mb-4" id="berita">
-  <p class="institusi-label mb-1 text-center">Informasi</p>
-  <h2 class="h4 fw-semibold text-dark mb-1 text-center">Berita Terbaru</h2>
-  <p class="text-muted text-center mb-4" style="font-size:0.83rem;">Update terkini seputar kegiatan dan informasi RS Gunung Maria Tomohon.</p>
+{# ── ARTIKEL KESEHATAN ────────────────────────────────────────────────── #}
+<section class="home-primary-column mx-auto w-100 mb-4" id="artikel">
+  <div class="row g-4 g-lg-5 align-items-start">
 
-  {% if news %}
-  <div class="row g-4 mb-4">
-    {% for item in news %}
-    <div class="col-12 col-md-4">
-      <a href="{% url 'news_detail' item.slug %}" class="article-card text-decoration-none">
-        <div class="article-card-thumb">
-          {% if item.thumbnail %}
-          <img src="{{ item.thumbnail.url }}" alt="{{ item.title }}" class="article-card-img" loading="lazy" decoding="async">
-          {% elif item.thumbnail_url %}
-          <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}" class="article-card-img" loading="lazy" decoding="async">
-          {% else %}
-          <div class="article-card-img-placeholder"><i class="bi bi-megaphone"></i></div>
-          {% endif %}
-        </div>
-        <div class="article-card-body">
-          <span class="article-card-date"><i class="bi bi-megaphone me-1"></i>{{ item.created_at|date:"d M Y" }}</span>
-          <h3 class="article-card-title">{{ item.title }}</h3>
-          <p class="article-card-excerpt">{{ item.get_excerpt }}</p>
-          <span class="article-card-cta">Baca selengkapnya <i class="bi bi-arrow-right ms-1"></i></span>
-        </div>
-      </a>
+    <div class="col-12 col-lg-3">
+      <div class="section-side-header">
+        <p class="institusi-label mb-2">Edukasi</p>
+        <h2 class="section-side-title">Artikel Kesehatan</h2>
+        <p class="section-side-desc">Informasi dan tips kesehatan terpercaya dari tim medis kami untuk hidup lebih sehat.</p>
+        <a href="{% url 'articles_list' %}" class="section-side-cta">
+          Lihat Semua Artikel <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
     </div>
-    {% endfor %}
+
+    <div class="col-12 col-lg-9">
+      {% if articles %}
+      <div class="row g-4">
+        {% for article in articles %}
+        <div class="col-12 col-sm-6 col-xl-4">
+          <a href="{% url 'article_detail' article.slug %}" class="article-card text-decoration-none">
+            <div class="article-card-thumb">
+              {% if article.thumbnail %}
+              <img src="{{ article.thumbnail.url }}" alt="{{ article.title }}" class="article-card-img" loading="lazy" decoding="async">
+              {% elif article.thumbnail_url %}
+              <img src="{{ article.thumbnail_url }}" alt="{{ article.title }}" class="article-card-img" loading="lazy" decoding="async">
+              {% else %}
+              <div class="article-card-img-placeholder"><i class="bi bi-journal-medical"></i></div>
+              {% endif %}
+            </div>
+            <div class="article-card-body">
+              <span class="article-card-date"><i class="bi bi-calendar3 me-1"></i>{{ article.created_at|date:"d M Y" }}</span>
+              <h3 class="article-card-title">{{ article.title }}</h3>
+              <p class="article-card-excerpt">{{ article.get_excerpt }}</p>
+              <span class="article-card-cta">Baca selengkapnya <i class="bi bi-arrow-right ms-1"></i></span>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="py-5 text-muted">
+        <i class="bi bi-journal-medical d-block mb-3" style="font-size:2.5rem;opacity:0.35;"></i>
+        <p class="mb-0" style="font-size:0.85rem;">Belum ada artikel yang dipublikasikan.</p>
+      </div>
+      {% endif %}
+    </div>
+
   </div>
-  <div class="text-center">
-    <a href="{% url 'news_list' %}" class="btn-articles-all" style="background:var(--brand-600);">
-      <i class="bi bi-megaphone me-2"></i>Lihat Semua Berita
-      <i class="bi bi-arrow-right ms-2"></i>
-    </a>
+</section>
+
+<hr class="home-section-divider my-5">
+
+{# ── BERITA TERBARU ───────────────────────────────────────────────────── #}
+<section class="home-primary-column mx-auto w-100 mb-4" id="berita">
+  <div class="row g-4 g-lg-5 align-items-start">
+
+    <div class="col-12 col-lg-3">
+      <div class="section-side-header">
+        <p class="institusi-label mb-2">Informasi</p>
+        <h2 class="section-side-title">Berita Terbaru</h2>
+        <p class="section-side-desc">Update terkini seputar kegiatan, program, dan informasi RS Gunung Maria Tomohon.</p>
+        <a href="{% url 'news_list' %}" class="section-side-cta" style="color:var(--brand-600);">
+          Lihat Semua Berita <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-9">
+      {% if news %}
+      <div class="row g-4">
+        {% for item in news %}
+        <div class="col-12 col-sm-6 col-xl-4">
+          <a href="{% url 'news_detail' item.slug %}" class="article-card text-decoration-none">
+            <div class="article-card-thumb">
+              {% if item.thumbnail %}
+              <img src="{{ item.thumbnail.url }}" alt="{{ item.title }}" class="article-card-img" loading="lazy" decoding="async">
+              {% elif item.thumbnail_url %}
+              <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}" class="article-card-img" loading="lazy" decoding="async">
+              {% else %}
+              <div class="article-card-img-placeholder"><i class="bi bi-megaphone"></i></div>
+              {% endif %}
+            </div>
+            <div class="article-card-body">
+              <span class="article-card-date"><i class="bi bi-megaphone me-1"></i>{{ item.created_at|date:"d M Y" }}</span>
+              <h3 class="article-card-title">{{ item.title }}</h3>
+              <p class="article-card-excerpt">{{ item.get_excerpt }}</p>
+              <span class="article-card-cta">Baca selengkapnya <i class="bi bi-arrow-right ms-1"></i></span>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="py-5 text-muted">
+        <i class="bi bi-megaphone d-block mb-3" style="font-size:2.5rem;opacity:0.35;"></i>
+        <p class="mb-0" style="font-size:0.85rem;">Belum ada berita yang dipublikasikan.</p>
+      </div>
+      {% endif %}
+    </div>
+
   </div>
-  {% else %}
-  <div class="text-center py-5">
-    <i class="bi bi-megaphone text-muted" style="font-size:2.5rem;opacity:0.35;"></i>
-    <p class="text-muted mt-3 mb-0" style="font-size:0.85rem;">Belum ada berita yang dipublikasikan.</p>
-  </div>
-  {% endif %}
 </section>
 {% endblock %}
