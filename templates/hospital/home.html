@@ -128,137 +128,50 @@ Maria Tomohon{% endblock %}
 </section>
 
 <div class="main-quick-actions">
-  <div class="container text-center">
-    <div
-      class="d-flex justify-content-center gap-2 gap-md-3 quick-actions-row mb-4"
-    >
-      <a href="#" class="btn-quick-action">
-        <div class="action-icon mcu-icon">
-          <i class="bi bi-heart-pulse"></i>
-        </div>
-        <div class="action-text">
-          <strong>Paket MCU</strong>
-          <small>Medical Check Up</small>
-        </div>
-      </a>
-      <a href="{% url 'appointment_create' %}" class="btn-quick-action">
-        <div class="action-icon app-icon">
-          <i class="bi bi-calendar-check"></i>
-        </div>
-        <div class="action-text">
-          <strong>Janji Temu</strong>
-          <small>Doctor Appointment</small>
-        </div>
-      </a>
-      <a
-        href="https://wa.me/62811351008"
-        target="_blank"
-        class="btn-quick-action"
-      >
-        <div class="action-icon wa-icon">
-          <i class="bi bi-whatsapp"></i>
-        </div>
-        <div class="action-text">
-          <strong>Chat WA</strong>
-          <small>Customer Service</small>
-        </div>
-      </a>
-    </div>
+  <div class="container">
+    <div class="hero-panel">
 
-    <!-- SEARCH BOX SECTION -->
-    <div class="home-primary-column mx-auto w-100">
-      <div
-        class="card border-0 shadow-sm rounded-4 text-start"
-        style="
-          background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-          position: relative;
-          z-index: 5;
-          max-width: 100%;
-        "
-      >
-        <div class="card-body p-4 p-md-5 position-relative overflow-hidden">
-          <!-- Decorative background icon -->
-          <i
-            class="bi bi-stethoscope position-absolute text-primary opacity-10"
-            style="
-              font-size: 15rem;
-              right: -2rem;
-              top: -3rem;
-              transform: rotate(-15deg);
-              z-index: 0;
-            "
-          ></i>
-
-          <div class="position-relative" style="z-index: 1">
-            <h3 class="fw-bold mb-1 text-dark">
-              <i class="bi bi-search text-primary me-2"></i>Cari Jadwal & Dokter
-            </h3>
-            <p class="text-muted mb-4 fs-6">
-              Temukan dokter spesialis yang tepat untuk menangani keluhan
-              kesehatan Anda.
-            </p>
-
-            <form
-              action="{% url 'doctors' %}"
-              method="GET"
-              class="row g-3 align-items-end"
-            >
-              <div class="col-md-5">
-                <label
-                  class="form-label fw-semibold text-secondary small text-uppercase tracking-wide mb-2"
-                  >Nama Dokter</label
-                >
-                <div
-                  class="input-group input-group-lg bg-white shadow-sm rounded-3 overflow-hidden border border-light"
-                >
-                  <span
-                    class="input-group-text bg-transparent border-0 text-primary px-3"
-                    ><i class="bi bi-person ms-1"></i
-                  ></span>
-                  <input
-                    type="text"
-                    name="q"
-                    class="form-control border-0 ps-0 shadow-none bg-transparent"
-                    placeholder="Ketik nama dokter..."
-                  />
-                </div>
-              </div>
-              <div class="col-md-5">
-                <label
-                  class="form-label fw-semibold text-secondary small text-uppercase tracking-wide mb-2"
-                  >Poliklinik / Spesialisasi</label
-                >
-                <div
-                  class="input-group input-group-lg bg-white shadow-sm rounded-3 overflow-hidden border border-light"
-                >
-                  <span
-                    class="input-group-text bg-transparent border-0 text-primary px-3"
-                    ><i class="bi bi-building-add ms-1"></i
-                  ></span>
-                  <select
-                    name="dept"
-                    class="form-select border-0 ps-0 shadow-none bg-transparent text-secondary cursor-pointer"
-                  >
-                    <option value="">Semua Poliklinik</option>
-                    {% for d in departments %}
-                    <option value="{{ d.id }}">{{ d.name }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-2">
-                <button
-                  type="submit"
-                  class="btn btn-primary btn-lg w-100 shadow-sm fw-bold rounded-3"
-                  style="height: 54px"
-                >
-                  Cari <i class="bi bi-arrow-right ms-1"></i>
-                </button>
-              </div>
-            </form>
-          </div>
+      <!-- Search -->
+      <form action="{% url 'doctors' %}" method="GET" class="hero-search-form">
+        <div class="hero-search-field">
+          <i class="bi bi-person hero-search-field-icon"></i>
+          <input type="text" name="q" placeholder="Nama dokter…" class="hero-search-input">
         </div>
+        <div class="hero-search-divider"></div>
+        <div class="hero-search-field">
+          <i class="bi bi-hospital hero-search-field-icon"></i>
+          <select name="dept" class="hero-search-select">
+            <option value="">Semua Poliklinik</option>
+            {% for d in departments %}
+            <option value="{{ d.id }}">{{ d.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="hero-search-btn">
+          <i class="bi bi-search me-1"></i> Cari Dokter
+        </button>
+      </form>
+
+      <!-- Quick links -->
+      <div class="hero-quick-links">
+        <a href="#" class="hero-quick-link">
+          <i class="bi bi-heart-pulse hero-quick-icon mcu"></i>
+          <span>Paket MCU</span>
+        </a>
+        <a href="{% url 'appointment_create' %}" class="hero-quick-link">
+          <i class="bi bi-calendar-check hero-quick-icon appt"></i>
+          <span>Janji Temu</span>
+        </a>
+        <a href="{% url 'queue_check' %}" class="hero-quick-link">
+          <i class="bi bi-ticket-perforated hero-quick-icon queue"></i>
+          <span>Cek Antrian</span>
+        </a>
+        <a href="https://wa.me/62811351008" target="_blank" rel="noopener" class="hero-quick-link">
+          <i class="bi bi-whatsapp hero-quick-icon wa"></i>
+          <span>Chat WA</span>
+        </a>
       </div>
+
     </div>
   </div>
 </div>
