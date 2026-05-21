@@ -1763,6 +1763,88 @@ textarea:focus {
   margin-bottom: 1.1rem;
 }
 
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+.site-footer {
+  background: #1a2c5b;
+  color: rgba(255,255,255,0.75);
+  padding-top: 3rem;
+}
+.site-footer-main { padding-bottom: 2.5rem; }
+
+.footer-col-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.footer-links li { font-size: 0.85rem; }
+.footer-links a {
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  transition: color .15s;
+}
+.footer-links a:hover { color: #fff; }
+
+.footer-contact li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.65);
+}
+.footer-contact .bi { flex-shrink: 0; margin-top: 2px; opacity: 0.7; }
+.footer-contact a { color: rgba(255,255,255,0.65); text-decoration: none; }
+.footer-contact a:hover { color: #fff; }
+
+.footer-socials {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+.footer-socials a {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.8);
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.footer-socials a:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+.footer-tagline {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 1rem 0;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.45);
+}
+.footer-bottom-link {
+  color: rgba(255,255,255,0.45);
+  text-decoration: none;
+  transition: color .15s;
+}
+.footer-bottom-link:hover { color: rgba(255,255,255,0.8); }
+
 /* ── Nav search icon button ─────────────────────────────────────────────── */
 .btn-nav-search {
   display: flex;
