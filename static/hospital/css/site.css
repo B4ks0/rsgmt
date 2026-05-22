@@ -23,8 +23,11 @@
 
 /* Header: area atas + navigasi (opsional wrapper .site-header) */
 .site-header {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 1035;
+  width: 100%;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
 }
 
 /* Font root: +10% dari skala sebelumnya — semua rem Bootstrap ikut */

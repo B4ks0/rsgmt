@@ -1,6 +1,7 @@
 from django import forms
+from django.db.models import Count
 
-from .models import Appointment, ContactMessage
+from .models import Appointment, ContactMessage, Department, Doctor, ScheduleException
 
 
 class AppointmentForm(forms.ModelForm):
@@ -19,8 +20,16 @@ class AppointmentForm(forms.ModelForm):
         self.fields["full_name"].required = True
         self.fields["national_id"].required = True
         self.fields["phone"].required = True
+        self.fields["department"].required = True
         self.fields["doctor"].required = True
         self.fields["preferred_date"].required = True
+        self.fields["department"].queryset = (
+            Department.objects.annotate(active_doctors=Count("doctors"))
+            .filter(active_doctors__gt=0, doctors__is_active=True)
+            .distinct()
+            .order_by("name")
+        )
+        self.fields["doctor"].queryset = Doctor.objects.filter(is_active=True).select_related("department")
 
     def clean_preferred_date(self):
         from django.utils import timezone
@@ -28,6 +37,39 @@ class AppointmentForm(forms.ModelForm):
         if date and date < timezone.now().date():
             raise forms.ValidationError("Tanggal tidak boleh di masa lalu.")
         return date
+
+    def clean_national_id(self):
+        national_id = (self.cleaned_data.get("national_id") or "").strip()
+        digits = "".join(filter(str.isdigit, national_id))
+        if len(digits) != 16:
+            raise forms.ValidationError("NIK harus terdiri dari 16 angka.")
+        return digits
+
+    def clean(self):
+        cleaned_data = super().clean()
+        department = cleaned_data.get("department")
+        doctor = cleaned_data.get("doctor")
+        preferred_date = cleaned_data.get("preferred_date")
+
+        if doctor and department and doctor.department_id != department.id:
+            self.add_error("doctor", "Dokter yang dipilih tidak sesuai dengan poli/departemen.")
+
+        if doctor and preferred_date:
+            exception = ScheduleException.objects.filter(
+                doctor=doctor,
+                exception_date=preferred_date,
+            ).first()
+            if exception and not exception.is_available:
+                self.add_error("preferred_date", "Dokter tidak tersedia pada tanggal tersebut.")
+            elif not exception:
+                has_schedule = doctor.schedules.filter(
+                    day_of_week=preferred_date.weekday(),
+                    is_active=True,
+                ).exists()
+                if not has_schedule:
+                    self.add_error("preferred_date", "Tanggal yang dipilih tidak sesuai jadwal praktik dokter.")
+
+        return cleaned_data
 
     class Meta:
         model = Appointment

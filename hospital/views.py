@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, Q
@@ -812,8 +813,8 @@ def get_doctor_available_dates(request):
         return JsonResponse({'success': False, 'error': 'doctor_id required'})
     
     try:
-        doctor = Doctor.objects.get(id=doctor_id)
-    except Doctor.DoesNotExist:
+        doctor = Doctor.objects.get(id=doctor_id, is_active=True)
+    except (Doctor.DoesNotExist, ValidationError, ValueError):
         return JsonResponse({'success': False, 'error': 'Doctor not found'})
     
     # Get doctor's schedules (Monday=0, Sunday=6)
