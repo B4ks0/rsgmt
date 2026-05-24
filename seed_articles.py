@@ -139,7 +139,7 @@ articles = [
     {
         'title': 'Kolesterol Tinggi: Bahaya, Gejala, dan Cara Mengatasinya',
         'slug': 'kolesterol-tinggi-bahaya-gejala-cara-mengatasi',
-        'thumbnail_url': 'https://images.unsplash.com/photo-1532938911079-1bb14698d8f4?w=800&h=500&fit=crop&q=80',
+        'thumbnail_url': '/static/hospital/img/article-cholesterol.svg',
         'content': (
             'Kolesterol adalah zat lemak alami yang diproduksi oleh hati dan juga diperoleh dari makanan. '
             'Tubuh membutuhkan kolesterol untuk membangun sel dan memproduksi hormon. Namun kadar yang terlalu tinggi dapat menjadi ancaman serius bagi kesehatan.\n\n'

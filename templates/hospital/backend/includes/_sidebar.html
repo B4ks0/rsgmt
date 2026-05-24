@@ -57,8 +57,14 @@
     <a href="{% url 'backend_facility_list' %}" class="{% if 'facility' in request.resolver_match.url_name %}active{% endif %}">
       <i class="bi bi-building-check me-2"></i> Fasilitas RS
     </a>
+    <a href="{% url 'backend_partner_list' %}" class="{% if 'partner' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-diagram-3 me-2"></i> Mitra
+    </a>
     <a href="{% url 'backend_news_list' %}" class="{% if 'news' in request.resolver_match.url_name %}active{% endif %}">
       <i class="bi bi-megaphone me-2"></i> Berita Terbaru
+    </a>
+    <a href="{% url 'backend_mcu_package_list' %}" class="{% if 'mcu_package' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-heart-pulse me-2"></i> Paket MCU
     </a>
     <a href="{% url 'backend_article_list' %}" class="{% if 'article' in request.resolver_match.url_name %}active{% endif %}">
       <i class="bi bi-newspaper me-2"></i> Artikel Kesehatan

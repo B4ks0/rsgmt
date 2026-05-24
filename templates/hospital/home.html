@@ -4,24 +4,96 @@ Maria Tomohon{% endblock %}
 {% block extra_scripts %}
 <script>
 (function () {
-  /* expand klinik */
-  window.expandClinics = function () {
-    var btn = document.getElementById('clinicExpandBtn');
-    var chevron = btn.querySelector('.clinic-expand-chevron');
-    var countEl = btn.querySelector('.clinic-expand-count');
-    var isExpanded = btn.dataset.expanded === '1';
-    var items = document.querySelectorAll('#clinicGrid > div');
+  var revealItems = [
+    ['.home-clinics-section .section-center-header', 'reveal-rise'],
+    ['.clinic-slide-item', 'reveal-card'],
+    ['.home-facilities-section .section-side-header', 'reveal-left'],
+    ['.facility-stat-card', 'reveal-card'],
+    ['.special-article-section .special-article-content', 'reveal-left'],
+    ['#artikel .section-side-header, #berita .section-side-header, .home-appointment-cta-copy, .home-affiliation-copy', 'reveal-left'],
+    ['#artikel .article-card, #berita .article-card, .home-appointment-cta-card, .home-affiliation-combined-logo, .home-affiliation-info', 'reveal-rise'],
+    ['.home-section-divider', 'reveal-fade']
+  ];
 
-    items.forEach(function (el, i) {
-      if (i >= 6) {
-        el.classList.toggle('clinic-hidden', isExpanded);
-      }
+  function initScrollReveal() {
+    var nodes = [];
+    revealItems.forEach(function (entry) {
+      document.querySelectorAll(entry[0]).forEach(function (el, index) {
+        if (el.closest('.site-footer')) return;
+        el.classList.add('scroll-reveal', entry[1]);
+        if (entry[1] === 'reveal-card' || entry[0].indexOf('article-card') !== -1) {
+          el.style.transitionDelay = Math.min((index % 10) * 70, 420) + 'ms';
+        }
+        nodes.push(el);
+      });
     });
 
-    btn.dataset.expanded = isExpanded ? '0' : '1';
-    if (countEl) countEl.style.display = isExpanded ? '' : 'none';
-    if (chevron) chevron.classList.toggle('rotated', !isExpanded);
-  };
+    if (!nodes.length) return;
+    if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      nodes.forEach(function (el) { el.classList.add('is-visible'); el.style.transitionDelay = '0ms'; });
+      return;
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.16, rootMargin: '0px 0px -8% 0px' });
+
+    nodes.forEach(function (el) { observer.observe(el); });
+  }
+
+  initScrollReveal();
+
+  /* klinik carousel */
+  var clinicTrack = document.getElementById('clinicGrid');
+  var clinicPrev = document.getElementById('clinicPrev');
+  var clinicNext = document.getElementById('clinicNext');
+  var clinicTimer = null;
+
+  function clinicStep() {
+    if (!clinicTrack) return 0;
+    var card = clinicTrack.querySelector('.clinic-slide-item');
+    if (!card) return 0;
+    var gap = parseFloat(getComputedStyle(clinicTrack).columnGap || getComputedStyle(clinicTrack).gap || '0');
+    return card.getBoundingClientRect().width + gap;
+  }
+
+  function slideClinics(direction) {
+    if (!clinicTrack) return;
+    var step = clinicStep();
+    if (!step) return;
+    var max = clinicTrack.scrollWidth - clinicTrack.clientWidth - 2;
+    var next = clinicTrack.scrollLeft + (step * direction);
+    if (next > max) next = 0;
+    if (next < 0) next = max;
+    clinicTrack.scrollTo({ left: next, behavior: 'smooth' });
+  }
+
+  function startClinicAuto() {
+    if (!clinicTrack || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    stopClinicAuto();
+    clinicTimer = window.setInterval(function () { slideClinics(1); }, 4200);
+  }
+
+  function stopClinicAuto() {
+    if (clinicTimer) window.clearInterval(clinicTimer);
+    clinicTimer = null;
+  }
+
+  if (clinicTrack) {
+    if (clinicPrev) clinicPrev.addEventListener('click', function () { slideClinics(-1); startClinicAuto(); });
+    if (clinicNext) clinicNext.addEventListener('click', function () { slideClinics(1); startClinicAuto(); });
+    clinicTrack.addEventListener('pointerdown', stopClinicAuto);
+    clinicTrack.addEventListener('pointerup', startClinicAuto);
+    clinicTrack.addEventListener('mouseenter', stopClinicAuto);
+    clinicTrack.addEventListener('mouseleave', startClinicAuto);
+    clinicTrack.addEventListener('focusin', stopClinicAuto);
+    clinicTrack.addEventListener('focusout', startClinicAuto);
+    startClinicAuto();
+  }
 
   var track = document.getElementById('facTrack');
   var btnPrev = document.getElementById('facPrev');
@@ -31,18 +103,29 @@ Maria Tomohon{% endblock %}
   var STEP = 300;
 
   function updateButtons() {
+    if (!btnPrev || !btnNext) return;
     btnPrev.disabled = track.scrollLeft <= 0;
     btnNext.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
   }
 
-  btnPrev.addEventListener('click', function () {
-    track.scrollBy({ left: -STEP, behavior: 'smooth' });
-  });
-  btnNext.addEventListener('click', function () {
-    track.scrollBy({ left: STEP, behavior: 'smooth' });
-  });
+  if (btnPrev) {
+    btnPrev.addEventListener('click', function () {
+      track.scrollBy({ left: -STEP, behavior: 'smooth' });
+    });
+  }
+  if (btnNext) {
+    btnNext.addEventListener('click', function () {
+      track.scrollBy({ left: STEP, behavior: 'smooth' });
+    });
+  }
   track.addEventListener('scroll', updateButtons);
   updateButtons();
+
+  track.addEventListener('wheel', function (e) {
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    window.scrollBy({ top: e.deltaY, left: 0, behavior: 'auto' });
+    e.preventDefault();
+  }, { passive: false });
 
   /* drag to scroll */
   var isDown = false, startX, scrollLeft;
@@ -178,63 +261,43 @@ Maria Tomohon{% endblock %}
 {% endblock %} {% block content %}
 
 {# ── KLINIK & POLIKLINIK ──────────────────────────────────────────────── #}
-<section class="home-clinics-section home-primary-column mx-auto w-100 mb-2">
-  <div class="row g-4 g-lg-5 align-items-start">
+<section class="home-clinics-section home-primary-column mx-auto w-100 mb-5">
+  <div class="section-center-header text-center mx-auto">
+    <p class="institusi-label mb-2">Klinik &amp; Poliklinik</p>
+    <h2 class="section-center-title">Layanan Unggulan</h2>
+    <p class="section-center-desc">Temukan layanan spesialisasi medis yang tepat untuk kebutuhan kesehatan Anda.</p>
+  </div>
 
-    <div class="col-12 col-lg-3">
-      <div class="section-side-header">
-        <p class="institusi-label mb-2">Layanan Unggulan</p>
-        <h2 class="section-side-title">Klinik &amp; Poliklinik</h2>
-        <p class="section-side-desc">Temukan layanan spesialisasi medis yang tepat untuk kebutuhan kesehatan Anda.</p>
-        {% if clinics|length > 9 %}
-        <button id="clinicExpandBtn" onclick="expandClinics()"
-          style="background:none;border:none;padding:0;margin:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:0.85rem;font-weight:600;color:var(--brand-500);">
-          Lihat Semua Klinik
-          <span class="clinic-expand-count">({{ clinics|length|add:"-6" }} lainnya)</span>
-          <i class="bi bi-chevron-down clinic-expand-chevron"></i>
-        </button>
-        {% else %}
-        <a href="{% url 'doctors' %}" class="section-side-cta">
-          Lihat Semua Dokter <i class="bi bi-arrow-right ms-1"></i>
+  <div class="clinic-slider-wrap">
+    <div class="clinic-slider-track" id="clinicGrid" tabindex="0" aria-label="Daftar klinik dan poliklinik">
+      {% for clinic in clinics %}
+      <div class="clinic-slide-item">
+        <a href="{% url 'doctors' %}?dept={{ clinic.id }}" class="clinic-excellence-card text-decoration-none">
+          <div class="clinic-excel-icon">
+            <i class="bi {{ clinic.icon }}"></i>
+          </div>
+          <div class="clinic-excel-body">
+            <div class="d-flex align-items-start justify-content-between gap-2">
+              <span class="clinic-excel-name">{{ clinic.name }}</span>
+              <i class="bi bi-arrow-up-right clinic-excel-arrow flex-shrink-0 mt-1"></i>
+            </div>
+            <p class="clinic-excel-desc">{{ clinic.desc }}</p>
+            <span class="clinic-excel-badge">
+              <i class="bi bi-person-fill me-1"></i>{{ clinic.doc_count }} dokter tersedia
+            </span>
+          </div>
         </a>
-        {% endif %}
       </div>
+      {% endfor %}
     </div>
-
-    <div class="col-12 col-lg-9">
-      <div class="row g-3" id="clinicGrid">
-        {% for clinic in clinics %}
-        <div class="col-12 col-sm-6 col-xl-4{% if forloop.counter > 6 %} clinic-hidden{% endif %}">
-          <a href="{% url 'doctors' %}?dept={{ clinic.id }}" class="clinic-excellence-card text-decoration-none">
-            <div class="clinic-excel-icon">
-              <i class="bi {{ clinic.icon }}"></i>
-            </div>
-            <div class="clinic-excel-body">
-              <div class="d-flex align-items-start justify-content-between gap-2">
-                <span class="clinic-excel-name">{{ clinic.name }}</span>
-                <i class="bi bi-arrow-up-right clinic-excel-arrow flex-shrink-0 mt-1"></i>
-              </div>
-              <p class="clinic-excel-desc">{{ clinic.desc }}</p>
-              <span class="clinic-excel-badge">
-                <i class="bi bi-person-fill me-1"></i>{{ clinic.doc_count }} dokter tersedia
-              </span>
-            </div>
-          </a>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-
   </div>
 </section>
-
-<hr class="home-section-divider my-5">
 
 {# ── FASILITAS ────────────────────────────────────────────────────────── #}
 <section class="home-facilities-section home-primary-column mx-auto w-100 mb-4">
   <div class="row g-4 g-lg-5 align-items-start">
 
-    <div class="col-12 col-lg-3">
+    <div class="col-12 col-lg-4">
       <div class="section-side-header">
         <p class="institusi-label mb-2">Infrastruktur</p>
         <h2 class="section-side-title">Fasilitas Rumah Sakit</h2>
@@ -242,36 +305,89 @@ Maria Tomohon{% endblock %}
       </div>
     </div>
 
-    <div class="col-12 col-lg-9">
+    <div class="col-12 col-lg-8">
       <div class="facilities-scroll-outer">
-        <button class="fac-scroll-btn fac-scroll-prev" id="facPrev" aria-label="Sebelumnya">
-          <i class="bi bi-chevron-left"></i>
-        </button>
         <div class="facilities-scroll-wrapper">
           <div class="facilities-scroll-track" id="facTrack">
-            {% for fac in facilities %}
-            <div class="facility-scroll-card">
-              <img src="{% if fac.get_image_src %}{{ fac.get_image_src }}{% else %}{{ fac.img }}{% endif %}"
-                   alt="{{ fac.name }}" class="facility-scroll-img" loading="lazy" decoding="async">
-              <div class="facility-scroll-content">
-                <div class="facility-scroll-icon">
-                  <i class="bi {{ fac.icon }}"></i>
-                </div>
-                <h3 class="facility-scroll-name">{{ fac.name }}</h3>
-                <p class="facility-scroll-desc">{% if fac.description %}{{ fac.description }}{% else %}{{ fac.desc }}{% endif %}</p>
-              </div>
-            </div>
-            {% endfor %}
+            <a class="facility-stat-card facility-stat-card--featured" href="{% url 'services' %}">
+              <span class="facility-stat-icon"><i class="bi bi-hospital"></i></span>
+              <span class="facility-stat-value">&plusmn;212</span>
+              <span class="facility-stat-label">Total bed operasional</span>
+              <span class="facility-stat-note">IGD, ICU, NICU/PICU, rawat inap</span>
+              <span class="facility-stat-arrow"><i class="bi bi-arrow-right"></i></span>
+            </a>
+            <a class="facility-stat-card facility-stat-card--alert" href="{% url 'services' %}">
+              <span class="facility-stat-icon"><i class="bi bi-alarm"></i></span>
+              <span class="facility-stat-value">24/7</span>
+              <span class="facility-stat-label">IGD 24 Jam</span>
+              <span class="facility-stat-note">Siap menangani kondisi darurat</span>
+              <span class="facility-stat-arrow"><i class="bi bi-arrow-right"></i></span>
+            </a>
+            <a class="facility-stat-card" href="{% url 'services' %}">
+              <span class="facility-stat-icon"><i class="bi bi-heart-pulse"></i></span>
+              <span class="facility-stat-value">11</span>
+              <span class="facility-stat-label">Bed IGD terpadu</span>
+              <span class="facility-stat-note">Instalasi Gawat Darurat</span>
+              <span class="facility-stat-arrow"><i class="bi bi-arrow-right"></i></span>
+            </a>
+            <a class="facility-stat-card" href="{% url 'services' %}">
+              <span class="facility-stat-icon"><i class="bi bi-activity"></i></span>
+              <span class="facility-stat-value">6</span>
+              <span class="facility-stat-label">Bed ICU</span>
+              <span class="facility-stat-note">Perawatan intensif</span>
+              <span class="facility-stat-arrow"><i class="bi bi-arrow-right"></i></span>
+            </a>
+            <a class="facility-stat-card" href="{% url 'services' %}">
+              <span class="facility-stat-icon"><i class="bi bi-clipboard2-pulse"></i></span>
+              <span class="facility-stat-value">10</span>
+              <span class="facility-stat-label">Bed NICU/PICU</span>
+              <span class="facility-stat-note">Fokus ibu dan anak</span>
+              <span class="facility-stat-arrow"><i class="bi bi-arrow-right"></i></span>
+            </a>
+            <a class="facility-stat-card" href="{% url 'services' %}">
+              <span class="facility-stat-icon"><i class="bi bi-scissors"></i></span>
+              <span class="facility-stat-value">2</span>
+              <span class="facility-stat-label">Kamar operasi</span>
+              <span class="facility-stat-note">Unit tindakan bedah</span>
+              <span class="facility-stat-arrow"><i class="bi bi-arrow-right"></i></span>
+            </a>
+            <a class="facility-stat-card" href="{% url 'services' %}">
+              <span class="facility-stat-icon"><i class="bi bi-building"></i></span>
+              <span class="facility-stat-value">&plusmn;185</span>
+              <span class="facility-stat-label">Bed rawat inap</span>
+              <span class="facility-stat-note">Kapasitas operasional</span>
+              <span class="facility-stat-arrow"><i class="bi bi-arrow-right"></i></span>
+            </a>
           </div>
         </div>
-        <button class="fac-scroll-btn fac-scroll-next" id="facNext" aria-label="Berikutnya">
-          <i class="bi bi-chevron-right"></i>
-        </button>
       </div>
     </div>
 
   </div>
 </section>
+
+{% if articles %}
+{% with special_article=articles.0 %}
+<section class="special-article-section">
+  <div class="special-article-overlay"></div>
+  <div class="special-article-inner">
+    <div class="special-article-content">
+      <p class="special-article-kicker">Artikel Pilihan</p>
+      <h2 class="special-article-title">{{ special_article.title }}</h2>
+      <p class="special-article-desc">{{ special_article.get_excerpt }}</p>
+      <div class="special-article-actions">
+        <a href="{% url 'article_detail' special_article.slug %}" class="special-article-link">
+          Baca Selengkapnya <i class="bi bi-arrow-right"></i>
+        </a>
+        <a href="{% url 'articles_list' %}" class="special-article-link special-article-link--muted">
+          Lihat Semua Artikel <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endwith %}
+{% endif %}
 
 <hr class="home-section-divider my-5">
 
@@ -279,7 +395,7 @@ Maria Tomohon{% endblock %}
 <section class="home-primary-column mx-auto w-100 mb-4" id="artikel">
   <div class="row g-4 g-lg-5 align-items-start">
 
-    <div class="col-12 col-lg-3">
+    <div class="col-12 col-lg-2">
       <div class="section-side-header">
         <p class="institusi-label mb-2">Edukasi</p>
         <h2 class="section-side-title">Artikel Kesehatan</h2>
@@ -290,11 +406,11 @@ Maria Tomohon{% endblock %}
       </div>
     </div>
 
-    <div class="col-12 col-lg-9">
+    <div class="col-12 col-lg-10">
       {% if articles %}
-      <div class="row g-4">
+      <div class="home-auto-grid home-auto-grid--articles">
         {% for article in articles %}
-        <div class="col-12 col-sm-6 col-xl-4">
+        <div>
           <a href="{% url 'article_detail' article.slug %}" class="article-card text-decoration-none">
             <div class="article-card-thumb">
               {% if article.thumbnail %}
@@ -332,7 +448,7 @@ Maria Tomohon{% endblock %}
 <section class="home-primary-column mx-auto w-100 mb-4" id="berita">
   <div class="row g-4 g-lg-5 align-items-start">
 
-    <div class="col-12 col-lg-3">
+    <div class="col-12 col-lg-2">
       <div class="section-side-header">
         <p class="institusi-label mb-2">Informasi</p>
         <h2 class="section-side-title">Berita Terbaru</h2>
@@ -343,11 +459,11 @@ Maria Tomohon{% endblock %}
       </div>
     </div>
 
-    <div class="col-12 col-lg-9">
+    <div class="col-12 col-lg-10">
       {% if news %}
-      <div class="row g-4">
+      <div class="home-auto-grid home-auto-grid--articles">
         {% for item in news %}
-        <div class="col-12 col-sm-6 col-xl-4">
+        <div>
           <a href="{% url 'news_detail' item.slug %}" class="article-card text-decoration-none">
             <div class="article-card-thumb">
               {% if item.thumbnail %}
@@ -376,6 +492,71 @@ Maria Tomohon{% endblock %}
       {% endif %}
     </div>
 
+  </div>
+</section>
+
+<hr class="home-section-divider my-5">
+
+<section class="home-primary-column mx-auto w-100 mb-4 home-appointment-cta">
+  <div class="row g-4 g-lg-5 align-items-start">
+    <div class="col-12 col-lg-4">
+      <div class="home-appointment-cta-copy">
+        <p class="institusi-label mb-2">Buat Janji Temu</p>
+        <h2 class="home-appointment-cta-title">Butuh bantuan untuk kunjungan Anda?</h2>
+        <p class="home-appointment-cta-desc">
+          Pilih jalur yang paling sesuai: tanyakan informasi layanan terlebih dahulu, atau langsung ajukan janji temu bersama dokter.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+      <div class="home-appointment-cta-grid">
+        <a href="https://wa.me/62811351008" target="_blank" rel="noopener" class="home-appointment-cta-card home-appointment-cta-card--info">
+          <span class="home-appointment-cta-overlay"></span>
+          <span class="home-appointment-cta-body">
+            <span class="home-appointment-cta-icon"><i class="bi bi-chat-dots"></i></span>
+            <span class="home-appointment-cta-card-title">Tanya Informasi Layanan</span>
+            <span class="home-appointment-cta-card-link">Hubungi kami <i class="bi bi-arrow-right ms-1"></i></span>
+          </span>
+        </a>
+
+        <a href="{% url 'appointment_create' %}" class="home-appointment-cta-card home-appointment-cta-card--doctor">
+          <span class="home-appointment-cta-overlay"></span>
+          <span class="home-appointment-cta-body">
+            <span class="home-appointment-cta-icon"><i class="bi bi-calendar-heart"></i></span>
+            <span class="home-appointment-cta-card-title">Buat Janji Temu Bersama Dokter</span>
+            <span class="home-appointment-cta-card-link">Ajukan janji temu <i class="bi bi-arrow-right ms-1"></i></span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="home-section-divider my-5">
+
+<section class="home-primary-column mx-auto w-100 mb-4 home-affiliation-section">
+  <div class="home-affiliation-head">
+    <div class="home-affiliation-copy">
+      <h2 class="home-affiliation-title">Afiliasi Kami</h2>
+    </div>
+    <div class="home-affiliation-logos" aria-label="Logo afiliasi RS Gunung Maria Tomohon">
+      <img src="{% static 'hospital/img/affiliations-combined.png' %}" alt="Afiliasi SJMJ Provinsi Manado, PT Ratna Timur Tumarendem, dan RS Gunung Maria Tomohon" class="home-affiliation-combined-logo" loading="lazy" decoding="async" draggable="false" oncontextmenu="return false;">
+    </div>
+  </div>
+
+  <div class="home-affiliation-info">
+    <div>
+      <p>
+        PT Ratna Timur Tumarendem adalah badan penyelenggara karya kesehatan yang berada dalam semangat pelayanan Kongregasi Jesus Maria Joseph. Jejaring ini menguatkan pelayanan RS Gunung Maria Tomohon melalui tata kelola kesehatan yang profesional, inovatif, dan berorientasi pada kasih.
+      </p>
+      <p>
+        Dalam pemberitaan Antara Sulawesi Utara, PT RTT disebut membawahi lima rumah sakit di Sulawesi Utara: RS Budi Setia Langowan, RS Cantia Tompasobaru, RS Hermana Lembean, RS Gunung Maria Tomohon, dan RS Budi Mulia Bitung.
+      </p>
+      <a href="https://ratnatimurtumarendem.com/tentang-kami/" target="_blank" rel="noopener" class="home-affiliation-link">
+        Lihat informasi PT RTT <i class="bi bi-arrow-right ms-1"></i>
+      </a>
+    </div>
   </div>
 </section>
 {% endblock %}

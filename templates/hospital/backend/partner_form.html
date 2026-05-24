@@ -1,0 +1,145 @@
+{% extends "hospital/backend/base_backend.html" %}
+{% block title %}{{ title }} - RSGM Backend{% endblock %}
+
+{% block extra_css %}
+<style>
+  .form-label { font-weight: 600; font-size: 0.85rem; color: #495057; }
+  .partner-preview { width: 100%; height: 150px; object-fit: contain; border-radius: 10px; display: block; background:#f8f9fa; border:1px solid #dee2e6; padding:1rem; }
+  .partner-placeholder { width: 100%; height: 150px; background: #f8f9fa; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; border: 2px dashed #dee2e6; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 pb-3 border-bottom">
+  <div>
+    <h3 class="fw-bold mb-1"><i class="bi bi-diagram-3 me-2 text-primary"></i>{{ title }}</h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0 small text-muted">
+        <li class="breadcrumb-item"><a href="{% url 'backend_dashboard' %}" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'backend_partner_list' %}" class="text-decoration-none">Mitra</a></li>
+        <li class="breadcrumb-item active">{{ title }}</li>
+      </ol>
+    </nav>
+  </div>
+  <a href="{% url 'backend_partner_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 flex-shrink-0">
+    <i class="bi bi-arrow-left me-1"></i> Kembali
+  </a>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+          <h5 class="fw-bold mb-0">Informasi Mitra</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="mb-3">
+            <label class="form-label mb-1">{{ form.name.label }}</label>
+            {{ form.name }}
+            {% for e in form.name.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label mb-1">{{ form.category.label }}</label>
+              {{ form.category }}
+              {% for e in form.category.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label mb-1">{{ form.website_url.label }}</label>
+              {{ form.website_url }}
+              {% for e in form.website_url.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+            </div>
+          </div>
+          <div>
+            <label class="form-label mb-1">{{ form.description.label }}</label>
+            {{ form.description }}
+            {% for e in form.description.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+          <h5 class="fw-bold mb-0">Logo Mitra</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-md-5">
+              {% if partner and partner.get_logo_src %}
+              <img src="{{ partner.get_logo_src }}" class="partner-preview" id="logoImg" alt="">
+              {% else %}
+              <div class="partner-placeholder" id="logoPlaceholder">
+                <i class="bi bi-image text-muted" style="font-size:2rem;opacity:0.4;"></i>
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-7">
+              <div class="mb-3">
+                <label class="form-label mb-1">{{ form.logo_url.label }}</label>
+                {{ form.logo_url }}
+                {% for e in form.logo_url.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+              </div>
+              <div>
+                <label class="form-label mb-1">{{ form.logo.label }}</label>
+                {{ form.logo }}
+                {% for e in form.logo.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+          <h5 class="fw-bold mb-0">Pengaturan Tampil</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="mb-3">
+            <label class="form-label mb-1">{{ form.order.label }}</label>
+            {{ form.order }}
+            {% for e in form.order.errors %}<div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ e }}</div>{% endfor %}
+          </div>
+          <div class="form-check form-switch mb-2">
+            {{ form.is_featured }}
+            <label class="form-check-label fw-semibold ms-2" for="{{ form.is_featured.id_for_label }}">Tampilkan di sorotan</label>
+          </div>
+          <div class="form-check form-switch mb-2">
+            {{ form.is_active }}
+            <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">Aktifkan mitra ini</label>
+          </div>
+          <div class="form-text">Mitra hanya muncul di frontend jika statusnya aktif.</div>
+        </div>
+        <div class="card-footer bg-white border-top p-4 pt-0">
+          <button type="submit" class="btn btn-primary w-100 fw-semibold py-2 rounded-3">
+            <i class="bi bi-save me-1"></i> Simpan Mitra
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  var logoUrlEl = document.getElementById('{{ form.logo_url.id_for_label }}');
+  logoUrlEl && logoUrlEl.addEventListener('blur', function () {
+    if (!this.value) return;
+    var img = document.getElementById('logoImg');
+    var ph = document.getElementById('logoPlaceholder');
+    if (img) { img.src = this.value; }
+    else {
+      var el = document.createElement('img');
+      el.className = 'partner-preview'; el.id = 'logoImg'; el.alt = ''; el.src = this.value;
+      if (ph) ph.replaceWith(el);
+    }
+  });
+})();
+</script>
+{% endblock %}

@@ -4,174 +4,169 @@
 {% block title %}Profil · RS Gunung Maria Tomohon{% endblock %}
 
 {% block content %}
-  <div class="row g-4">
-    <div class="col-lg-8">
-      <article class="about-article">
-      <h1 class="h3 fw-bold mb-4">Profil Rumah Sakit</h1>
-
-      <p class="text-muted mb-4">
-        Rumah Sakit Gunung Maria Tomohon merupakan salah satu institusi medis tertua di Sulawesi Utara—berakar dari fasilitas yang dikenal masyarakat sebagai “Rumah Sakit Bundar”
-        sejak 1913. Rumah sakit ini memadukan misi kemanusiaan berbasis nilai keagamaan dengan tuntutan tata kelola rumah sakit modern yang profesional.
+<div class="about-page pb-4">
+  <section class="about-hero">
+    <div class="about-hero-content">
+      <p class="institusi-label mb-2">Profil Institusi</p>
+      <h1>RS Gunung Maria Tomohon</h1>
+      <p class="about-hero-lead">
+        Rumah sakit swasta Katolik di Kota Tomohon yang bertumbuh dari warisan pelayanan sejak 1913, dengan komitmen pada layanan medis yang profesional, manusiawi, dan berorientasi pada keselamatan pasien.
       </p>
-
-      <div class="institusi-section home-primary-column mx-auto w-100 mb-5">
-        <div class="card institusi-narrative-card mb-3">
-          <div class="card-body p-4 p-lg-5">
-            <p class="institusi-label mb-2">Sejarah</p>
-            <h2 class="h5 fw-semibold text-dark mb-3">Berakar dari “Rumah Sakit Bundar” (1913)</h2>
-            <p class="text-secondary mb-0 lh-lg small">Warisan arsitektur kolonial yang khas tidak hanya menjadi identitas sejatinya, namun secara langsung menciptakan atmosfer terapeutik yang tenang demi mendukung masa pemulihan pasien.</p>
-          </div>
-        </div>
-
-        <div class="card institusi-narrative-card mb-3">
-          <div class="card-body p-4 p-lg-5">
-            <p class="institusi-label mb-2">Tata kelola</p>
-            <h2 class="h5 fw-semibold text-dark mb-3">Dedikasi PT Ratna Maria Tomohon</h2>
-            <div class="institusi-pt-logo mb-3">
-              <img src="{% static 'hospital/img/PT-RTT-300x95.png' %}" alt="Logo PT Ratna Maria Tomohon" class="img-fluid" loading="lazy" decoding="async">
-            </div>
-            <p class="text-secondary mb-0 lh-lg small">Dikelola penuh sebagai rumah sakit swasta mandiri (di bawah naungan organisasi Katolik) dengan menjunjung dedikasi pelayanan dan kepemimpinan profesional terpadu.</p>
-          </div>
-        </div>
-
-        <div class="sjmj-affiliation card institusi-narrative-card">
-          <div class="card-body p-4 p-lg-5">
-            <p class="institusi-label mb-2">Keterkaitan</p>
-            <h2 class="h5 fw-semibold text-dark mb-4">RS Gunung Maria Tomohon &amp; SJMJ Provinsi Manado</h2>
-            <div class="text-center text-md-start mb-4">
-              <img src="{% static 'hospital/img/sjmj-manado.webp' %}" alt="SJMJ Provinsi Manado" class="img-fluid sjmj-affiliation-img rounded-3" loading="lazy" decoding="async">
-            </div>
-            <p class="text-secondary mb-3 lh-lg small">RS Gunung Maria Tomohon berkiprah dalam satu kesinambungan misi dengan <strong class="text-dark fw-semibold">SJMJ Provinsi Manado</strong> (Serikat Jemaat Maria Jerusalemitarum). Sebagai rumah sakit di bawah naungan lembaga Katolik, kami memperkuat kerja sama pastoral dan pelayanan kesehatan yang selaras dengan nilai dan arahan jemaat di wilayah Sulawesi Utara.</p>
-            <p class="text-secondary mb-0 lh-lg small">Melalui hubungan ini, pelayanan kepada pasien tidak terpisah dari komitmen terhadap martabat manusia dan solidaritas dengan komunitas yang dilayani SJMJ di Manado dan sekitarnya.</p>
-          </div>
-        </div>
-
-        <div class="institusi-stats-stack">
-          <div class="card institusi-stat-card">
-            <div class="card-body p-4 d-flex flex-column h-100">
-              <div class="d-flex align-items-center justify-content-start mb-3">
-                <div class="institusi-stat-icon" aria-hidden="true">
-                  <i class="bi bi-people"></i>
-                </div>
-              </div>
-              <p class="institusi-label mb-2">Kunjungan rawat jalan</p>
-              <p class="institusi-stat-value mb-2">±59.504<span class="fs-6 fw-normal text-muted">/thn</span></p>
-              <p class="small text-muted mb-0">Rata-rata aktivitas mencapai ≈160+ pasien/hari.</p>
-            </div>
-          </div>
-
-          <div class="card institusi-stat-card">
-            <div class="card-body p-4 d-flex flex-column h-100">
-              <div class="d-flex align-items-center justify-content-start mb-3">
-                <div class="institusi-stat-icon" aria-hidden="true">
-                  <i class="bi bi-hospital"></i>
-                </div>
-              </div>
-              <p class="institusi-label mb-2">Kapasitas rawat inap</p>
-              <p class="institusi-stat-value mb-2">138–185 <span class="fs-6 fw-normal text-muted">TT</span></p>
-              <p class="small text-muted mb-0">Tempat tidur menyesuaikan kebutuhan operasional harian.</p>
-            </div>
-          </div>
-
-          <div class="card institusi-stat-card">
-            <div class="card-body p-4 d-flex flex-column h-100">
-              <div class="d-flex align-items-center justify-content-start mb-3">
-                <div class="institusi-stat-icon" aria-hidden="true">
-                  <i class="bi bi-heart-pulse"></i>
-                </div>
-              </div>
-              <p class="institusi-label mb-2">Fasilitas intensif spesialis</p>
-              <p class="institusi-stat-value mb-2 text-wrap">NICU <span class="fs-6 fw-normal text-muted mx-1">&amp;</span> PICU</p>
-              <p class="small text-muted mb-0">10 TT NICU/PICU; ICU 6 TT; IGD terpadu 11 bed.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      </article>
     </div>
-
-    <div class="col-lg-4">
-      <div class="card">
-        <div class="card-body">
-          <h2 class="h5 fw-semibold mb-2">Evolusi historis & arsitektur sebagai instrumen terapi</h2>
-          <div class="text-muted">
-            Warisan bangunan klasik dengan langit-langit tinggi dan ventilasi alami membentuk atmosfer yang menenangkan, sekaligus menjadi identitas institusi.
-            Tantangannya adalah sinkronisasi gedung bersejarah dengan standar fasilitas modern (radiologi, bedah, dan layanan penunjang), yang dikelola melalui integrasi desain dan manajemen fasilitas yang berkelanjutan.
-          </div>
-        </div>
+    <div class="about-identity-card">
+      <div class="about-identity-mark">
+        <i class="bi bi-hospital"></i>
       </div>
-
-      <div class="card mt-3">
-        <div class="card-body">
-          <h2 class="h5 fw-semibold mb-2">Tata kelola, legalitas, dan kepemimpinan</h2>
-          <div class="text-muted">
-            Secara korporasi, rumah sakit berada di bawah naungan <span class="fw-semibold">PT Ratna Maria Tomohon</span> (swasta/organisasi Katolik).
-            Kepemimpinan operasional dipimpin oleh <span class="fw-semibold">dr. Frankie V.T. Palendeng, MARS</span>.
-          </div>
-        </div>
-      </div>
-
-      <div class="row g-3 mt-3">
-        <div class="col-md-6">
-          <div class="card h-100">
-            <div class="card-body">
-              <div class="text-muted small">Aset lahan & bangunan</div>
-              <div class="fw-semibold">28.410 m² (lahan) · 13.072 m² (bangunan)</div>
-              <div class="small text-muted mt-1">Memberi ruang pengembangan layanan & lingkungan penyembuhan (healing environment).</div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card h-100">
-            <div class="card-body">
-              <div class="text-muted small">Kualitas & akreditasi</div>
-              <div class="fw-semibold">Akreditasi Paripurna (KARS)</div>
-              <div class="small text-muted mt-1">Standar tinggi pada keselamatan pasien, PPI, tata kelola, dan kompetensi staf.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card mt-3">
-        <div class="card-body">
-          <h2 class="h5 fw-semibold mb-2">Sinergi akademik</h2>
-          <div class="text-muted">
-            Rumah sakit berelasi erat dengan <span class="fw-semibold">STIKes Gunung Maria Tomohon</span> sebagai ekosistem pembelajaran klinis.
-            Dampaknya mencakup alur rekrutmen lulusan yang lebih siap, pembaruan pengetahuan klinis, dan dukungan layanan dasar pasien melalui praktik terstruktur.
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body">
-          <div class="fw-semibold mb-2">Identitas institusi</div>
-          <div class="small text-muted">Nama: <span class="fw-semibold">Rumah Sakit Gunung Maria</span></div>
-          <div class="small text-muted">Kode RS: <span class="fw-semibold">7173051</span></div>
-          <div class="small text-muted">Kelas: <span class="fw-semibold">C</span></div>
-          <div class="small text-muted">Alamat: <span class="fw-semibold">Jl. Sejahtera No. 282, Kel. Kolongan, Kota Tomohon</span></div>
-          <div class="small text-muted">Telp: <span class="fw-semibold">(0431) 351008</span></div>
-          <div class="small text-muted">Email: <span class="fw-semibold">rsgunungmaria@yahoo.co.id</span></div>
-          <div class="small text-muted">Website: <a href="http://rsgunungmaria.com" target="_blank" rel="noreferrer">rsgunungmaria.com</a></div>
-        </div>
-      </div>
-      <div class="card mt-3">
-        <div class="card-body">
-          <div class="fw-semibold mb-2">Penjamin & mitra</div>
-          <div class="small text-muted mb-2">Mendukung BPJS Kesehatan serta berbagai asuransi swasta/korporasi.</div>
-          <div class="d-flex flex-wrap gap-2">
-            <span class="badge text-bg-light border">BPJS</span>
-            <span class="badge text-bg-light border">Prudential</span>
-            <span class="badge text-bg-light border">Allianz</span>
-            <span class="badge text-bg-light border">AIA</span>
-            <span class="badge text-bg-light border">Manulife</span>
-            <span class="badge text-bg-light border">Sequis</span>
-            <span class="badge text-bg-light border">AXA</span>
-            <span class="badge text-bg-light border">AdMedika (TPA)</span>
-          </div>
-        </div>
+      <div>
+        <div class="about-identity-title">Identitas Rumah Sakit</div>
+        <dl class="about-identity-list">
+          <div><dt>Kode RS</dt><dd>7173051</dd></div>
+          <div><dt>Kelas</dt><dd>C</dd></div>
+          <div><dt>Akreditasi</dt><dd>Paripurna KARS</dd></div>
+          <div><dt>Alamat</dt><dd>Jl. Sejahtera No. 282, Kolongan, Tomohon</dd></div>
+        </dl>
       </div>
     </div>
+  </section>
+
+  <section class="about-metrics" aria-label="Ringkasan kapasitas rumah sakit">
+    <div class="about-metric">
+      <span class="about-metric-icon"><i class="bi bi-calendar2-pulse"></i></span>
+      <span class="about-metric-value">1913</span>
+      <span class="about-metric-label">Akar sejarah pelayanan</span>
+    </div>
+    <div class="about-metric">
+      <span class="about-metric-icon"><i class="bi bi-people"></i></span>
+      <span class="about-metric-value">59.504</span>
+      <span class="about-metric-label">Kunjungan rawat jalan per tahun</span>
+    </div>
+    <div class="about-metric">
+      <span class="about-metric-icon"><i class="bi bi-hospital"></i></span>
+      <span class="about-metric-value">138-185</span>
+      <span class="about-metric-label">Tempat tidur operasional</span>
+    </div>
+    <div class="about-metric">
+      <span class="about-metric-icon"><i class="bi bi-heart-pulse"></i></span>
+      <span class="about-metric-value">NICU/PICU</span>
+      <span class="about-metric-label">Dukungan fasilitas intensif</span>
+    </div>
+  </section>
+
+  <div class="row g-4 align-items-start">
+    <div class="col-lg-8">
+      <section class="about-section">
+        <p class="institusi-label mb-2">Tentang Kami</p>
+        <h2>Pelayanan kesehatan dengan akar sejarah dan tata kelola modern</h2>
+        <p>
+          RS Gunung Maria Tomohon dikenal masyarakat dari sejarah panjangnya sebagai fasilitas kesehatan yang berakar dari "Rumah Sakit Bundar". Identitas historis ini menjadi bagian dari karakter rumah sakit, namun pengelolaan layanan tetap diarahkan pada standar rumah sakit modern.
+        </p>
+        <p>
+          Rumah sakit dikelola oleh PT Ratna Maria Tomohon sebagai institusi swasta Katolik. Di dalam praktik pelayanan, nilai kemanusiaan, disiplin klinis, dan tata kelola profesional dipadukan untuk menghadirkan layanan yang aman, tertib, dan bermartabat bagi pasien.
+        </p>
+      </section>
+
+      <section class="about-section">
+        <p class="institusi-label mb-2">Sejarah & Lingkungan</p>
+        <h2>Warisan arsitektur sebagai bagian dari suasana pemulihan</h2>
+        <p>
+          Warisan bangunan klasik dengan ruang yang lapang, pencahayaan, dan ventilasi alami menjadi salah satu ciri lingkungan RS Gunung Maria Tomohon. Karakter ini memberi suasana yang lebih tenang bagi pasien dan keluarga.
+        </p>
+        <p>
+          Tantangan pengembangannya adalah menjaga kesinambungan antara bangunan bersejarah dengan kebutuhan fasilitas modern seperti layanan radiologi, bedah, rawat inap, dan penunjang medis. Integrasi ini dilakukan bertahap melalui pengelolaan fasilitas yang berkelanjutan.
+        </p>
+      </section>
+
+      <section class="about-section about-affiliation">
+        <div>
+          <p class="institusi-label mb-2">Keterkaitan Misi</p>
+          <h2>Selaras dengan SJMJ Provinsi Manado</h2>
+          <p>
+            RS Gunung Maria Tomohon berkiprah dalam kesinambungan misi dengan SJMJ Provinsi Manado. Hubungan ini memperkuat dimensi pelayanan yang menempatkan martabat manusia, solidaritas, dan kepedulian sebagai bagian penting dari praktik kesehatan.
+          </p>
+          <p>
+            Melalui relasi tersebut, pelayanan rumah sakit tidak hanya dilihat sebagai proses klinis, tetapi juga sebagai bentuk kehadiran bagi komunitas yang membutuhkan dukungan kesehatan.
+          </p>
+        </div>
+        <figure class="about-affiliation-media">
+          <img src="{% static 'hospital/img/sjmj-manado.webp' %}" alt="SJMJ Provinsi Manado" loading="lazy" decoding="async">
+        </figure>
+      </section>
+
+      <section class="about-values">
+        <div class="about-value">
+          <i class="bi bi-shield-check"></i>
+          <h3>Keselamatan pasien</h3>
+          <p>Standar pelayanan diarahkan pada keamanan tindakan, pencegahan infeksi, dan evaluasi mutu berkelanjutan.</p>
+        </div>
+        <div class="about-value">
+          <i class="bi bi-person-heart"></i>
+          <h3>Pelayanan manusiawi</h3>
+          <p>Pasien dan keluarga dilayani dengan komunikasi yang jelas, empati, dan penghormatan pada martabat pribadi.</p>
+        </div>
+        <div class="about-value">
+          <i class="bi bi-mortarboard"></i>
+          <h3>Sinergi akademik</h3>
+          <p>Relasi dengan STIKes Gunung Maria Tomohon mendukung pembelajaran klinis dan penguatan kompetensi layanan.</p>
+        </div>
+      </section>
+    </div>
+
+    <aside class="col-lg-4">
+      <div class="about-side-panel">
+        <h2>Informasi Singkat</h2>
+        <div class="about-info-list">
+          <div>
+            <span>Nama</span>
+            <strong>Rumah Sakit Gunung Maria</strong>
+          </div>
+          <div>
+            <span>Direktur</span>
+            <strong>dr. Frankie V.T. Palendeng, MARS</strong>
+          </div>
+          <div>
+            <span>Lahan</span>
+            <strong>28.410 m<sup>2</sup></strong>
+          </div>
+          <div>
+            <span>Bangunan</span>
+            <strong>13.072 m<sup>2</sup></strong>
+          </div>
+          <div>
+            <span>Telepon</span>
+            <strong>(0431) 351008</strong>
+          </div>
+          <div>
+            <span>Email</span>
+            <strong>rsgunungmaria@yahoo.co.id</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-side-panel">
+        <h2>Tata Kelola</h2>
+        <div class="about-logo-box">
+          <img src="{% static 'hospital/img/PT-RTT-300x95.png' %}" alt="Logo PT Ratna Maria Tomohon" loading="lazy" decoding="async">
+        </div>
+        <p class="mb-0 text-muted">
+          Dikelola oleh PT Ratna Maria Tomohon dengan penguatan kepemimpinan operasional, tata kelola layanan, dan standar mutu rumah sakit.
+        </p>
+      </div>
+
+      <div class="about-side-panel">
+        <h2>Penjamin & Mitra</h2>
+        <p class="text-muted mb-3">Mendukung BPJS Kesehatan serta berbagai asuransi swasta dan korporasi.</p>
+        <div class="about-partner-tags">
+          <span>BPJS</span>
+          <span>Prudential</span>
+          <span>Allianz</span>
+          <span>AIA</span>
+          <span>Manulife</span>
+          <span>Sequis</span>
+          <span>AXA</span>
+          <span>AdMedika</span>
+        </div>
+      </div>
+    </aside>
   </div>
+</div>
 {% endblock %}
-

@@ -14,10 +14,11 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     />
-    <link rel="stylesheet" href="{% static 'hospital/css/site.css' %}" />
+    <link rel="stylesheet" href="{% static 'hospital/css/site.css' %}?v=20260524-home-affiliation" />
     {% block extra_css %}{% endblock %}
   </head>
   <body>
+    <div class="page-load-bar" aria-hidden="true"></div>
     <header class="site-header">
       <div class="topbar">
         <div
@@ -176,7 +177,7 @@
                   <li><a class="dropdown-item nav-dd-item nav-dd-item--sm" href="{% url 'services' %}"><i class="bi bi-building me-2 text-primary"></i>Rawat Inap</a></li>
                   <li><a class="dropdown-item nav-dd-item nav-dd-item--sm" href="{% url 'services' %}"><i class="bi bi-calendar-check me-2 text-success"></i>Rawat Jalan</a></li>
                   <li><a class="dropdown-item nav-dd-item nav-dd-item--sm" href="{% url 'services' %}"><i class="bi bi-graph-up me-2 text-warning"></i>ICU / ICCU</a></li>
-                  <li><a class="dropdown-item nav-dd-item nav-dd-item--sm" href="{% url 'services' %}"><i class="bi bi-stethoscope me-2 text-info"></i>Medical Check Up</a></li>
+                  <li><a class="dropdown-item nav-dd-item nav-dd-item--sm" href="{% url 'mcu_package_list' %}"><i class="bi bi-heart-pulse me-2 text-danger"></i>Paket Medical Check Up</a></li>
                   <li><a class="dropdown-item nav-dd-item nav-dd-item--sm" href="{% url 'services' %}"><i class="bi bi-scissors me-2 text-secondary"></i>Kamar Operasi</a></li>
                   <li><a class="dropdown-item nav-dd-item nav-dd-item--sm" href="{% url 'services' %}"><i class="bi bi-truck me-2 text-danger"></i>Ambulans 24 Jam</a></li>
                 </ul>
@@ -253,6 +254,7 @@
               <li><a href="{% url 'doctors' %}">Jadwal Dokter</a></li>
               <li><a href="{% url 'appointment_create' %}">Buat Janji Temu</a></li>
               <li><a href="{% url 'queue_check' %}">Cek Antrian</a></li>
+              <li><a href="{% url 'mcu_package_list' %}">Paket MCU</a></li>
               <li><a href="{% url 'services' %}">Fasilitas &amp; Layanan</a></li>
             </ul>
           </div>

@@ -206,7 +206,7 @@ class BackendDepartmentForm(forms.ModelForm):
             "phone": "Nomor Telepon",
         }
 
-from .models import Article, Facility, News, Slide
+from .models import Article, Facility, McuPackage, News, Partner, Slide
 
 class BackendNewsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -234,6 +234,45 @@ class BackendNewsForm(forms.ModelForm):
             "content_image": "Gambar dalam Konten (Upload)", "content_image_url": "Gambar dalam Konten (URL)",
             "is_published": "Publikasikan",
         }
+
+
+class BackendMcuPackageForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.setdefault("class", "form-check-input")
+            else:
+                field.widget.attrs.setdefault("class", "form-control")
+
+    class Meta:
+        model = McuPackage
+        fields = [
+            "title", "slug", "excerpt", "content", "price_label", "duration",
+            "checklist", "preparation", "thumbnail", "thumbnail_url",
+            "content_image", "content_image_url", "order", "is_featured",
+            "is_published",
+        ]
+        widgets = {
+            "excerpt": forms.Textarea(attrs={"rows": 3}),
+            "content": forms.Textarea(attrs={"rows": 12}),
+            "checklist": forms.Textarea(attrs={"rows": 8, "placeholder": "Tulis satu item pemeriksaan per baris"}),
+            "preparation": forms.Textarea(attrs={"rows": 6, "placeholder": "Tulis satu instruksi persiapan per baris"}),
+            "slug": forms.TextInput(attrs={"placeholder": "otomatis-dari-judul"}),
+            "thumbnail_url": forms.URLInput(attrs={"placeholder": "https://images.unsplash.com/..."}),
+            "content_image_url": forms.URLInput(attrs={"placeholder": "https://..."}),
+        }
+        labels = {
+            "title": "Nama Paket", "slug": "Slug URL",
+            "excerpt": "Ringkasan", "content": "Isi Konten",
+            "price_label": "Label Harga", "duration": "Estimasi Durasi",
+            "checklist": "Daftar Pemeriksaan", "preparation": "Persiapan Pasien",
+            "thumbnail": "Thumbnail (Upload File)", "thumbnail_url": "Thumbnail URL",
+            "content_image": "Gambar dalam Konten (Upload)", "content_image_url": "Gambar dalam Konten (URL)",
+            "order": "Urutan Tampil", "is_featured": "Jadikan Paket Utama",
+            "is_published": "Publikasikan",
+        }
+
 
 class BackendArticleForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -286,6 +325,40 @@ class BackendFacilityForm(forms.ModelForm):
             "image": "Gambar (Upload File)",
             "image_url": "Gambar URL (Eksternal)",
             "order": "Urutan",
+            "is_active": "Aktifkan",
+        }
+
+
+class BackendPartnerForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.setdefault("class", "form-check-input")
+            else:
+                field.widget.attrs.setdefault("class", "form-control")
+
+    class Meta:
+        model = Partner
+        fields = [
+            "name", "category", "description", "logo", "logo_url",
+            "website_url", "order", "is_featured", "is_active",
+        ]
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 4}),
+            "logo_url": forms.URLInput(attrs={"placeholder": "https://... atau /static/hospital/img/kerjasama/logo.png"}),
+            "website_url": forms.URLInput(attrs={"placeholder": "https://contoh-mitra.com"}),
+            "order": forms.NumberInput(attrs={"min": "0"}),
+        }
+        labels = {
+            "name": "Nama Mitra",
+            "category": "Kategori",
+            "description": "Deskripsi",
+            "logo": "Logo (Upload File)",
+            "logo_url": "Logo URL",
+            "website_url": "Website Mitra",
+            "order": "Urutan",
+            "is_featured": "Tampilkan di Sorotan",
             "is_active": "Aktifkan",
         }
 

@@ -17,11 +17,13 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import (
     AppointmentForm, BackendAppointmentForm, BackendArticleForm,
     BackendDepartmentForm, BackendDoctorForm, BackendFacilityForm,
-    BackendNewsForm, BackendPatientForm, BackendSlideForm, DoctorScheduleFormSet,
+    BackendMcuPackageForm, BackendNewsForm, BackendPatientForm,
+    BackendPartnerForm, BackendSlideForm, DoctorScheduleFormSet,
 )
 from .models import (
     Appointment, Article, ContactMessage, Department, Doctor, DoctorSchedule,
-    Facility, News, Patient, Payment, ScheduleException, Slide,
+    Facility, McuPackage, News, Partner, Patient, Payment, ScheduleException,
+    Slide,
 )
 
 
@@ -149,7 +151,7 @@ def home(request):
         }
         for d in dept_with_doctors
     ]
-    articles = Article.objects.filter(is_published=True).only('title', 'slug', 'thumbnail', 'thumbnail_url', 'created_at', 'content')[:3]
+    articles = Article.objects.filter(is_published=True).only('title', 'slug', 'thumbnail', 'thumbnail_url', 'created_at', 'content')[:4]
     news = News.objects.filter(is_published=True).only('title', 'slug', 'thumbnail', 'thumbnail_url', 'created_at', 'excerpt', 'content')[:3]
     slides = list(Slide.objects.filter(is_active=True))
     db_facilities = list(Facility.objects.filter(is_active=True))
@@ -177,6 +179,28 @@ def news_detail(request, slug):
         raise Http404
     return render(request, "hospital/news_detail.html", {"news": item})
 
+def mcu_package_list(request):
+    packages = list(McuPackage.objects.filter(is_published=True))
+    featured = next((item for item in packages if item.is_featured), packages[0] if packages else None)
+    other_packages = [item for item in packages if item != featured]
+    return render(request, "hospital/mcu_packages.html", {
+        "featured": featured,
+        "packages": packages,
+        "other_packages": other_packages,
+    })
+
+def mcu_package_detail(request, slug):
+    try:
+        package = McuPackage.objects.get(slug=slug, is_published=True)
+    except McuPackage.DoesNotExist:
+        from django.http import Http404
+        raise Http404
+    related_packages = McuPackage.objects.filter(is_published=True).exclude(pk=package.pk)[:4]
+    return render(request, "hospital/mcu_package_detail.html", {
+        "package": package,
+        "related_packages": related_packages,
+    })
+
 def articles_list(request):
     all_articles = list(Article.objects.filter(is_published=True))
     featured   = all_articles[0] if all_articles else None
@@ -201,11 +225,46 @@ def about(request):
 
 
 def mitra_list(request):
-    return render(request, "hospital/mitra_list.html")
+    category = request.GET.get("kategori", "").strip()
+    partners = Partner.objects.filter(is_active=True)
+    if category:
+        partners = partners.filter(category=category)
+    featured_partners = Partner.objects.filter(is_active=True, is_featured=True)[:8]
+    categories = [
+        (key, label, Partner.objects.filter(is_active=True, category=key).count())
+        for key, label in Partner.CATEGORY_CHOICES
+    ]
+    return render(request, "hospital/mitra_list.html", {
+        "partners": partners,
+        "featured_partners": featured_partners,
+        "categories": categories,
+        "selected_category": category,
+    })
 
 
 def services(request):
-    return render(request, "hospital/services.html")
+    db_facilities = list(Facility.objects.filter(is_active=True))
+    if db_facilities:
+        facilities = [
+            {
+                "name": item.name,
+                "description": item.description,
+                "icon": item.icon,
+                "image_src": item.get_image_src(),
+            }
+            for item in db_facilities
+        ]
+    else:
+        facilities = [
+            {
+                "name": item["name"],
+                "description": item["desc"],
+                "icon": item["icon"],
+                "image_src": item["img"],
+            }
+            for item in _FACILITIES
+        ]
+    return render(request, "hospital/services.html", {"facilities": facilities})
 
 
 def doctors(request):
@@ -1143,6 +1202,137 @@ def backend_news_delete(request, news_id):
         except News.DoesNotExist:
             messages.error(request, "Berita tidak ditemukan.")
     return redirect("backend_news_list")
+
+@staff_member_required
+def backend_mcu_package_list(request):
+    q = request.GET.get('q', '').strip()
+    status = request.GET.get('status', '')
+    items = McuPackage.objects.all()
+    if q:
+        items = items.filter(Q(title__icontains=q) | Q(checklist__icontains=q))
+    if status == 'published':
+        items = items.filter(is_published=True)
+    elif status == 'draft':
+        items = items.filter(is_published=False)
+    paginator = Paginator(items.order_by('order', '-created_at'), 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    return render(request, "hospital/backend/mcu_package_list.html", {
+        "packages": page_obj, "q": q, "status": status,
+    })
+
+@staff_member_required
+def backend_mcu_package_create(request):
+    if request.method == "POST":
+        form = BackendMcuPackageForm(request.POST, request.FILES)
+        if form.is_valid():
+            package = form.save()
+            messages.success(request, f"Paket MCU \"{package.title}\" berhasil ditambahkan.")
+            return redirect("backend_mcu_package_list")
+    else:
+        form = BackendMcuPackageForm()
+    return render(request, "hospital/backend/mcu_package_form.html", {
+        "form": form, "package": None, "title": "Tambah Paket MCU",
+    })
+
+@staff_member_required
+def backend_mcu_package_edit(request, package_id):
+    try:
+        package = McuPackage.objects.get(id=package_id)
+    except McuPackage.DoesNotExist:
+        messages.error(request, "Paket MCU tidak ditemukan.")
+        return redirect("backend_mcu_package_list")
+    if request.method == "POST":
+        form = BackendMcuPackageForm(request.POST, request.FILES, instance=package)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Paket MCU \"{package.title}\" berhasil diperbarui.")
+            return redirect("backend_mcu_package_list")
+    else:
+        form = BackendMcuPackageForm(instance=package)
+    return render(request, "hospital/backend/mcu_package_form.html", {
+        "form": form, "package": package, "title": f"Edit: {package.title}",
+    })
+
+@staff_member_required
+def backend_mcu_package_delete(request, package_id):
+    if request.method == "POST":
+        try:
+            package = McuPackage.objects.get(id=package_id)
+            title = package.title
+            package.delete()
+            messages.success(request, f"Paket MCU \"{title}\" berhasil dihapus.")
+        except McuPackage.DoesNotExist:
+            messages.error(request, "Paket MCU tidak ditemukan.")
+    return redirect("backend_mcu_package_list")
+
+@staff_member_required
+def backend_partner_list(request):
+    q = request.GET.get('q', '').strip()
+    category = request.GET.get('category', '').strip()
+    status = request.GET.get('status', '')
+    items = Partner.objects.all()
+    if q:
+        items = items.filter(Q(name__icontains=q) | Q(description__icontains=q))
+    if category:
+        items = items.filter(category=category)
+    if status == 'active':
+        items = items.filter(is_active=True)
+    elif status == 'inactive':
+        items = items.filter(is_active=False)
+    paginator = Paginator(items.order_by('order', 'name'), 12)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    return render(request, "hospital/backend/partner_list.html", {
+        "partners": page_obj,
+        "q": q,
+        "category": category,
+        "status": status,
+        "category_choices": Partner.CATEGORY_CHOICES,
+    })
+
+@staff_member_required
+def backend_partner_create(request):
+    if request.method == "POST":
+        form = BackendPartnerForm(request.POST, request.FILES)
+        if form.is_valid():
+            partner = form.save()
+            messages.success(request, f"Mitra \"{partner.name}\" berhasil ditambahkan.")
+            return redirect("backend_partner_list")
+    else:
+        form = BackendPartnerForm()
+    return render(request, "hospital/backend/partner_form.html", {
+        "form": form, "partner": None, "title": "Tambah Mitra",
+    })
+
+@staff_member_required
+def backend_partner_edit(request, partner_id):
+    try:
+        partner = Partner.objects.get(id=partner_id)
+    except Partner.DoesNotExist:
+        messages.error(request, "Mitra tidak ditemukan.")
+        return redirect("backend_partner_list")
+    if request.method == "POST":
+        form = BackendPartnerForm(request.POST, request.FILES, instance=partner)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Mitra \"{partner.name}\" berhasil diperbarui.")
+            return redirect("backend_partner_list")
+    else:
+        form = BackendPartnerForm(instance=partner)
+    return render(request, "hospital/backend/partner_form.html", {
+        "form": form, "partner": partner, "title": f"Edit: {partner.name}",
+    })
+
+@staff_member_required
+def backend_partner_delete(request, partner_id):
+    if request.method == "POST":
+        try:
+            partner = Partner.objects.get(id=partner_id)
+            name = partner.name
+            partner.delete()
+            messages.success(request, f"Mitra \"{name}\" berhasil dihapus.")
+        except Partner.DoesNotExist:
+            messages.error(request, "Mitra tidak ditemukan.")
+    return redirect("backend_partner_list")
 
 @staff_member_required
 def backend_article_list(request):

@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import (
     Specialization, Department, Doctor, Patient, DoctorSchedule,
     ScheduleException, Appointment, AppointmentHistory,
-    Payment, Notification, Review, ContactMessage, Article, News
+    Payment, Notification, Review, ContactMessage, Article, McuPackage, News,
+    Partner
 )
 
 @admin.register(Specialization)
@@ -73,6 +74,21 @@ class NewsAdmin(admin.ModelAdmin):
     search_fields = ["title", "content"]
     prepopulated_fields = {"slug": ("title",)}
     list_editable = ["is_published"]
+
+@admin.register(McuPackage)
+class McuPackageAdmin(admin.ModelAdmin):
+    list_display = ["title", "price_label", "order", "is_featured", "is_published", "created_at"]
+    list_filter = ["is_featured", "is_published"]
+    search_fields = ["title", "content", "checklist"]
+    prepopulated_fields = {"slug": ("title",)}
+    list_editable = ["order", "is_featured", "is_published"]
+
+@admin.register(Partner)
+class PartnerAdmin(admin.ModelAdmin):
+    list_display = ["name", "category", "order", "is_featured", "is_active", "created_at"]
+    list_filter = ["category", "is_featured", "is_active"]
+    search_fields = ["name", "description"]
+    list_editable = ["order", "is_featured", "is_active"]
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):

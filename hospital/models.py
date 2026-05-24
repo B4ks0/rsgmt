@@ -298,6 +298,47 @@ class News(models.Model):
         text = re.sub(r'<[^>]+>', '', self.content).strip()
         return text[:length] + '…' if len(text) > length else text
 
+class McuPackage(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, max_length=220)
+    excerpt = models.TextField(max_length=320, blank=True)
+    content = models.TextField()
+    price_label = models.CharField(max_length=80, blank=True)
+    duration = models.CharField(max_length=120, blank=True)
+    checklist = models.TextField(blank=True)
+    preparation = models.TextField(blank=True)
+    thumbnail = models.ImageField(upload_to='mcu/', blank=True, null=True)
+    thumbnail_url = models.URLField(blank=True, max_length=500)
+    content_image = models.ImageField(upload_to='mcu/content/', blank=True, null=True)
+    content_image_url = models.URLField(blank=True, max_length=500)
+    order = models.PositiveIntegerField(default=0, db_index=True)
+    is_featured = models.BooleanField(default=False, db_index=True)
+    is_published = models.BooleanField(default=False, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+        verbose_name = 'MCU Package'
+        verbose_name_plural = 'MCU Packages'
+
+    def __str__(self):
+        return self.title
+
+    def get_excerpt(self, length=170):
+        if self.excerpt:
+            return self.excerpt[:length] + ('â€¦' if len(self.excerpt) > length else '')
+        import re
+        text = re.sub(r'<[^>]+>', '', self.content).strip()
+        return text[:length] + 'â€¦' if len(text) > length else text
+
+    def checklist_items(self):
+        return [item.strip() for item in self.checklist.splitlines() if item.strip()]
+
+    def preparation_items(self):
+        return [item.strip() for item in self.preparation.splitlines() if item.strip()]
+
+
 class Article(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, max_length=220)
@@ -339,6 +380,41 @@ class Facility(models.Model):
         if self.image:
             return self.image.url
         return self.image_url or ''
+
+
+class Partner(models.Model):
+    CATEGORY_CHOICES = [
+        ('insurance', 'Asuransi / Penjamin'),
+        ('corporate', 'Korporasi'),
+        ('education', 'Pendidikan'),
+        ('institution', 'Institusi'),
+        ('other', 'Lainnya'),
+    ]
+
+    name = models.CharField(max_length=160)
+    category = models.CharField(max_length=40, choices=CATEGORY_CHOICES, default='other', db_index=True)
+    description = models.TextField(blank=True)
+    logo = models.ImageField(upload_to='partners/', blank=True, null=True)
+    logo_url = models.URLField(blank=True, max_length=500)
+    website_url = models.URLField(blank=True, max_length=500)
+    order = models.PositiveIntegerField(default=0, db_index=True)
+    is_featured = models.BooleanField(default=False, db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'name']
+        verbose_name = 'Partner'
+        verbose_name_plural = 'Partners'
+
+    def __str__(self):
+        return self.name
+
+    def get_logo_src(self):
+        if self.logo:
+            return self.logo.url
+        return self.logo_url or ''
 
 
 class Slide(models.Model):

@@ -1,0 +1,151 @@
+{% extends "hospital/backend/base_backend.html" %}
+{% block title %}Mitra - RSGM Backend{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-end mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Mitra</h2>
+    <div class="text-muted">Kelola logo dan daftar mitra yang tampil di halaman frontend.</div>
+  </div>
+  <a href="{% url 'backend_partner_create' %}" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold">
+    <i class="bi bi-plus-lg me-1"></i> Tambah Mitra
+  </a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+  <div class="card-header bg-white p-4 border-bottom-0">
+    <form method="get" class="row g-2 align-items-center">
+      <div class="col-12 col-md-4">
+        <div class="input-group shadow-sm rounded-pill overflow-hidden">
+          <span class="input-group-text bg-light border-0 px-3"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" name="q" class="form-control border-0 bg-light shadow-none"
+                 placeholder="Cari nama mitra..." value="{{ q }}">
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <select name="category" class="form-select border-0 bg-light shadow-sm rounded-pill text-muted" onchange="this.form.submit()">
+          <option value="">Semua Kategori</option>
+          {% for key, label in category_choices %}
+          <option value="{{ key }}" {% if category == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <select name="status" class="form-select border-0 bg-light shadow-sm rounded-pill text-muted" onchange="this.form.submit()">
+          <option value="">Semua Status</option>
+          <option value="active" {% if status == 'active' %}selected{% endif %}>Aktif</option>
+          <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Nonaktif</option>
+        </select>
+      </div>
+      <div class="col-auto ms-auto d-flex gap-1">
+        <button type="submit" class="btn btn-light border shadow-sm rounded-pill px-3 btn-sm">Cari</button>
+        {% if q or category or status %}
+        <a href="?" class="btn btn-light border shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width:34px;height:34px;">
+          <i class="bi bi-x-lg"></i>
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light text-muted" style="font-size:0.82rem;letter-spacing:0.4px;">
+          <tr>
+            <th class="ps-4 border-0 fw-semibold text-uppercase" style="width:42%">Mitra</th>
+            <th class="border-0 fw-semibold text-uppercase">Kategori</th>
+            <th class="border-0 fw-semibold text-uppercase">Status</th>
+            <th class="border-0 fw-semibold text-uppercase">Urutan</th>
+            <th class="border-0 fw-semibold text-uppercase text-end pe-4">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="border-top-0">
+          {% for partner in partners %}
+          <tr>
+            <td class="ps-4 py-3">
+              <div class="d-flex align-items-center gap-3">
+                <div class="rounded-3 overflow-hidden flex-shrink-0 bg-light d-flex align-items-center justify-content-center border" style="width:64px;height:44px;">
+                  {% if partner.get_logo_src %}
+                    <img src="{{ partner.get_logo_src }}" alt="" style="max-width:100%;max-height:100%;object-fit:contain;">
+                  {% else %}
+                    <i class="bi bi-diagram-3 text-secondary opacity-50"></i>
+                  {% endif %}
+                </div>
+                <div>
+                  <div class="fw-semibold text-dark" style="font-size:0.9rem;">{{ partner.name }}</div>
+                  {% if partner.website_url %}
+                  <div class="text-muted small text-truncate" style="max-width:340px;">{{ partner.website_url }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+            <td class="text-muted small">{{ partner.get_category_display }}</td>
+            <td>
+              {% if partner.is_active %}
+              <span class="badge rounded-pill bg-success-subtle text-success fw-semibold px-3" style="font-size:0.75rem;">Aktif</span>
+              {% else %}
+              <span class="badge rounded-pill bg-secondary-subtle text-secondary fw-semibold px-3" style="font-size:0.75rem;">Nonaktif</span>
+              {% endif %}
+              {% if partner.is_featured %}
+              <span class="badge rounded-pill bg-primary-subtle text-primary fw-semibold px-3 ms-1" style="font-size:0.75rem;">Sorotan</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ partner.order }}</td>
+            <td class="text-end pe-4">
+              <div class="d-flex justify-content-end gap-2">
+                <a href="{% url 'mitra_list' %}" target="_blank"
+                   class="btn btn-sm btn-light border rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                   style="width:32px;height:32px;" title="Lihat di Frontend">
+                  <i class="bi bi-box-arrow-up-right text-secondary"></i>
+                </a>
+                <a href="{% url 'backend_partner_edit' partner.id %}"
+                   class="btn btn-sm btn-light border rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                   style="width:32px;height:32px;" title="Edit">
+                  <i class="bi bi-pencil-square text-primary"></i>
+                </a>
+                <form method="post" action="{% url 'backend_partner_delete' partner.id %}" class="d-inline m-0 p-0"
+                      onsubmit="return confirm('Hapus mitra &quot;{{ partner.name|escapejs }}&quot;?')">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="btn btn-sm btn-light border rounded-circle shadow-sm text-danger d-flex align-items-center justify-content-center"
+                          style="width:32px;height:32px;" title="Hapus">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-5 text-muted">
+              <i class="bi bi-diagram-3 fs-1 opacity-25 d-block mb-3"></i>
+              Belum ada mitra. <a href="{% url 'backend_partner_create' %}">Tambah sekarang</a>.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% if partners.has_other_pages %}
+<nav class="mt-4">
+  <ul class="pagination pagination-sm justify-content-center">
+    {% if partners.has_previous %}
+    <li class="page-item"><a class="page-link rounded-start-pill" href="?page={{ partners.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if status %}&status={{ status }}{% endif %}">Prev</a></li>
+    {% endif %}
+    {% for num in partners.paginator.page_range %}
+      {% if partners.number == num %}<li class="page-item active"><span class="page-link">{{ num }}</span></li>
+      {% elif num > partners.number|add:'-3' and num < partners.number|add:'3' %}
+      <li class="page-item"><a class="page-link" href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if status %}&status={{ status }}{% endif %}">{{ num }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if partners.has_next %}
+    <li class="page-item"><a class="page-link rounded-end-pill" href="?page={{ partners.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if status %}&status={{ status }}{% endif %}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

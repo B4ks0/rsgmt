@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Paket Medical Check Up · RS Gunung Maria Tomohon{% endblock %}
+
+{% block content %}
+<div class="articles-page-wrap pb-4">
+  <div class="articles-page-header mb-4">
+    <p class="institusi-label mb-1">Medical Check Up</p>
+    <h1 class="h3 fw-bold text-dark mb-0">Pilih Paket MCU</h1>
+  </div>
+
+  {% if featured %}
+  <div class="row g-4 mb-5 align-items-stretch">
+    <div class="col-12 col-lg-7 d-flex flex-column">
+      <a href="{% url 'mcu_package_detail' featured.slug %}" class="art-hero text-decoration-none flex-grow-1">
+        <div class="art-hero-thumb">
+          {% if featured.thumbnail %}<img src="{{ featured.thumbnail.url }}" alt="{{ featured.title }}" class="art-hero-img" loading="lazy">
+          {% elif featured.thumbnail_url %}<img src="{{ featured.thumbnail_url }}" alt="{{ featured.title }}" class="art-hero-img" loading="lazy">
+          {% else %}<div class="art-hero-placeholder"><i class="bi bi-heart-pulse"></i></div>{% endif %}
+        </div>
+        <div class="art-hero-body">
+          <div class="d-flex flex-wrap gap-2 mb-2">
+            {% if featured.is_featured %}<span class="badge rounded-pill bg-primary-subtle text-primary">Paket Utama</span>{% endif %}
+            {% if featured.price_label %}<span class="badge rounded-pill bg-success-subtle text-success">{{ featured.price_label }}</span>{% endif %}
+            {% if featured.duration %}<span class="badge rounded-pill bg-light text-muted border"><i class="bi bi-clock me-1"></i>{{ featured.duration }}</span>{% endif %}
+          </div>
+          <h2 class="art-hero-title">{{ featured.title }}</h2>
+          <p class="art-hero-excerpt">{{ featured.get_excerpt }}</p>
+          <span class="art-hero-meta">Cek isi paket <i class="bi bi-arrow-right ms-1"></i></span>
+        </div>
+      </a>
+    </div>
+    <div class="col-12 col-lg-5 d-flex flex-column">
+      <div class="art-sidebar flex-grow-1">
+        <h3 class="art-sidebar-heading">Paket Lainnya</h3>
+        {% for item in other_packages %}
+        <a href="{% url 'mcu_package_detail' item.slug %}"
+           class="art-sidebar-item text-decoration-none{% if forloop.last %} art-sidebar-item--last{% endif %}">
+          <div class="art-sidebar-title">{{ item.title }}</div>
+          <div class="art-sidebar-meta">
+            <span>{% if item.price_label %}{{ item.price_label }}{% else %}Paket MCU{% endif %}</span>
+            <span>{% if item.duration %}{{ item.duration }}{% else %}Detail paket{% endif %}</span>
+          </div>
+        </a>
+        {% empty %}
+        <p class="text-muted small mb-0">Belum ada paket lain.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="art-grid-section">
+    <div class="row g-3">
+      {% for item in packages %}
+      <div class="col-12 col-sm-6 col-lg-4 d-flex flex-column">
+        <a href="{% url 'mcu_package_detail' item.slug %}" class="art-grid-card text-decoration-none flex-grow-1">
+          <div class="art-grid-thumb">
+            {% if item.thumbnail %}<img src="{{ item.thumbnail.url }}" alt="{{ item.title }}" class="art-grid-img" loading="lazy">
+            {% elif item.thumbnail_url %}<img src="{{ item.thumbnail_url }}" alt="{{ item.title }}" class="art-grid-img" loading="lazy">
+            {% else %}<div class="art-grid-placeholder"><i class="bi bi-heart-pulse"></i></div>{% endif %}
+          </div>
+          <div class="art-grid-body">
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              {% if item.price_label %}<span class="badge rounded-pill bg-success-subtle text-success">{{ item.price_label }}</span>{% endif %}
+              {% if item.duration %}<span class="badge rounded-pill bg-light text-muted border">{{ item.duration }}</span>{% endif %}
+            </div>
+            <h3 class="art-grid-title">{{ item.title }}</h3>
+            <p class="art-grid-excerpt">{{ item.get_excerpt }}</p>
+            <span class="art-grid-meta">Pilih paket ini &nbsp;·&nbsp; Lihat isi pemeriksaan</span>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-heart-pulse text-muted" style="font-size:3rem;opacity:0.3;"></i>
+    <p class="text-muted mt-3">Belum ada paket MCU yang dipublikasikan.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
