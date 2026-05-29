@@ -366,27 +366,25 @@ Maria Tomohon{% endblock %}
   </div>
 </section>
 
-{% if articles %}
-{% with special_article=articles.0 %}
-<section class="special-article-section">
+{% if home_article_feature.is_active and home_article_feature.display_title %}
+<section class="special-article-section" style="--special-article-bg: url('{{ home_article_feature.display_image }}');">
   <div class="special-article-overlay"></div>
   <div class="special-article-inner">
     <div class="special-article-content">
-      <p class="special-article-kicker">Artikel Pilihan</p>
-      <h2 class="special-article-title">{{ special_article.title }}</h2>
-      <p class="special-article-desc">{{ special_article.get_excerpt }}</p>
+      <p class="special-article-kicker">{{ home_article_feature.kicker }}</p>
+      <h2 class="special-article-title">{{ home_article_feature.display_title }}</h2>
+      <p class="special-article-desc">{{ home_article_feature.display_excerpt }}</p>
       <div class="special-article-actions">
-        <a href="{% url 'article_detail' special_article.slug %}" class="special-article-link">
-          Baca Selengkapnya <i class="bi bi-arrow-right"></i>
+        <a href="{{ home_article_feature.display_primary_url }}" class="special-article-link">
+          {{ home_article_feature.primary_label }} <i class="bi bi-arrow-right"></i>
         </a>
-        <a href="{% url 'articles_list' %}" class="special-article-link special-article-link--muted">
-          Lihat Semua Artikel <i class="bi bi-arrow-right"></i>
+        <a href="{{ home_article_feature.secondary_url|default:'/artikel/' }}" class="special-article-link special-article-link--muted">
+          {{ home_article_feature.secondary_label }} <i class="bi bi-arrow-right"></i>
         </a>
       </div>
     </div>
   </div>
 </section>
-{% endwith %}
 {% endif %}
 
 <hr class="home-section-divider my-5">

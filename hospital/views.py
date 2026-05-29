@@ -17,13 +17,14 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import (
     AppointmentForm, BackendAppointmentForm, BackendArticleForm,
     BackendDepartmentForm, BackendDoctorForm, BackendFacilityForm,
-    BackendMcuPackageForm, BackendNewsForm, BackendPatientForm,
+    BackendFooterLinkForm, BackendFooterSectionForm, BackendFooterSettingForm,
+    BackendHomeArticleFeatureForm, BackendMcuPackageForm, BackendNewsForm, BackendPatientForm,
     BackendPartnerForm, BackendSlideForm, DoctorScheduleFormSet,
 )
 from .models import (
     Appointment, Article, ContactMessage, Department, Doctor, DoctorSchedule,
-    Facility, McuPackage, News, Partner, Patient, Payment, ScheduleException,
-    Slide,
+    Facility, FooterLink, FooterSection, FooterSetting, HomeArticleFeature, McuPackage, News,
+    Partner, Patient, Payment, ScheduleException, Slide,
 )
 
 
@@ -154,11 +155,13 @@ def home(request):
     articles = Article.objects.filter(is_published=True).only('title', 'slug', 'thumbnail', 'thumbnail_url', 'created_at', 'content')[:4]
     news = News.objects.filter(is_published=True).only('title', 'slug', 'thumbnail', 'thumbnail_url', 'created_at', 'excerpt', 'content')[:3]
     slides = list(Slide.objects.filter(is_active=True))
+    home_article_feature = HomeArticleFeature.get_solo()
     db_facilities = list(Facility.objects.filter(is_active=True))
     facilities = db_facilities if db_facilities else _FACILITIES
     return render(request, "hospital/home.html", {
         "departments": departments, "clinics": clinics, "facilities": facilities,
         "articles": articles, "news": news, "slides": slides,
+        "home_article_feature": home_article_feature,
     })
 
 
@@ -1053,6 +1056,165 @@ def backend_slide_download(request, slide_id):
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
     raise Http404("Slide tidak memiliki gambar.")
+
+
+# Homepage artikel pilihan
+
+@staff_member_required
+def backend_home_article_feature_edit(request):
+    feature = HomeArticleFeature.get_solo()
+    if not feature.article:
+        first_article = Article.objects.filter(is_published=True).order_by("-created_at").first()
+        if first_article:
+            feature.article = first_article
+            feature.save(update_fields=["article", "updated_at"])
+    if request.method == "POST":
+        form = BackendHomeArticleFeatureForm(request.POST, request.FILES, instance=feature)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Section Artikel Pilihan Beranda berhasil diperbarui.")
+            return redirect("backend_home_article_feature_edit")
+    else:
+        form = BackendHomeArticleFeatureForm(instance=feature)
+    return render(request, "hospital/backend/home_article_feature_form.html", {
+        "form": form,
+        "feature": feature,
+        "title": "Artikel Pilihan Beranda",
+    })
+
+
+# Footer CRUD
+
+@staff_member_required
+def backend_footer_list(request):
+    sections = FooterSection.objects.prefetch_related("links").order_by("order", "id")
+    return render(request, "hospital/backend/footer_list.html", {
+        "sections": sections,
+        "footer_setting": FooterSetting.get_solo(),
+    })
+
+
+@staff_member_required
+def backend_footer_setting_edit(request):
+    setting = FooterSetting.get_solo()
+    if request.method == "POST":
+        form = BackendFooterSettingForm(request.POST, instance=setting)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Pengaturan footer berhasil diperbarui.")
+            return redirect("backend_footer_list")
+    else:
+        form = BackendFooterSettingForm(instance=setting)
+    return render(request, "hospital/backend/footer_setting_form.html", {
+        "form": form,
+        "title": "Pengaturan Footer",
+    })
+
+
+@staff_member_required
+def backend_footer_section_create(request):
+    if request.method == "POST":
+        form = BackendFooterSectionForm(request.POST)
+        if form.is_valid():
+            section = form.save()
+            messages.success(request, f"Section footer \"{section.title}\" berhasil ditambahkan.")
+            return redirect("backend_footer_list")
+    else:
+        form = BackendFooterSectionForm()
+    return render(request, "hospital/backend/footer_section_form.html", {
+        "form": form,
+        "title": "Tambah Section Footer",
+    })
+
+
+@staff_member_required
+def backend_footer_section_edit(request, section_id):
+    try:
+        section = FooterSection.objects.get(id=section_id)
+    except FooterSection.DoesNotExist:
+        messages.error(request, "Section footer tidak ditemukan.")
+        return redirect("backend_footer_list")
+    if request.method == "POST":
+        form = BackendFooterSectionForm(request.POST, instance=section)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Section footer \"{section.title}\" berhasil diperbarui.")
+            return redirect("backend_footer_list")
+    else:
+        form = BackendFooterSectionForm(instance=section)
+    return render(request, "hospital/backend/footer_section_form.html", {
+        "form": form,
+        "section": section,
+        "title": f"Edit: {section.title}",
+    })
+
+
+@staff_member_required
+def backend_footer_section_delete(request, section_id):
+    if request.method == "POST":
+        try:
+            section = FooterSection.objects.get(id=section_id)
+            title = section.title
+            section.delete()
+            messages.success(request, f"Section footer \"{title}\" berhasil dihapus.")
+        except FooterSection.DoesNotExist:
+            messages.error(request, "Section footer tidak ditemukan.")
+    return redirect("backend_footer_list")
+
+
+@staff_member_required
+def backend_footer_link_create(request):
+    initial = {}
+    section_id = request.GET.get("section")
+    if section_id:
+        initial["section"] = section_id
+    if request.method == "POST":
+        form = BackendFooterLinkForm(request.POST)
+        if form.is_valid():
+            link = form.save()
+            messages.success(request, f"Link footer \"{link.label}\" berhasil ditambahkan.")
+            return redirect("backend_footer_list")
+    else:
+        form = BackendFooterLinkForm(initial=initial)
+    return render(request, "hospital/backend/footer_link_form.html", {
+        "form": form,
+        "title": "Tambah Link Footer",
+    })
+
+
+@staff_member_required
+def backend_footer_link_edit(request, link_id):
+    try:
+        link = FooterLink.objects.select_related("section").get(id=link_id)
+    except FooterLink.DoesNotExist:
+        messages.error(request, "Link footer tidak ditemukan.")
+        return redirect("backend_footer_list")
+    if request.method == "POST":
+        form = BackendFooterLinkForm(request.POST, instance=link)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Link footer \"{link.label}\" berhasil diperbarui.")
+            return redirect("backend_footer_list")
+    else:
+        form = BackendFooterLinkForm(instance=link)
+    return render(request, "hospital/backend/footer_link_form.html", {
+        "form": form,
+        "link": link,
+        "title": f"Edit: {link.label}",
+    })
+
+
+@staff_member_required
+def backend_footer_link_delete(request, link_id):
+    if request.method == "POST":
+        try:
+            link = FooterLink.objects.get(id=link_id)
+            label = link.label
+            link.delete()
+            messages.success(request, f"Link footer \"{label}\" berhasil dihapus.")
+        except FooterLink.DoesNotExist:
+            messages.error(request, "Link footer tidak ditemukan.")
+    return redirect("backend_footer_list")
 
 @staff_member_required
 def backend_queue_list(request):

@@ -1,0 +1,87 @@
+{% extends "hospital/backend/base_backend.html" %}
+{% block title %}{{ title }} - RSGM Backend{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4 pb-3 border-bottom">
+  <div>
+    <h3 class="fw-bold mb-1"><i class="bi bi-link-45deg me-2 text-primary"></i>{{ title }}</h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0 small text-muted">
+        <li class="breadcrumb-item"><a href="{% url 'backend_dashboard' %}" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'backend_footer_list' %}" class="text-decoration-none">Footer Website</a></li>
+        <li class="breadcrumb-item active">{{ title }}</li>
+      </ol>
+    </nav>
+  </div>
+  <a href="{% url 'backend_footer_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+    <i class="bi bi-arrow-left me-1"></i> Kembali
+  </a>
+</div>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <div class="row g-3">
+        <div class="col-md-5">
+          <label class="form-label fw-semibold small">{{ form.section.label }}</label>
+          {{ form.section }}
+          {% for e in form.section.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="col-md-7">
+          <label class="form-label fw-semibold small">{{ form.label.label }}</label>
+          {{ form.label }}
+          {% for e in form.label.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="col-md-8">
+          <label class="form-label fw-semibold small">{{ form.url.label }}</label>
+          {{ form.url }}
+          {% for e in form.url.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-semibold small">{{ form.icon.label }}</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i id="iconPreview" class="bi {{ form.icon.value|default:'bi-link-45deg' }}"></i></span>
+            {{ form.icon }}
+          </div>
+          {% for e in form.icon.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-semibold small">{{ form.order.label }}</label>
+          {{ form.order }}
+          {% for e in form.order.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+        </div>
+      </div>
+
+      <div class="d-flex flex-column flex-md-row gap-3 mt-4">
+        <div class="form-check form-switch">
+          {{ form.is_active }}
+          <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+        </div>
+        <div class="form-check form-switch">
+          {{ form.open_new_tab }}
+          <label class="form-check-label fw-semibold ms-2" for="{{ form.open_new_tab.id_for_label }}">{{ form.open_new_tab.label }}</label>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer bg-white border-top p-4">
+      <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold">
+        <i class="bi bi-save me-1"></i> Simpan Link
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  var iconInput = document.getElementById('{{ form.icon.id_for_label }}');
+  var iconPreview = document.getElementById('iconPreview');
+  if (!iconInput || !iconPreview) return;
+  iconInput.addEventListener('input', function () {
+    iconPreview.className = 'bi ' + (this.value.trim() || 'bi-link-45deg');
+  });
+})();
+</script>
+{% endblock %}

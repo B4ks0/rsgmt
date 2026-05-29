@@ -72,6 +72,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'hospital.context_processors.static_version',
+                'hospital.context_processors.footer_content',
             ],
         },
     },

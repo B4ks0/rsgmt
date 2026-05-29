@@ -360,6 +360,66 @@ class Article(models.Model):
         text = re.sub(r'<[^>]+>', '', self.content).strip()
         return text[:length] + '…' if len(text) > length else text
 
+class HomeArticleFeature(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.SET_NULL, null=True, blank=True, related_name="home_features")
+    kicker = models.CharField(max_length=120, default="Artikel Pilihan")
+    title_override = models.CharField(max_length=220, blank=True)
+    excerpt_override = models.TextField(blank=True)
+    image = models.ImageField(upload_to="home/article_feature/", blank=True, null=True)
+    image_url = models.URLField(blank=True, max_length=500)
+    primary_label = models.CharField(max_length=80, default="Baca Selengkapnya")
+    primary_url = models.CharField(max_length=500, blank=True)
+    secondary_label = models.CharField(max_length=80, default="Lihat Semua Artikel")
+    secondary_url = models.CharField(max_length=500, default="/artikel/", blank=True)
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Home Article Feature"
+        verbose_name_plural = "Home Article Feature"
+
+    def __str__(self):
+        return "Artikel Pilihan Beranda"
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    @property
+    def display_title(self):
+        if self.title_override:
+            return self.title_override
+        return self.article.title if self.article else ""
+
+    @property
+    def display_excerpt(self):
+        if self.excerpt_override:
+            return self.excerpt_override
+        return self.article.get_excerpt() if self.article else ""
+
+    @property
+    def display_image(self):
+        if self.image:
+            return self.image.url
+        if self.image_url:
+            return self.image_url
+        if self.article:
+            if self.article.thumbnail:
+                return self.article.thumbnail.url
+            if self.article.thumbnail_url:
+                return self.article.thumbnail_url
+        return "https://images.unsplash.com/photo-1565615833231-e8c91a38a012?auto=format&fit=crop&w=1800&q=82"
+
+    @property
+    def display_primary_url(self):
+        if self.primary_url:
+            return self.primary_url
+        if self.article:
+            return f"/artikel/{self.article.slug}/"
+        return "/artikel/"
+
+
 class Facility(models.Model):
     name = models.CharField(max_length=120)
     icon = models.CharField(max_length=60, default='bi-building')
@@ -436,6 +496,75 @@ class Slide(models.Model):
         if self.image:
             return self.image.url
         return self.image_url or ''
+
+
+class FooterSetting(models.Model):
+    site_name = models.CharField(max_length=160, default="RS Gunung Maria Tomohon")
+    hospital_code = models.CharField(max_length=80, default="7173051", blank=True)
+    tagline = models.TextField(default="Melayani dengan kasih,\ndemi kesehatan Anda.", blank=True)
+    dashboard_label = models.CharField(max_length=80, default="Dashboard", blank=True)
+    dashboard_url = models.CharField(max_length=500, default="/dashboard/", blank=True)
+    show_dashboard_link = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Footer Setting"
+        verbose_name_plural = "Footer Settings"
+
+    def __str__(self):
+        return "Pengaturan Footer"
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    @property
+    def copyright_text(self):
+        suffix = f" · Kode RS {self.hospital_code}" if self.hospital_code else ""
+        return f"{self.site_name}{suffix}"
+
+
+class FooterSection(models.Model):
+    class SectionType(models.TextChoices):
+        LINKS = "links", "Menu Link"
+        CONTACT = "contact", "Kontak"
+        SOCIAL = "social", "Sosial Media"
+
+    title = models.CharField(max_length=120)
+    section_type = models.CharField(max_length=20, choices=SectionType.choices, default=SectionType.LINKS)
+    order = models.PositiveIntegerField(default=0, db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "Footer Section"
+        verbose_name_plural = "Footer Sections"
+
+    def __str__(self):
+        return self.title
+
+
+class FooterLink(models.Model):
+    section = models.ForeignKey(FooterSection, on_delete=models.CASCADE, related_name="links")
+    label = models.CharField(max_length=160)
+    url = models.CharField(max_length=500, blank=True)
+    icon = models.CharField(max_length=60, blank=True, help_text="Contoh: bi-whatsapp, bi-geo-alt")
+    order = models.PositiveIntegerField(default=0, db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    open_new_tab = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "Footer Link"
+        verbose_name_plural = "Footer Links"
+
+    def __str__(self):
+        return self.label
+
+    @property
+    def is_external(self):
+        return self.url.startswith(("http://", "https://"))
 
 
 class ContactMessage(models.Model):

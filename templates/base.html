@@ -238,6 +238,56 @@
       <div class="container">
         <div class="row g-4 g-lg-5 site-footer-main">
 
+          {% for section in footer_sections %}
+          <div class="{% if section.section_type == 'social' %}col-12 col-lg-3{% elif section.section_type == 'contact' %}col-6 col-md-3 col-lg-3{% else %}col-6 col-md-3 col-lg-2{% endif %}">
+            <p class="footer-col-title">{{ section.title }}</p>
+
+            {% if section.section_type == 'social' %}
+            <div class="footer-socials">
+              {% for item in section.links.all %}
+                {% if item.is_active %}
+                <a href="{{ item.url|default:'#' }}" {% if item.open_new_tab or item.is_external %}target="_blank" rel="noopener"{% endif %} aria-label="{{ item.label }}">
+                  <i class="bi {{ item.icon|default:'bi-link-45deg' }}"></i>
+                </a>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% if footer_setting.tagline %}
+            <p class="footer-tagline">{{ footer_setting.tagline|linebreaksbr }}</p>
+            {% endif %}
+
+            {% elif section.section_type == 'contact' %}
+            <ul class="footer-links footer-contact">
+              {% for item in section.links.all %}
+                {% if item.is_active %}
+                <li>
+                  {% if item.icon %}<i class="bi {{ item.icon }}"></i>{% endif %}
+                  {% if item.url %}
+                  <a href="{{ item.url }}" {% if item.open_new_tab or item.is_external %}target="_blank" rel="noopener"{% endif %}>{{ item.label }}</a>
+                  {% else %}
+                  {{ item.label }}
+                  {% endif %}
+                </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+
+            {% else %}
+            <ul class="footer-links">
+              {% for item in section.links.all %}
+                {% if item.is_active %}
+                <li>
+                  <a href="{{ item.url|default:'#' }}" {% if item.open_new_tab or item.is_external %}target="_blank" rel="noopener"{% endif %}>
+                    {{ item.label }}
+                  </a>
+                </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+          {% empty %}
+
           <div class="col-6 col-md-3 col-lg-2">
             <p class="footer-col-title">Tentang Kami</p>
             <ul class="footer-links">
@@ -289,15 +339,26 @@
             <p class="footer-tagline">Melayani dengan kasih,<br>demi kesehatan Anda.</p>
           </div>
 
+          {% endfor %}
+
         </div>
       </div>
 
       <div class="footer-bottom">
         <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+          {% if footer_setting %}
+          <span>© {% now "Y" %} {{ footer_setting.copyright_text }}</span>
+          {% if footer_setting.show_dashboard_link and footer_setting.dashboard_url %}
+          <a href="{{ footer_setting.dashboard_url }}" class="footer-bottom-link">
+            <i class="bi bi-speedometer2 me-1"></i>{{ footer_setting.dashboard_label|default:"Dashboard" }}
+          </a>
+          {% endif %}
+          {% else %}
           <span>© {% now "Y" %} RS Gunung Maria Tomohon · Kode RS 7173051</span>
           <a href="/dashboard/" class="footer-bottom-link">
             <i class="bi bi-speedometer2 me-1"></i>Dashboard
           </a>
+          {% endif %}
         </div>
       </div>
     </footer>

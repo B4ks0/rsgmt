@@ -69,6 +69,12 @@
     <a href="{% url 'backend_article_list' %}" class="{% if 'article' in request.resolver_match.url_name %}active{% endif %}">
       <i class="bi bi-newspaper me-2"></i> Artikel Kesehatan
     </a>
+    <a href="{% url 'backend_home_article_feature_edit' %}" class="{% if request.resolver_match.url_name == 'backend_home_article_feature_edit' %}active{% endif %}">
+      <i class="bi bi-window-fullscreen me-2"></i> Artikel Pilihan
+    </a>
+    <a href="{% url 'backend_footer_list' %}" class="{% if 'footer' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-layout-text-window-reverse me-2"></i> Footer Website
+    </a>
 
     <!-- Administrasi -->
     <div class="sidebar-heading mt-3">Administrasi</div>
@@ -88,9 +94,8 @@
     <a href="{% url 'home' %}" target="_blank" rel="noopener">
       <i class="bi bi-box-arrow-up-right me-2"></i> Lihat Website
     </a>
-    <a href="#" class="sidebar-disabled" tabindex="-1" aria-disabled="true">
+    <a href="{% url 'backend_footer_list' %}" class="{% if 'footer' in request.resolver_match.url_name %}active{% endif %}">
       <i class="bi bi-gear me-2"></i> Pengaturan Web
-      <span class="sidebar-badge">Segera</span>
     </a>
 
     <!-- Spacer + Logout -->

@@ -68,6 +68,7 @@ urlpatterns = [
     path("dashboard/articles/add/", views.backend_article_create, name="backend_article_create"),
     path("dashboard/articles/<int:article_id>/edit/", views.backend_article_edit, name="backend_article_edit"),
     path("dashboard/articles/<int:article_id>/delete/", views.backend_article_delete, name="backend_article_delete"),
+    path("dashboard/home-article-feature/", views.backend_home_article_feature_edit, name="backend_home_article_feature_edit"),
     path("dashboard/contacts/", views.backend_contact_list, name="backend_contact_list"),
     path("dashboard/contacts/<int:contact_id>/detail/", views.backend_contact_detail, name="backend_contact_detail"),
     path("dashboard/departments/", views.backend_department_list, name="backend_department_list"),
@@ -87,5 +88,15 @@ urlpatterns = [
     path("dashboard/slides/<int:slide_id>/edit/", views.backend_slide_edit, name="backend_slide_edit"),
     path("dashboard/slides/<int:slide_id>/delete/", views.backend_slide_delete, name="backend_slide_delete"),
     path("dashboard/slides/<int:slide_id>/download/", views.backend_slide_download, name="backend_slide_download"),
+
+    # Footer
+    path("dashboard/footer/", views.backend_footer_list, name="backend_footer_list"),
+    path("dashboard/footer/settings/", views.backend_footer_setting_edit, name="backend_footer_setting_edit"),
+    path("dashboard/footer/sections/add/", views.backend_footer_section_create, name="backend_footer_section_create"),
+    path("dashboard/footer/sections/<int:section_id>/edit/", views.backend_footer_section_edit, name="backend_footer_section_edit"),
+    path("dashboard/footer/sections/<int:section_id>/delete/", views.backend_footer_section_delete, name="backend_footer_section_delete"),
+    path("dashboard/footer/links/add/", views.backend_footer_link_create, name="backend_footer_link_create"),
+    path("dashboard/footer/links/<int:link_id>/edit/", views.backend_footer_link_edit, name="backend_footer_link_edit"),
+    path("dashboard/footer/links/<int:link_id>/delete/", views.backend_footer_link_delete, name="backend_footer_link_delete"),
 ]
 

@@ -206,7 +206,7 @@ class BackendDepartmentForm(forms.ModelForm):
             "phone": "Nomor Telepon",
         }
 
-from .models import Article, Facility, McuPackage, News, Partner, Slide
+from .models import Article, Facility, FooterLink, FooterSection, FooterSetting, HomeArticleFeature, McuPackage, News, Partner, Slide
 
 class BackendNewsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -300,6 +300,47 @@ class BackendArticleForm(forms.ModelForm):
             "is_published": "Publikasikan",
         }
 
+
+class BackendHomeArticleFeatureForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["article"].queryset = Article.objects.filter(is_published=True).order_by("-created_at")
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.setdefault("class", "form-check-input")
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs.setdefault("class", "form-select")
+            else:
+                field.widget.attrs.setdefault("class", "form-control")
+
+    class Meta:
+        model = HomeArticleFeature
+        fields = [
+            "is_active", "article", "kicker", "title_override", "excerpt_override",
+            "image", "image_url", "primary_label", "primary_url",
+            "secondary_label", "secondary_url",
+        ]
+        widgets = {
+            "excerpt_override": forms.Textarea(attrs={"rows": 4, "placeholder": "Kosongkan untuk memakai ringkasan dari artikel terpilih."}),
+            "image_url": forms.URLInput(attrs={"placeholder": "https://images.unsplash.com/..."}),
+            "primary_url": forms.TextInput(attrs={"placeholder": "Kosongkan untuk otomatis ke detail artikel."}),
+            "secondary_url": forms.TextInput(attrs={"placeholder": "/artikel/"}),
+        }
+        labels = {
+            "is_active": "Tampilkan section artikel pilihan",
+            "article": "Artikel yang ditampilkan",
+            "kicker": "Label kecil di atas judul",
+            "title_override": "Judul custom",
+            "excerpt_override": "Deskripsi custom",
+            "image": "Gambar background (upload)",
+            "image_url": "Gambar background URL",
+            "primary_label": "Label tombol utama",
+            "primary_url": "Custom link tombol utama",
+            "secondary_label": "Label tombol kedua",
+            "secondary_url": "Link tombol kedua",
+        }
+
+
 class BackendFacilityForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -387,6 +428,87 @@ class BackendSlideForm(forms.ModelForm):
             "link_url": "Link URL (klik pada slide)",
             "order": "Urutan",
             "is_active": "Aktifkan Slide",
+        }
+
+
+class BackendFooterSettingForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.setdefault("class", "form-check-input")
+            else:
+                field.widget.attrs.setdefault("class", "form-control")
+
+    class Meta:
+        model = FooterSetting
+        fields = ["site_name", "hospital_code", "tagline", "dashboard_label", "dashboard_url", "show_dashboard_link"]
+        widgets = {
+            "tagline": forms.Textarea(attrs={"rows": 3}),
+            "dashboard_url": forms.TextInput(attrs={"placeholder": "/dashboard/"}),
+        }
+        labels = {
+            "site_name": "Nama Website / Rumah Sakit",
+            "hospital_code": "Kode RS",
+            "tagline": "Tagline Footer",
+            "dashboard_label": "Label Link Dashboard",
+            "dashboard_url": "URL Dashboard",
+            "show_dashboard_link": "Tampilkan link dashboard di footer",
+        }
+
+
+class BackendFooterSectionForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.setdefault("class", "form-check-input")
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs.setdefault("class", "form-select")
+            else:
+                field.widget.attrs.setdefault("class", "form-control")
+
+    class Meta:
+        model = FooterSection
+        fields = ["title", "section_type", "order", "is_active"]
+        widgets = {
+            "order": forms.NumberInput(attrs={"min": "0"}),
+        }
+        labels = {
+            "title": "Judul Kolom",
+            "section_type": "Tipe Section",
+            "order": "Urutan Tampil",
+            "is_active": "Aktifkan Section",
+        }
+
+
+class BackendFooterLinkForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.setdefault("class", "form-check-input")
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs.setdefault("class", "form-select")
+            else:
+                field.widget.attrs.setdefault("class", "form-control")
+
+    class Meta:
+        model = FooterLink
+        fields = ["section", "label", "url", "icon", "order", "is_active", "open_new_tab"]
+        widgets = {
+            "url": forms.TextInput(attrs={"placeholder": "/about/ atau https://... atau mailto:..."}),
+            "icon": forms.TextInput(attrs={"placeholder": "bi-whatsapp"}),
+            "order": forms.NumberInput(attrs={"min": "0"}),
+        }
+        labels = {
+            "section": "Section Footer",
+            "label": "Label / Teks",
+            "url": "Custom Link",
+            "icon": "Icon Bootstrap",
+            "order": "Urutan Tampil",
+            "is_active": "Aktifkan Link",
+            "open_new_tab": "Buka di tab baru",
         }
 
 

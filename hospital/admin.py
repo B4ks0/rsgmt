@@ -3,7 +3,7 @@ from .models import (
     Specialization, Department, Doctor, Patient, DoctorSchedule,
     ScheduleException, Appointment, AppointmentHistory,
     Payment, Notification, Review, ContactMessage, Article, McuPackage, News,
-    Partner
+    Partner, FooterLink, FooterSection, FooterSetting, HomeArticleFeature
 )
 
 @admin.register(Specialization)
@@ -90,6 +90,36 @@ class PartnerAdmin(admin.ModelAdmin):
     search_fields = ["name", "description"]
     list_editable = ["order", "is_featured", "is_active"]
 
+
+class FooterLinkInline(admin.TabularInline):
+    model = FooterLink
+    extra = 1
+    fields = ["label", "url", "icon", "order", "is_active", "open_new_tab"]
+
+
+@admin.register(FooterSetting)
+class FooterSettingAdmin(admin.ModelAdmin):
+    list_display = ["site_name", "hospital_code", "show_dashboard_link", "updated_at"]
+
+    def has_add_permission(self, request):
+        return not FooterSetting.objects.exists()
+
+
+@admin.register(FooterSection)
+class FooterSectionAdmin(admin.ModelAdmin):
+    list_display = ["title", "section_type", "order", "is_active"]
+    list_filter = ["section_type", "is_active"]
+    list_editable = ["order", "is_active"]
+    inlines = [FooterLinkInline]
+
+
+@admin.register(FooterLink)
+class FooterLinkAdmin(admin.ModelAdmin):
+    list_display = ["label", "section", "url", "icon", "order", "is_active", "open_new_tab"]
+    list_filter = ["section", "is_active", "open_new_tab"]
+    search_fields = ["label", "url", "icon"]
+    list_editable = ["order", "is_active", "open_new_tab"]
+
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ["title", "is_published", "created_at"]
@@ -97,6 +127,14 @@ class ArticleAdmin(admin.ModelAdmin):
     search_fields = ["title", "content"]
     prepopulated_fields = {"slug": ("title",)}
     list_editable = ["is_published"]
+
+
+@admin.register(HomeArticleFeature)
+class HomeArticleFeatureAdmin(admin.ModelAdmin):
+    list_display = ["article", "kicker", "is_active", "updated_at"]
+
+    def has_add_permission(self, request):
+        return not HomeArticleFeature.objects.exists()
 
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):

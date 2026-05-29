@@ -1,0 +1,118 @@
+{% extends "hospital/backend/base_backend.html" %}
+{% block title %}Footer Website - RSGM Backend{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Footer Website</h2>
+    <div class="text-muted">Kelola section, menu, custom link, kontak, sosial media, tagline, dan copyright footer.</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'backend_footer_setting_edit' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold">
+      <i class="bi bi-gear me-1"></i> Pengaturan
+    </a>
+    <a href="{% url 'backend_footer_section_create' %}" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold">
+      <i class="bi bi-plus-lg me-1"></i> Tambah Section
+    </a>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+  <div class="card-body p-4">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-5">
+        <div class="small text-muted mb-1">Copyright</div>
+        <div class="fw-semibold">© {% now "Y" %} {{ footer_setting.copyright_text }}</div>
+      </div>
+      <div class="col-md-5">
+        <div class="small text-muted mb-1">Tagline</div>
+        <div class="fw-semibold">{{ footer_setting.tagline|linebreaksbr|default:"-" }}</div>
+      </div>
+      <div class="col-md-2 text-md-end">
+        {% if footer_setting.show_dashboard_link %}
+        <span class="badge rounded-pill bg-success-subtle text-success">Dashboard tampil</span>
+        {% else %}
+        <span class="badge rounded-pill bg-secondary-subtle text-secondary">Dashboard disembunyikan</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if sections %}
+<div class="row g-3">
+  {% for section in sections %}
+  <div class="col-12 col-xl-6">
+    <div class="card border-0 shadow-sm rounded-4 h-100">
+      <div class="card-header bg-white border-bottom-0 px-4 pt-4 pb-2">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h5 class="fw-bold mb-0">{{ section.title }}</h5>
+              <span class="badge rounded-pill bg-light text-dark border">#{{ section.order }}</span>
+              {% if section.is_active %}
+              <span class="badge rounded-pill bg-success-subtle text-success">Aktif</span>
+              {% else %}
+              <span class="badge rounded-pill bg-secondary-subtle text-secondary">Nonaktif</span>
+              {% endif %}
+            </div>
+            <div class="small text-muted">{{ section.get_section_type_display }}</div>
+          </div>
+          <div class="d-flex gap-1">
+            <a href="{% url 'backend_footer_link_create' %}?section={{ section.id }}" class="btn btn-sm btn-light border rounded-circle" title="Tambah Link">
+              <i class="bi bi-plus-lg text-primary"></i>
+            </a>
+            <a href="{% url 'backend_footer_section_edit' section.id %}" class="btn btn-sm btn-light border rounded-circle" title="Edit Section">
+              <i class="bi bi-pencil-square text-primary"></i>
+            </a>
+            <form method="post" action="{% url 'backend_footer_section_delete' section.id %}" class="m-0" onsubmit="return confirm('Hapus section &quot;{{ section.title|escapejs }}&quot; beserta semua linknya?')">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-light border rounded-circle" title="Hapus Section">
+                <i class="bi bi-trash text-danger"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="card-body px-4 pb-4">
+        <div class="list-group list-group-flush">
+          {% for link in section.links.all %}
+          <div class="list-group-item px-0 d-flex justify-content-between align-items-center gap-3">
+            <div class="min-w-0">
+              <div class="fw-semibold text-dark">
+                {% if link.icon %}<i class="bi {{ link.icon }} me-1 text-primary"></i>{% endif %}
+                {{ link.label }}
+                {% if not link.is_active %}<span class="badge bg-secondary-subtle text-secondary ms-1">Nonaktif</span>{% endif %}
+              </div>
+              <div class="small text-muted text-truncate" style="max-width:420px;">{{ link.url|default:"Tanpa link" }}</div>
+            </div>
+            <div class="d-flex gap-1 flex-shrink-0">
+              <a href="{% url 'backend_footer_link_edit' link.id %}" class="btn btn-sm btn-light border rounded-circle" title="Edit Link">
+                <i class="bi bi-pencil-square text-primary"></i>
+              </a>
+              <form method="post" action="{% url 'backend_footer_link_delete' link.id %}" class="m-0" onsubmit="return confirm('Hapus link &quot;{{ link.label|escapejs }}&quot;?')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-light border rounded-circle" title="Hapus Link">
+                  <i class="bi bi-trash text-danger"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-muted small py-3">Belum ada link di section ini.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card border-0 shadow-sm rounded-4">
+  <div class="card-body text-center py-5 text-muted">
+    <i class="bi bi-layout-text-window-reverse fs-1 opacity-25 d-block mb-3"></i>
+    <div>Belum ada section footer. <a href="{% url 'backend_footer_section_create' %}">Tambah section sekarang</a>.</div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
